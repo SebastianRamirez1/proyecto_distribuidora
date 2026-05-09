@@ -18,8 +18,8 @@
     <description>Sistema de gestión para distribuidora de huevos</description>
 
     <properties>
-        <!-- DECISIÓN: usuario tiene JDK 22, se sube el target para compatibilidad -->
-        <java.version>22</java.version>
+        <!-- Java 21 LTS: funciona local con JDK 22 y en Railway con JDK 21 -->
+        <java.version>21</java.version>
     </properties>
 
     <dependencies>

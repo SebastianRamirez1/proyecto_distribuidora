@@ -1,0 +1,15 @@
+# Nixpacks: builder nativo de Railway (más rápido que Docker en su plataforma)
+[phases.setup]
+nixPkgs = ["nodejs_20", "jdk21", "maven"]
+
+[phases.install]
+cmds = ["cd frontend && npm install && cd .."]
+
+[phases.build]
+cmds = [
+  "cd frontend && npm run build && cd ..",
+  "mvn package -DskipTests -DskipFrontend=true"
+]
+
+[start]
+cmd = "java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dspring.profiles.active=prod -jar target/huevos-1.0.0-SNAPSHOT.jar"

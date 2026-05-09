@@ -1,5 +1,5 @@
 # ════════════════════════════════════════════════════════════
-#  ETAPA 1 — Compilar frontend (Node 20)
+#  ETAPA 1 — Compilar frontend (Node 20 Alpine)
 # ════════════════════════════════════════════════════════════
 FROM node:20-alpine AS frontend-build
 
@@ -10,36 +10,36 @@ COPY frontend/ ./
 RUN npm run build
 
 # ════════════════════════════════════════════════════════════
-#  ETAPA 2 — Compilar backend (Maven + Java 22)
+#  ETAPA 2 — Compilar backend (Java 21 LTS + Maven)
 # ════════════════════════════════════════════════════════════
-FROM maven:3.9.6-eclipse-temurin-22 AS backend-build
+FROM eclipse-temurin:21-jdk-alpine AS backend-build
 
 WORKDIR /app
 
-# Copiar pom.xml para cachear descarga de dependencias Java
-COPY pom.xml ./
+# Instalar Maven en Alpine
+RUN apk add --no-cache curl && \
+    curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz \
+    | tar -xzC /opt && \
+    ln -s /opt/apache-maven-3.9.6/bin/mvn /usr/local/bin/mvn
 
-# Descargar solo dependencias Java (NO el frontend-maven-plugin)
-# -DskipFrontend=true evita que Maven invoque Node/npm
+# Cachear dependencias Java primero
+COPY pom.xml ./
 RUN mvn dependency:resolve -q -DskipFrontend=true
 
-# Copiar código fuente
+# Copiar fuentes y frontend compilado
 COPY src/ ./src/
-
-# Copiar el frontend ya compilado desde la etapa 1
 COPY --from=frontend-build /app/frontend/dist ./src/main/resources/static/
 
-# Empaquetar JAR. Saltamos tests y el plugin de frontend
+# Compilar JAR (sin tests, sin plugin de Node)
 RUN mvn package -DskipTests -DskipFrontend=true
 
 # ════════════════════════════════════════════════════════════
-#  ETAPA 3 — Imagen final ligera (solo JRE 22)
+#  ETAPA 3 — Imagen final mínima (solo JRE 21)
 # ════════════════════════════════════════════════════════════
-FROM eclipse-temurin:22-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 WORKDIR /app
 
-# Usuario no-root por seguridad
 RUN addgroup -S distribuidora && adduser -S distribuidora -G distribuidora
 USER distribuidora
 
