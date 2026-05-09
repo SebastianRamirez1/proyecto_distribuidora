@@ -20,8 +20,7 @@ public class InventarioRepositoryImpl implements InventarioRepository {
 
     @Override
     public Inventario findUnico() {
-        return jpaRepository.findAll().stream()
-                .findFirst()
+        return jpaRepository.findFirstByOrderByIdAsc()
                 .map(mapper::toDomain)
                 .orElseThrow(() -> new IllegalStateException(
                         "No existe registro de inventario. Verifique que schema.sql se haya ejecutado."));

@@ -99,3 +99,11 @@ WHERE NOT EXISTS (SELECT 1 FROM inventario);
 INSERT INTO precio_publico (precio_extra, precio_aa, precio_a, precio_b)
 SELECT 0.00, 0.00, 0.00, 0.00
 WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
+
+-- ============================================================
+-- Limpieza de filas duplicadas en tablas singleton
+-- Conserva solo la fila de menor id para garantizar
+-- resultados deterministas en findFirstByOrderByIdAsc()
+-- ============================================================
+DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
+DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);

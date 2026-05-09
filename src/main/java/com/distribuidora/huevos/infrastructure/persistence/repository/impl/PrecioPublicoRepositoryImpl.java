@@ -18,8 +18,7 @@ public class PrecioPublicoRepositoryImpl implements PrecioPublicoRepository {
 
     @Override
     public PrecioPublico findCurrent() {
-        return jpaRepository.findAll().stream()
-                .findFirst()
+        return jpaRepository.findFirstByOrderByIdAsc()
                 .map(e -> new PrecioPublico(e.getId(),
                         Precio.de(e.getPrecioExtra()),
                         Precio.de(e.getPrecioAA()),
