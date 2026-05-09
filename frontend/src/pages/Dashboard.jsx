@@ -61,7 +61,7 @@ export default function Dashboard() {
   if (loading) return <Spinner />
 
   const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-  const tipoColor = { EXTRA: 'amber', NORMAL: 'slate' }
+  const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
 
   return (
     <div>
@@ -74,9 +74,11 @@ export default function Dashboard() {
 
       {/* Inventario */}
       <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">📦 Stock actual</h2>
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <StatCard icon="🥚" label="Canastas Extra" value={inventario?.stockExtra ?? 0} color="amber" />
-        <StatCard icon="🥚" label="Canastas Normal" value={inventario?.stockNormal ?? 0} color="blue" />
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatCard icon="🥚" label="Canastas EXTRA" value={inventario?.stockExtra ?? 0} color="amber" />
+        <StatCard icon="🥚" label="Canastas AA"    value={inventario?.stockAA    ?? 0} color="amber" />
+        <StatCard icon="🥚" label="Canastas A"     value={inventario?.stockA     ?? 0} color="blue"  />
+        <StatCard icon="🥚" label="Canastas B"     value={inventario?.stockB     ?? 0} color="purple" />
       </div>
 
       {/* Caja */}

@@ -21,7 +21,7 @@ function CajaRow({ icon, label, value, highlight = false }) {
 }
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-const tipoColor = { EXTRA: 'amber', NORMAL: 'slate' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
 
 export default function Reportes() {
   const [caja, setCaja] = useState(null)
@@ -48,7 +48,9 @@ export default function Reportes() {
 
   // Stats from ventas
   const ventasExtra  = ventas.filter(v => v.tipoProducto === 'EXTRA')
-  const ventasNormal = ventas.filter(v => v.tipoProducto === 'NORMAL')
+  const ventasAA     = ventas.filter(v => v.tipoProducto === 'AA')
+  const ventasA      = ventas.filter(v => v.tipoProducto === 'A')
+  const ventasB      = ventas.filter(v => v.tipoProducto === 'B')
   const totalCanastas = ventas.reduce((a, v) => a + v.cantidad, 0)
 
   return (
@@ -83,14 +85,29 @@ export default function Reportes() {
                   <p className="text-2xl font-bold text-slate-700">{ventas.length}</p>
                   <p className="text-xs text-slate-400 mt-1">Ventas</p>
                 </div>
-                <div className="text-center bg-amber-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-amber-600">{ventasExtra.reduce((a, v) => a + v.cantidad, 0)}</p>
-                  <p className="text-xs text-slate-400 mt-1">Can. Extra</p>
+                <div className="text-center bg-slate-50 rounded-lg p-3">
+                  <p className="text-2xl font-bold text-slate-700">{totalCanastas}</p>
+                  <p className="text-xs text-slate-400 mt-1">Total canastas</p>
                 </div>
-                <div className="text-center bg-blue-50 rounded-lg p-3">
-                  <p className="text-2xl font-bold text-blue-600">{ventasNormal.reduce((a, v) => a + v.cantidad, 0)}</p>
-                  <p className="text-xs text-slate-400 mt-1">Can. Normal</p>
+                <div className="text-center bg-slate-50 rounded-lg p-3">
+                  <p className="text-2xl font-bold text-amber-600">
+                    {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
+                  </p>
+                  <p className="text-xs text-slate-400 mt-1">Total S/</p>
                 </div>
+              </div>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {[
+                  { label: 'EXTRA', data: ventasExtra,  bg: 'bg-amber-50',  text: 'text-amber-600'  },
+                  { label: 'AA',    data: ventasAA,     bg: 'bg-yellow-50', text: 'text-yellow-600' },
+                  { label: 'A',     data: ventasA,      bg: 'bg-blue-50',   text: 'text-blue-600'   },
+                  { label: 'B',     data: ventasB,      bg: 'bg-slate-50',  text: 'text-slate-600'  },
+                ].map(({ label, data, bg, text }) => (
+                  <div key={label} className={`text-center ${bg} rounded-lg p-2`}>
+                    <p className={`text-xl font-bold ${text}`}>{data.reduce((a, v) => a + v.cantidad, 0)}</p>
+                    <p className="text-xs text-slate-400 mt-1">Can. {label}</p>
+                  </div>
+                ))}
               </div>
 
               {/* Desglose por tipo de pago */}

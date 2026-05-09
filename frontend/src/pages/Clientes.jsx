@@ -12,7 +12,10 @@ import Spinner from '../components/ui/Spinner'
 
 const tipoColor = { NORMAL: 'slate', ESPECIAL: 'amber' }
 
-const initCrear = { nombre: '', tipo: 'NORMAL' }
+const initCrear = {
+  nombre: '', tipo: 'NORMAL',
+  precioEspecialExtra: '', precioEspecialAA: '', precioEspecialA: '', precioEspecialB: '',
+}
 const initPrecio = { precioEspecialExtra: '', precioEspecialAA: '', precioEspecialA: '', precioEspecialB: '' }
 
 export default function Clientes() {
@@ -48,10 +51,14 @@ export default function Clientes() {
     e.preventDefault()
     setSaving(true)
     try {
-      await crearCliente({
-        nombre: formCrear.nombre,
-        tipo: formCrear.tipo,
-      })
+      const payload = { nombre: formCrear.nombre, tipo: formCrear.tipo }
+      if (formCrear.tipo === 'ESPECIAL') {
+        payload.precioEspecialExtra = Number(formCrear.precioEspecialExtra)
+        payload.precioEspecialAA    = Number(formCrear.precioEspecialAA)
+        payload.precioEspecialA     = Number(formCrear.precioEspecialA)
+        payload.precioEspecialB     = Number(formCrear.precioEspecialB)
+      }
+      await crearCliente(payload)
       setModalCrear(false)
       setFormCrear(initCrear)
       await load()
@@ -186,6 +193,29 @@ export default function Clientes() {
             <option value="NORMAL">NORMAL (precio público)</option>
             <option value="ESPECIAL">ESPECIAL (precio personalizado)</option>
           </Select>
+
+          {formCrear.tipo === 'ESPECIAL' && (
+            <div className="mt-3 border border-amber-200 bg-amber-50 rounded-lg p-3">
+              <p className="text-xs font-semibold text-amber-700 mb-3">💲 Precios personalizados por canasta</p>
+              {[
+                { field: 'precioEspecialExtra', label: 'EXTRA' },
+                { field: 'precioEspecialAA',    label: 'AA'    },
+                { field: 'precioEspecialA',     label: 'A'     },
+                { field: 'precioEspecialB',     label: 'B'     },
+              ].map(({ field, label }) => (
+                <Input
+                  key={field}
+                  label={`Precio canasta ${label} (S/)`}
+                  type="number" step="0.01" min="0"
+                  placeholder="0.00"
+                  value={formCrear[field]}
+                  onChange={e => setFormCrear(p => ({ ...p, [field]: e.target.value }))}
+                  required
+                />
+              ))}
+            </div>
+          )}
+
           <div className="flex gap-3 justify-end mt-4">
             <Button type="button" variant="secondary" onClick={() => setModalCrear(false)}>Cancelar</Button>
             <Button type="submit" loading={saving}>Crear cliente</Button>
