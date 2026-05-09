@@ -64,6 +64,8 @@
 
     <build>
         <plugins>
+
+            <!-- ── Spring Boot ──────────────────────────────────── -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -76,6 +78,65 @@
                     </excludes>
                 </configuration>
             </plugin>
+
+            <!-- ── Frontend build (Node + npm + Vite) ───────────── -->
+            <!--    Activo solo con: mvn package -P prod-build       -->
+            <!--    En desarrollo usa: npm run dev  (más rápido)     -->
+            <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+                <version>1.15.0</version>
+                <configuration>
+                    <workingDirectory>frontend</workingDirectory>
+                    <installDirectory>target</installDirectory>
+                    <skip>${skipFrontend}</skip>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>install-node-npm</id>
+                        <goals><goal>install-node-and-npm</goal></goals>
+                        <configuration>
+                            <nodeVersion>v20.11.0</nodeVersion>
+                            <npmVersion>10.2.4</npmVersion>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-install</id>
+                        <goals><goal>npm</goal></goals>
+                        <configuration>
+                            <arguments>install</arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-build</id>
+                        <goals><goal>npm</goal></goals>
+                        <phase>generate-resources</phase>
+                        <configuration>
+                            <arguments>run build</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
+
+    <profiles>
+        <!-- Omite compilación del frontend en desarrollo -->
+        <profile>
+            <id>dev</id>
+            <activation><activeByDefault>true</activeByDefault></activation>
+            <properties>
+                <skipFrontend>true</skipFrontend>
+            </properties>
+        </profile>
+        <!-- Incluye frontend en el JAR final -->
+        <profile>
+            <id>prod-build</id>
+            <properties>
+                <skipFrontend>false</skipFrontend>
+            </properties>
+        </profile>
+    </profiles>
+
 </project>
