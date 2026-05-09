@@ -16,12 +16,16 @@ public class CrearClienteCommand {
 
     // Requeridos si tipo == ESPECIAL
     private BigDecimal precioEspecialExtra;
-    private BigDecimal precioEspecialNormal;
+    private BigDecimal precioEspecialAA;
+    private BigDecimal precioEspecialA;
+    private BigDecimal precioEspecialB;
 
     // Opcionales (descuento por volumen para clientes ESPECIAL)
     private Integer descuentoDesdeCanastas;
     private BigDecimal descuentoPrecioExtra;
-    private BigDecimal descuentoPrecioNormal;
+    private BigDecimal descuentoPrecioAA;
+    private BigDecimal descuentoPrecioA;
+    private BigDecimal descuentoPrecioB;
 
     public CrearClienteCommand() {}
 
@@ -32,17 +36,29 @@ public class CrearClienteCommand {
     public void setTipo(TipoCliente tipo) { this.tipo = tipo; }
 
     public BigDecimal getPrecioEspecialExtra() { return precioEspecialExtra; }
-    public void setPrecioEspecialExtra(BigDecimal precioEspecialExtra) { this.precioEspecialExtra = precioEspecialExtra; }
+    public void setPrecioEspecialExtra(BigDecimal v) { this.precioEspecialExtra = v; }
 
-    public BigDecimal getPrecioEspecialNormal() { return precioEspecialNormal; }
-    public void setPrecioEspecialNormal(BigDecimal precioEspecialNormal) { this.precioEspecialNormal = precioEspecialNormal; }
+    public BigDecimal getPrecioEspecialAA() { return precioEspecialAA; }
+    public void setPrecioEspecialAA(BigDecimal v) { this.precioEspecialAA = v; }
+
+    public BigDecimal getPrecioEspecialA() { return precioEspecialA; }
+    public void setPrecioEspecialA(BigDecimal v) { this.precioEspecialA = v; }
+
+    public BigDecimal getPrecioEspecialB() { return precioEspecialB; }
+    public void setPrecioEspecialB(BigDecimal v) { this.precioEspecialB = v; }
 
     public Integer getDescuentoDesdeCanastas() { return descuentoDesdeCanastas; }
-    public void setDescuentoDesdeCanastas(Integer descuentoDesdeCanastas) { this.descuentoDesdeCanastas = descuentoDesdeCanastas; }
+    public void setDescuentoDesdeCanastas(Integer v) { this.descuentoDesdeCanastas = v; }
 
     public BigDecimal getDescuentoPrecioExtra() { return descuentoPrecioExtra; }
-    public void setDescuentoPrecioExtra(BigDecimal descuentoPrecioExtra) { this.descuentoPrecioExtra = descuentoPrecioExtra; }
+    public void setDescuentoPrecioExtra(BigDecimal v) { this.descuentoPrecioExtra = v; }
 
-    public BigDecimal getDescuentoPrecioNormal() { return descuentoPrecioNormal; }
-    public void setDescuentoPrecioNormal(BigDecimal descuentoPrecioNormal) { this.descuentoPrecioNormal = descuentoPrecioNormal; }
+    public BigDecimal getDescuentoPrecioAA() { return descuentoPrecioAA; }
+    public void setDescuentoPrecioAA(BigDecimal v) { this.descuentoPrecioAA = v; }
+
+    public BigDecimal getDescuentoPrecioA() { return descuentoPrecioA; }
+    public void setDescuentoPrecioA(BigDecimal v) { this.descuentoPrecioA = v; }
+
+    public BigDecimal getDescuentoPrecioB() { return descuentoPrecioB; }
+    public void setDescuentoPrecioB(BigDecimal v) { this.descuentoPrecioB = v; }
 }

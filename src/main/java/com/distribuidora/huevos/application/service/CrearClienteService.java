@@ -36,13 +36,18 @@ public class CrearClienteService {
 
     private PrecioEspecial construirPrecioEspecial(CrearClienteCommand command) {
         if (command.getTipo() == TipoCliente.ESPECIAL) {
-            if (command.getPrecioEspecialExtra() == null || command.getPrecioEspecialNormal() == null) {
+            if (command.getPrecioEspecialExtra() == null
+                    || command.getPrecioEspecialAA() == null
+                    || command.getPrecioEspecialA()  == null
+                    || command.getPrecioEspecialB()  == null) {
                 throw new ClienteIncompletoException(
-                        "Un cliente ESPECIAL debe tener precioEspecialExtra y precioEspecialNormal definidos");
+                        "Un cliente ESPECIAL debe tener precios especiales definidos para todos los tipos: EXTRA, AA, A, B");
             }
             return new PrecioEspecial(
                     Precio.de(command.getPrecioEspecialExtra()),
-                    Precio.de(command.getPrecioEspecialNormal()));
+                    Precio.de(command.getPrecioEspecialAA()),
+                    Precio.de(command.getPrecioEspecialA()),
+                    Precio.de(command.getPrecioEspecialB()));
         }
         return null;
     }
@@ -50,11 +55,15 @@ public class CrearClienteService {
     private DescuentoPorVolumen construirDescuentoVolumen(CrearClienteCommand command) {
         if (command.getDescuentoDesdeCanastas() != null
                 && command.getDescuentoPrecioExtra() != null
-                && command.getDescuentoPrecioNormal() != null) {
+                && command.getDescuentoPrecioAA()    != null
+                && command.getDescuentoPrecioA()     != null
+                && command.getDescuentoPrecioB()     != null) {
             return new DescuentoPorVolumen(
                     new Cantidad(command.getDescuentoDesdeCanastas()),
                     Precio.de(command.getDescuentoPrecioExtra()),
-                    Precio.de(command.getDescuentoPrecioNormal()));
+                    Precio.de(command.getDescuentoPrecioAA()),
+                    Precio.de(command.getDescuentoPrecioA()),
+                    Precio.de(command.getDescuentoPrecioB()));
         }
         return null;
     }
