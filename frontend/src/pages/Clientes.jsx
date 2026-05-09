@@ -52,10 +52,10 @@ export default function Clientes() {
         nombre: formCrear.nombre,
         tipo: formCrear.tipo,
       })
-      setSuccess('Cliente creado correctamente')
       setModalCrear(false)
       setFormCrear(initCrear)
-      load()
+      await load()
+      setSuccess('Cliente creado correctamente')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -71,9 +71,9 @@ export default function Clientes() {
         precioEspecialExtra: Number(formPrecio.precioEspecialExtra),
         precioEspecialNormal: Number(formPrecio.precioEspecialNormal),
       })
-      setSuccess('Precio especial actualizado')
       setModalPrecio(false)
-      load()
+      await load()
+      setSuccess('Precio especial actualizado')
     } catch (e) {
       setError(e.message)
     } finally {

@@ -63,9 +63,9 @@ export default function Ventas() {
         cantidad: Number(formVenta.cantidad),
         tipoPago: formVenta.tipoPago,
       })
-      setSuccess('Venta registrada correctamente ✅')
       setFormVenta(initVenta)
-      loadVentas()
+      await loadVentas()
+      setSuccess('Venta registrada correctamente ✅')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -82,9 +82,9 @@ export default function Ventas() {
         clienteId: Number(formAbono.clienteId),
         monto: Number(formAbono.monto),
       })
-      setSuccess('Abono registrado correctamente ✅')
       setFormAbono(initAbono)
-      loadVentas()
+      await loadVentas()
+      setSuccess('Abono registrado correctamente ✅')
     } catch (e) {
       setError(e.message)
     } finally {

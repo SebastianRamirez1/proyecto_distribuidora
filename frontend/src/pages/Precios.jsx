@@ -38,8 +38,9 @@ export default function Precios() {
         precioExtra: Number(form.precioExtra),
         precioNormal: Number(form.precioNormal),
       })
+      // Refrescar desde el servidor para garantizar estado real de la BD
+      await load()
       setSuccess('Precios actualizados correctamente ✅')
-      load()
     } catch (e) {
       setError(e.message)
     } finally {
