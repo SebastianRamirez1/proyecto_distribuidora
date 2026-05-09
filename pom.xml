@@ -18,7 +18,7 @@
     <description>Sistema de gestión para distribuidora de huevos</description>
 
     <properties>
-        <!-- Java 21 LTS: funciona local con JDK 22 y en Railway con JDK 21 -->
+        <!-- Java 21 LTS: compatible con JDK 22 local y JDK 21 en cloud -->
         <java.version>21</java.version>
     </properties>
 
@@ -35,26 +35,22 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
-
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
             <optional>true</optional>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
-        <!-- H2: scope 'runtime' para poder usar el perfil dev sin Docker -->
+        <!-- H2 para desarrollo local sin Docker -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -64,8 +60,8 @@
 
     <build>
         <plugins>
-
-            <!-- ── Spring Boot ──────────────────────────────────── -->
+            <!-- Solo Spring Boot plugin en el build principal -->
+            <!-- El frontend-maven-plugin está en el perfil "with-frontend" -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -78,64 +74,53 @@
                     </excludes>
                 </configuration>
             </plugin>
-
-            <!-- ── Frontend build (Node + npm + Vite) ───────────── -->
-            <!--    Activo solo con: mvn package -P prod-build       -->
-            <!--    En desarrollo usa: npm run dev  (más rápido)     -->
-            <plugin>
-                <groupId>com.github.eirslett</groupId>
-                <artifactId>frontend-maven-plugin</artifactId>
-                <version>1.15.0</version>
-                <configuration>
-                    <workingDirectory>frontend</workingDirectory>
-                    <installDirectory>target</installDirectory>
-                    <skip>${skipFrontend}</skip>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-node-npm</id>
-                        <goals><goal>install-node-and-npm</goal></goals>
-                        <configuration>
-                            <nodeVersion>v20.11.0</nodeVersion>
-                            <npmVersion>10.2.4</npmVersion>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm-install</id>
-                        <goals><goal>npm</goal></goals>
-                        <configuration>
-                            <arguments>install</arguments>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>npm-build</id>
-                        <goals><goal>npm</goal></goals>
-                        <phase>generate-resources</phase>
-                        <configuration>
-                            <arguments>run build</arguments>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
         </plugins>
     </build>
 
     <profiles>
-        <!-- Omite compilación del frontend en desarrollo -->
+        <!--
+            Perfil "with-frontend":
+            Compila Node + React + empaqueta todo en el JAR.
+            Uso: mvn package -P with-frontend
+            Requiere Node 20 instalado localmente.
+            En Docker/Railway el frontend se compila por separado.
+        -->
         <profile>
-            <id>dev</id>
-            <activation><activeByDefault>true</activeByDefault></activation>
-            <properties>
-                <skipFrontend>true</skipFrontend>
-            </properties>
-        </profile>
-        <!-- Incluye frontend en el JAR final -->
-        <profile>
-            <id>prod-build</id>
-            <properties>
-                <skipFrontend>false</skipFrontend>
-            </properties>
+            <id>with-frontend</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>com.github.eirslett</groupId>
+                        <artifactId>frontend-maven-plugin</artifactId>
+                        <version>1.15.0</version>
+                        <configuration>
+                            <workingDirectory>frontend</workingDirectory>
+                            <installDirectory>target</installDirectory>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>install-node-npm</id>
+                                <goals><goal>install-node-and-npm</goal></goals>
+                                <configuration>
+                                    <nodeVersion>v20.11.0</nodeVersion>
+                                    <npmVersion>10.2.4</npmVersion>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>npm-install</id>
+                                <goals><goal>npm</goal></goals>
+                                <configuration><arguments>install</arguments></configuration>
+                            </execution>
+                            <execution>
+                                <id>npm-build</id>
+                                <goals><goal>npm</goal></goals>
+                                <phase>generate-resources</phase>
+                                <configuration><arguments>run build</arguments></configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
         </profile>
     </profiles>
 

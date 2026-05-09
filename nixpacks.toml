@@ -1,15 +1,22 @@
-# Nixpacks: builder nativo de Railway (más rápido que Docker en su plataforma)
+# nixpacks.toml — Builder nativo de Railway
+# Railway lo detecta automáticamente cuando no hay Dockerfile
+
 [phases.setup]
+# Paquetes Nix: Node 20, JDK 21, Maven
 nixPkgs = ["nodejs_20", "jdk21", "maven"]
 
 [phases.install]
-cmds = ["cd frontend && npm install && cd .."]
+# Instalar dependencias del frontend
+cmds = ["cd frontend && npm install"]
 
 [phases.build]
+# 1. Compilar React → genera src/main/resources/static/
+# 2. Compilar Spring Boot → empaqueta todo en el JAR
 cmds = [
-  "cd frontend && npm run build && cd ..",
-  "mvn package -DskipTests -DskipFrontend=true"
+  "cd frontend && npm run build",
+  "mvn package -DskipTests"
 ]
 
 [start]
+# Arrancar con perfil prod (lee DB_URL, DB_USERNAME, DB_PASSWORD)
 cmd = "java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dspring.profiles.active=prod -jar target/huevos-1.0.0-SNAPSHOT.jar"
