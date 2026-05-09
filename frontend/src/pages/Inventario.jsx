@@ -29,18 +29,20 @@ export default function Inventario() {
 
   const handleCargar = async (e) => {
     e.preventDefault()
-    if (!form.cantidadExtra && !form.cantidadNormal) {
-      setError('Ingresa al menos una cantidad')
+    const extra  = form.cantidadExtra  ? Number(form.cantidadExtra)  : 0
+    const normal = form.cantidadNormal ? Number(form.cantidadNormal) : 0
+    if (extra <= 0 && normal <= 0) {
+      setError('Ingresa al menos una cantidad mayor a 0')
       return
     }
     setSaving(true)
     setError('')
     try {
-      const updated = await cargarInventario({
-        cantidadExtra: form.cantidadExtra ? Number(form.cantidadExtra) : 0,
-        cantidadNormal: form.cantidadNormal ? Number(form.cantidadNormal) : 0,
-      })
-      setInventario(updated)
+      // El backend recibe UNA llamada por tipo: { tipoProducto, cantidad }
+      let updated
+      if (extra > 0)  updated = await cargarInventario({ tipoProducto: 'EXTRA',  cantidad: extra })
+      if (normal > 0) updated = await cargarInventario({ tipoProducto: 'NORMAL', cantidad: normal })
+      if (updated) setInventario(updated)
       setSuccess('Inventario cargado correctamente ✅')
       setForm({ cantidadExtra: '', cantidadNormal: '' })
     } catch (e) {
