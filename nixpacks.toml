@@ -1,22 +1,27 @@
 # nixpacks.toml — Builder nativo de Railway
-# Railway lo detecta automáticamente cuando no hay Dockerfile
+#
+# NOTA: No usamos el paquete "maven" de Nix porque arrastra JDK 19
+# como dependencia, sobreescribiendo el JDK 21 y rompiendo el build.
+# En su lugar descargamos Maven manualmente para que use solo JDK 21.
 
 [phases.setup]
-# Paquetes Nix: Node 20, JDK 21, Maven
-nixPkgs = ["nodejs_20", "jdk21", "maven"]
+nixPkgs = ["nodejs_20", "jdk21", "curl"]
 
 [phases.install]
-# Instalar dependencias del frontend
-cmds = ["cd frontend && npm install"]
+cmds = [
+  # Descargar Maven 3.9.6 sin dependencias de JDK propias
+  "curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -o /tmp/mvn.tar.gz && tar -xzf /tmp/mvn.tar.gz -C /tmp",
+  # Instalar dependencias del frontend
+  "cd frontend && npm install"
+]
 
 [phases.build]
-# 1. Compilar React → genera src/main/resources/static/
-# 2. Compilar Spring Boot → empaqueta todo en el JAR
 cmds = [
+  # Compilar React → genera src/main/resources/static/
   "cd frontend && npm run build",
-  "mvn package -DskipTests"
+  # Compilar Spring Boot usando Maven con JDK 21 (único JDK instalado)
+  "/tmp/apache-maven-3.9.6/bin/mvn package -DskipTests"
 ]
 
 [start]
-# Arrancar con perfil prod (lee DB_URL, DB_USERNAME, DB_PASSWORD)
 cmd = "java -XX:+UseContainerSupport -XX:MaxRAMPercentage=75.0 -Dspring.profiles.active=prod -jar target/huevos-1.0.0-SNAPSHOT.jar"
