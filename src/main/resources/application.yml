@@ -1,0 +1,80 @@
+# ============================================================
+# PERFIL DEFAULT: H2 en memoria
+# Arranca sin Docker ni PostgreSQL. Datos se pierden al reiniciar.
+# ============================================================
+spring:
+  application:
+    name: distribuidora-huevos
+  datasource:
+    url: jdbc:h2:mem:distribuidora;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create-drop        # Hibernate crea las tablas desde las entidades
+    show-sql: true
+    open-in-view: false
+    defer-datasource-initialization: true   # El SQL de seed corre DESPUÉS de que Hibernate creó las tablas
+  sql:
+    init:
+      mode: always
+      data-locations: classpath:data-h2.sql  # Solo datos iniciales (tablas ya las crea Hibernate)
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8080
+
+---
+# ============================================================
+# PERFIL postgres: PostgreSQL real via Docker
+# Activar con: -Dspring.profiles.active=postgres
+# Requiere: docker-compose up -d
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: postgres
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/distribuidora_huevos}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: false
+    open-in-view: false
+    defer-datasource-initialization: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+
+---
+# ============================================================
+# PERFIL local: PostgreSQL + SQL visible en consola
+# Activar con: -Dspring.profiles.active=local
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: local
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/distribuidora_huevos}
+    username: ${DB_USERNAME:postgres}
+    password: ${DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    open-in-view: false
+    defer-datasource-initialization: false
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
