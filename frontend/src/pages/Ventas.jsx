@@ -140,7 +140,9 @@ export default function Ventas() {
                   onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
                 >
                   <option value="EXTRA">🥚 EXTRA</option>
-                  <option value="NORMAL">🥚 NORMAL</option>
+                  <option value="AA">🥚 AA</option>
+                  <option value="A">🥚 A</option>
+                  <option value="B">🥚 B</option>
                 </Select>
                 <Input
                   label="Cantidad (canastas)"

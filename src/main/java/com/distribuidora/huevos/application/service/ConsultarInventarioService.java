@@ -18,6 +18,7 @@ public class ConsultarInventarioService {
 
     public InventarioResponse ejecutar() {
         Inventario inventario = inventarioRepository.findUnico();
-        return new InventarioResponse(inventario.getStockExtra(), inventario.getStockNormal());
+        return new InventarioResponse(inventario.getStockExtra(), inventario.getStockAA(),
+                inventario.getStockA(), inventario.getStockB());
     }
 }

@@ -21,6 +21,12 @@ public class PrecioPublicoJpaEntity {
     @Column(name = "precio_extra", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioExtra;
 
-    @Column(name = "precio_normal", nullable = false, precision = 12, scale = 2)
-    private BigDecimal precioNormal;
+    @Column(name = "precio_aa", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioAA;
+
+    @Column(name = "precio_a", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioA;
+
+    @Column(name = "precio_b", nullable = false, precision = 12, scale = 2)
+    private BigDecimal precioB;
 }

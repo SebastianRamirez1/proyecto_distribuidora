@@ -6,14 +6,28 @@ import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 
+const TIPOS = [
+  { key: 'stockExtra', tipo: 'EXTRA', label: 'EXTRA',  color: 'amber',   emoji: '🥚' },
+  { key: 'stockAA',    tipo: 'AA',    label: 'AA',     color: 'yellow',  emoji: '🥚' },
+  { key: 'stockA',     tipo: 'A',     label: 'A',      color: 'blue',    emoji: '🥚' },
+  { key: 'stockB',     tipo: 'B',     label: 'B',      color: 'slate',   emoji: '🥚' },
+]
+
+const colorMap = {
+  amber:  { bg: 'bg-amber-100',  text: 'text-amber-600'  },
+  yellow: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+  blue:   { bg: 'bg-blue-100',   text: 'text-blue-600'   },
+  slate:  { bg: 'bg-slate-100',  text: 'text-slate-600'  },
+}
+
 export default function Inventario() {
   const [inventario, setInventario] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
-  const [success, setSuccess] = useState('')
-  const [saving, setSaving] = useState(false)
+  const [loading, setLoading]     = useState(true)
+  const [error, setError]         = useState('')
+  const [success, setSuccess]     = useState('')
+  const [saving, setSaving]       = useState(false)
 
-  const [form, setForm] = useState({ cantidadExtra: '', cantidadNormal: '' })
+  const [form, setForm] = useState({ EXTRA: '', AA: '', A: '', B: '' })
 
   const load = async () => {
     try {
@@ -29,22 +43,28 @@ export default function Inventario() {
 
   const handleCargar = async (e) => {
     e.preventDefault()
-    const extra  = form.cantidadExtra  ? Number(form.cantidadExtra)  : 0
-    const normal = form.cantidadNormal ? Number(form.cantidadNormal) : 0
-    if (extra <= 0 && normal <= 0) {
+    const valores = {
+      EXTRA: form.EXTRA ? Number(form.EXTRA) : 0,
+      AA:    form.AA    ? Number(form.AA)    : 0,
+      A:     form.A     ? Number(form.A)     : 0,
+      B:     form.B     ? Number(form.B)     : 0,
+    }
+    const hayAlguno = Object.values(valores).some(v => v > 0)
+    if (!hayAlguno) {
       setError('Ingresa al menos una cantidad mayor a 0')
       return
     }
     setSaving(true)
     setError('')
     try {
-      // El backend recibe UNA llamada por tipo: { tipoProducto, cantidad }
-      if (extra > 0)  await cargarInventario({ tipoProducto: 'EXTRA',  cantidad: extra })
-      if (normal > 0) await cargarInventario({ tipoProducto: 'NORMAL', cantidad: normal })
-      // Refrescar desde el servidor para garantizar estado real de la BD
+      for (const [tipo, cantidad] of Object.entries(valores)) {
+        if (cantidad > 0) {
+          await cargarInventario({ tipoProducto: tipo, cantidad })
+        }
+      }
       await load()
       setSuccess('Inventario cargado correctamente ✅')
-      setForm({ cantidadExtra: '', cantidadNormal: '' })
+      setForm({ EXTRA: '', AA: '', A: '', B: '' })
     } catch (e) {
       setError(e.message)
     } finally {
@@ -68,29 +88,24 @@ export default function Inventario() {
           <div className="space-y-4">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Stock actual</h2>
 
-            <Card className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-amber-100 flex items-center justify-center text-3xl flex-shrink-0">
-                🥚
-              </div>
-              <div className="flex-1">
-                <p className="text-slate-500 text-sm">Canastas EXTRA</p>
-                <p className="text-4xl font-bold text-amber-600">{inventario?.stockExtra ?? 0}</p>
-                <p className="text-xs text-slate-400 mt-1">unidades disponibles</p>
-              </div>
-              <div className={`w-3 h-3 rounded-full ${(inventario?.stockExtra ?? 0) > 10 ? 'bg-emerald-400' : (inventario?.stockExtra ?? 0) > 0 ? 'bg-amber-400' : 'bg-red-400'}`} />
-            </Card>
-
-            <Card className="flex items-center gap-4">
-              <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-3xl flex-shrink-0">
-                🥚
-              </div>
-              <div className="flex-1">
-                <p className="text-slate-500 text-sm">Canastas NORMAL</p>
-                <p className="text-4xl font-bold text-blue-600">{inventario?.stockNormal ?? 0}</p>
-                <p className="text-xs text-slate-400 mt-1">unidades disponibles</p>
-              </div>
-              <div className={`w-3 h-3 rounded-full ${(inventario?.stockNormal ?? 0) > 10 ? 'bg-emerald-400' : (inventario?.stockNormal ?? 0) > 0 ? 'bg-amber-400' : 'bg-red-400'}`} />
-            </Card>
+            {TIPOS.map(({ key, label, color }) => {
+              const stock = inventario?.[key] ?? 0
+              const { bg, text } = colorMap[color]
+              const dot = stock > 10 ? 'bg-emerald-400' : stock > 0 ? 'bg-amber-400' : 'bg-red-400'
+              return (
+                <Card key={key} className="flex items-center gap-4">
+                  <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-3xl flex-shrink-0`}>
+                    🥚
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-slate-500 text-sm">Canastas {label}</p>
+                    <p className={`text-4xl font-bold ${text}`}>{stock}</p>
+                    <p className="text-xs text-slate-400 mt-1">unidades disponibles</p>
+                  </div>
+                  <div className={`w-3 h-3 rounded-full ${dot}`} />
+                </Card>
+              )
+            })}
 
             <div className="bg-slate-50 rounded-lg p-4 text-sm text-slate-500">
               <p className="flex items-center gap-2"><span className="w-3 h-3 rounded-full bg-emerald-400 inline-block" /> &gt; 10 canastas — Stock suficiente</p>
@@ -104,20 +119,16 @@ export default function Inventario() {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Cargar inventario</h2>
             <Card>
               <form onSubmit={handleCargar}>
-                <Input
-                  label="Canastas EXTRA a agregar"
-                  type="number" min="0"
-                  placeholder="Ej: 100"
-                  value={form.cantidadExtra}
-                  onChange={e => setForm(p => ({ ...p, cantidadExtra: e.target.value }))}
-                />
-                <Input
-                  label="Canastas NORMAL a agregar"
-                  type="number" min="0"
-                  placeholder="Ej: 150"
-                  value={form.cantidadNormal}
-                  onChange={e => setForm(p => ({ ...p, cantidadNormal: e.target.value }))}
-                />
+                {TIPOS.map(({ tipo, label }) => (
+                  <Input
+                    key={tipo}
+                    label={`Canastas ${label} a agregar`}
+                    type="number" min="0"
+                    placeholder="Ej: 100"
+                    value={form[tipo]}
+                    onChange={e => setForm(p => ({ ...p, [tipo]: e.target.value }))}
+                  />
+                ))}
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 mb-4">
                   ℹ️ Los valores ingresados se <strong>suman</strong> al stock actual. Para reponer 100 canastas, ingresa 100.
                 </div>

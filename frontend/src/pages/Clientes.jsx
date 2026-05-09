@@ -13,7 +13,7 @@ import Spinner from '../components/ui/Spinner'
 const tipoColor = { NORMAL: 'slate', ESPECIAL: 'amber' }
 
 const initCrear = { nombre: '', tipo: 'NORMAL' }
-const initPrecio = { precioEspecialExtra: '', precioEspecialNormal: '' }
+const initPrecio = { precioEspecialExtra: '', precioEspecialAA: '', precioEspecialA: '', precioEspecialB: '' }
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
@@ -69,7 +69,9 @@ export default function Clientes() {
     try {
       await actualizarPrecioEspecial(selectedCliente.id, {
         precioEspecialExtra: Number(formPrecio.precioEspecialExtra),
-        precioEspecialNormal: Number(formPrecio.precioEspecialNormal),
+        precioEspecialAA:    Number(formPrecio.precioEspecialAA),
+        precioEspecialA:     Number(formPrecio.precioEspecialA),
+        precioEspecialB:     Number(formPrecio.precioEspecialB),
       })
       setModalPrecio(false)
       await load()
@@ -85,7 +87,9 @@ export default function Clientes() {
     setSelectedCliente(c)
     setFormPrecio({
       precioEspecialExtra: c.precioEspecialExtra ?? '',
-      precioEspecialNormal: c.precioEspecialNormal ?? '',
+      precioEspecialAA:    c.precioEspecialAA    ?? '',
+      precioEspecialA:     c.precioEspecialA     ?? '',
+      precioEspecialB:     c.precioEspecialB     ?? '',
     })
     setModalPrecio(true)
   }
@@ -124,14 +128,16 @@ export default function Clientes() {
                 <th className="px-4 py-3 text-left">ID</th>
                 <th className="px-4 py-3 text-left">Nombre</th>
                 <th className="px-4 py-3 text-left">Tipo</th>
-                <th className="px-4 py-3 text-right">P. Especial Extra</th>
-                <th className="px-4 py-3 text-right">P. Especial Normal</th>
+                <th className="px-4 py-3 text-right">P. Extra</th>
+                <th className="px-4 py-3 text-right">P. AA</th>
+                <th className="px-4 py-3 text-right">P. A</th>
+                <th className="px-4 py-3 text-right">P. B</th>
                 <th className="px-4 py-3 text-center">Acciones</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {clientes.length === 0 ? (
-                <tr><td colSpan={6} className="text-center text-slate-400 py-8">No hay clientes registrados</td></tr>
+                <tr><td colSpan={8} className="text-center text-slate-400 py-8">No hay clientes registrados</td></tr>
               ) : clientes.map((c) => (
                 <tr key={c.id} className="hover:bg-slate-50">
                   <td className="table-cell text-slate-400">#{c.id}</td>
@@ -140,7 +146,9 @@ export default function Clientes() {
                     <Badge color={tipoColor[c.tipo]}>{c.tipo}</Badge>
                   </td>
                   <td className="table-cell text-right">{fmt(c.precioEspecialExtra)}</td>
-                  <td className="table-cell text-right">{fmt(c.precioEspecialNormal)}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialAA)}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialA)}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialB)}</td>
                   <td className="table-cell text-center">
                     <div className="flex gap-2 justify-center">
                       {c.tipo === 'ESPECIAL' && (
@@ -188,22 +196,22 @@ export default function Clientes() {
       {/* Modal Precio Especial */}
       <Modal isOpen={modalPrecio} onClose={() => setModalPrecio(false)} title={`Precio especial — ${selectedCliente?.nombre}`}>
         <form onSubmit={handlePrecio}>
-          <Input
-            label="Precio por canasta EXTRA (S/)"
-            type="number" step="0.01" min="0"
-            placeholder="0.00"
-            value={formPrecio.precioEspecialExtra}
-            onChange={e => setFormPrecio(p => ({ ...p, precioEspecialExtra: e.target.value }))}
-            required
-          />
-          <Input
-            label="Precio por canasta NORMAL (S/)"
-            type="number" step="0.01" min="0"
-            placeholder="0.00"
-            value={formPrecio.precioEspecialNormal}
-            onChange={e => setFormPrecio(p => ({ ...p, precioEspecialNormal: e.target.value }))}
-            required
-          />
+          {[
+            { field: 'precioEspecialExtra', label: 'EXTRA' },
+            { field: 'precioEspecialAA',    label: 'AA'    },
+            { field: 'precioEspecialA',     label: 'A'     },
+            { field: 'precioEspecialB',     label: 'B'     },
+          ].map(({ field, label }) => (
+            <Input
+              key={field}
+              label={`Precio por canasta ${label} (S/)`}
+              type="number" step="0.01" min="0"
+              placeholder="0.00"
+              value={formPrecio[field]}
+              onChange={e => setFormPrecio(p => ({ ...p, [field]: e.target.value }))}
+              required
+            />
+          ))}
           <div className="flex gap-3 justify-end mt-4">
             <Button type="button" variant="secondary" onClick={() => setModalPrecio(false)}>Cancelar</Button>
             <Button type="submit" loading={saving}>Guardar precios</Button>

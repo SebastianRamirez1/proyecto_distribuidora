@@ -21,7 +21,9 @@ public class ActualizarPrecioPublicoService {
         PrecioPublico actual = precioPublicoRepository.findCurrent();
         PrecioPublico actualizado = actual.conNuevosPrecios(
                 Precio.de(command.getPrecioExtra()),
-                Precio.de(command.getPrecioNormal()));
+                Precio.de(command.getPrecioAA()),
+                Precio.de(command.getPrecioA()),
+                Precio.de(command.getPrecioB()));
         precioPublicoRepository.save(actualizado);
     }
 }

@@ -5,23 +5,35 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-// DECISIÓN: Precio público es un requisito implícito (clientes NORMAL necesitan precio).
-// Se expone vía PUT /api/precios/publico para que el dueño lo actualice diariamente.
 public class ActualizarPrecioPublicoCommand {
 
     @NotNull(message = "El precio EXTRA es obligatorio")
     @DecimalMin(value = "0", message = "El precio EXTRA no puede ser negativo")
     private BigDecimal precioExtra;
 
-    @NotNull(message = "El precio NORMAL es obligatorio")
-    @DecimalMin(value = "0", message = "El precio NORMAL no puede ser negativo")
-    private BigDecimal precioNormal;
+    @NotNull(message = "El precio AA es obligatorio")
+    @DecimalMin(value = "0", message = "El precio AA no puede ser negativo")
+    private BigDecimal precioAA;
+
+    @NotNull(message = "El precio A es obligatorio")
+    @DecimalMin(value = "0", message = "El precio A no puede ser negativo")
+    private BigDecimal precioA;
+
+    @NotNull(message = "El precio B es obligatorio")
+    @DecimalMin(value = "0", message = "El precio B no puede ser negativo")
+    private BigDecimal precioB;
 
     public ActualizarPrecioPublicoCommand() {}
 
     public BigDecimal getPrecioExtra() { return precioExtra; }
     public void setPrecioExtra(BigDecimal precioExtra) { this.precioExtra = precioExtra; }
 
-    public BigDecimal getPrecioNormal() { return precioNormal; }
-    public void setPrecioNormal(BigDecimal precioNormal) { this.precioNormal = precioNormal; }
+    public BigDecimal getPrecioAA() { return precioAA; }
+    public void setPrecioAA(BigDecimal precioAA) { this.precioAA = precioAA; }
+
+    public BigDecimal getPrecioA() { return precioA; }
+    public void setPrecioA(BigDecimal precioA) { this.precioA = precioA; }
+
+    public BigDecimal getPrecioB() { return precioB; }
+    public void setPrecioB(BigDecimal precioB) { this.precioB = precioB; }
 }

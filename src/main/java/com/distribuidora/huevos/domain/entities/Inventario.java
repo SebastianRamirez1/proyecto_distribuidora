@@ -8,16 +8,29 @@ public class Inventario {
 
     private Long id;
     private int stockExtra;
-    private int stockNormal;
+    private int stockAA;
+    private int stockA;
+    private int stockB;
 
-    public Inventario(Long id, int stockExtra, int stockNormal) {
+    public Inventario(Long id, int stockExtra, int stockAA, int stockA, int stockB) {
         this.id = id;
         this.stockExtra = stockExtra;
-        this.stockNormal = stockNormal;
+        this.stockAA = stockAA;
+        this.stockA = stockA;
+        this.stockB = stockB;
+    }
+
+    public int obtenerStock(TipoProducto tipo) {
+        return switch (tipo) {
+            case EXTRA -> stockExtra;
+            case AA    -> stockAA;
+            case A     -> stockA;
+            case B     -> stockB;
+        };
     }
 
     public void validarStock(TipoProducto tipo, Cantidad cantidad) {
-        int disponible = tipo == TipoProducto.EXTRA ? stockExtra : stockNormal;
+        int disponible = obtenerStock(tipo);
         if (disponible < cantidad.getValor()) {
             throw new StockInsuficienteException(
                     String.format("Stock insuficiente para canastas %s. Disponible: %d, solicitado: %d",
@@ -27,34 +40,26 @@ public class Inventario {
 
     public void descontar(TipoProducto tipo, Cantidad cantidad) {
         validarStock(tipo, cantidad);
-        if (tipo == TipoProducto.EXTRA) {
-            this.stockExtra -= cantidad.getValor();
-        } else {
-            this.stockNormal -= cantidad.getValor();
+        switch (tipo) {
+            case EXTRA -> stockExtra -= cantidad.getValor();
+            case AA    -> stockAA    -= cantidad.getValor();
+            case A     -> stockA     -= cantidad.getValor();
+            case B     -> stockB     -= cantidad.getValor();
         }
     }
 
     public void agregar(TipoProducto tipo, Cantidad cantidad) {
-        if (tipo == TipoProducto.EXTRA) {
-            this.stockExtra += cantidad.getValor();
-        } else {
-            this.stockNormal += cantidad.getValor();
+        switch (tipo) {
+            case EXTRA -> stockExtra += cantidad.getValor();
+            case AA    -> stockAA    += cantidad.getValor();
+            case A     -> stockA     += cantidad.getValor();
+            case B     -> stockB     += cantidad.getValor();
         }
     }
 
-    public int obtenerStock(TipoProducto tipo) {
-        return tipo == TipoProducto.EXTRA ? stockExtra : stockNormal;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public int getStockExtra() {
-        return stockExtra;
-    }
-
-    public int getStockNormal() {
-        return stockNormal;
-    }
+    public Long getId()       { return id; }
+    public int getStockExtra() { return stockExtra; }
+    public int getStockAA()    { return stockAA; }
+    public int getStockA()     { return stockA; }
+    public int getStockB()     { return stockB; }
 }

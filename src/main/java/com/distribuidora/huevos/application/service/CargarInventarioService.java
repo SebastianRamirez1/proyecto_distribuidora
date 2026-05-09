@@ -22,6 +22,7 @@ public class CargarInventarioService {
         Inventario inventario = inventarioRepository.findUnico();
         inventario.agregar(command.getTipoProducto(), new Cantidad(command.getCantidad()));
         inventarioRepository.save(inventario);
-        return new InventarioResponse(inventario.getStockExtra(), inventario.getStockNormal());
+        return new InventarioResponse(inventario.getStockExtra(), inventario.getStockAA(),
+                inventario.getStockA(), inventario.getStockB());
     }
 }

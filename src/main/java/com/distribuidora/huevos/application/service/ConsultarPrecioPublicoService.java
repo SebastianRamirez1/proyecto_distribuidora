@@ -18,6 +18,7 @@ public class ConsultarPrecioPublicoService {
 
     public PrecioPublicoResponse ejecutar() {
         PrecioPublico pp = precioPublicoRepository.findCurrent();
-        return new PrecioPublicoResponse(pp.getPrecioExtra().getValor(), pp.getPrecioNormal().getValor());
+        return new PrecioPublicoResponse(pp.getPrecioExtra().getValor(), pp.getPrecioAA().getValor(),
+                pp.getPrecioA().getValor(), pp.getPrecioB().getValor());
     }
 }
