@@ -27,9 +27,8 @@ public class PrecioController {
     }
 
     @PutMapping("/publico")
-    public ResponseEntity<Void> actualizarPrecioPublico(
+    public ResponseEntity<PrecioPublicoResponse> actualizarPrecioPublico(
             @Valid @RequestBody ActualizarPrecioPublicoCommand command) {
-        actualizarPrecioPublicoService.ejecutar(command);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.ok(actualizarPrecioPublicoService.ejecutar(command));
     }
 }

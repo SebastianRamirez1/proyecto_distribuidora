@@ -54,13 +54,14 @@ export default function Precios() {
     setSaving(true)
     setError('')
     try {
-      await actualizarPrecioPublico({
+      // El PUT retorna los precios ya guardados; actualizamos estado directo
+      const preciosGuardados = await actualizarPrecioPublico({
         precioExtra: Number(form.precioExtra),
         precioAA:    Number(form.precioAA),
         precioA:     Number(form.precioA),
         precioB:     Number(form.precioB),
       })
-      await load()
+      setPrecios(preciosGuardados)
       setSuccess('Precios actualizados correctamente ✅')
     } catch (e) {
       setError(e.message)

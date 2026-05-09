@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { obtenerInventario, cargarInventario } from '../api/inventarioApi'
+import { obtenerInventario, cargarInventarioBulk } from '../api/inventarioApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
@@ -57,12 +57,15 @@ export default function Inventario() {
     setSaving(true)
     setError('')
     try {
-      for (const [tipo, cantidad] of Object.entries(valores)) {
-        if (cantidad > 0) {
-          await cargarInventario({ tipoProducto: tipo, cantidad })
-        }
-      }
-      await load()
+      // Una sola llamada atómica: todos los tipos en una transacción
+      const inventarioActualizado = await cargarInventarioBulk({
+        extra: valores.EXTRA,
+        aa:    valores.AA,
+        a:     valores.A,
+        b:     valores.B,
+      })
+      // Actualizar estado desde la respuesta del servidor (sin GET adicional)
+      setInventario(inventarioActualizado)
       setSuccess('Inventario cargado correctamente ✅')
       setForm({ EXTRA: '', AA: '', A: '', B: '' })
     } catch (e) {
