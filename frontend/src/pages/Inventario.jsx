@@ -39,10 +39,10 @@ export default function Inventario() {
     setError('')
     try {
       // El backend recibe UNA llamada por tipo: { tipoProducto, cantidad }
-      let updated
-      if (extra > 0)  updated = await cargarInventario({ tipoProducto: 'EXTRA',  cantidad: extra })
-      if (normal > 0) updated = await cargarInventario({ tipoProducto: 'NORMAL', cantidad: normal })
-      if (updated) setInventario(updated)
+      if (extra > 0)  await cargarInventario({ tipoProducto: 'EXTRA',  cantidad: extra })
+      if (normal > 0) await cargarInventario({ tipoProducto: 'NORMAL', cantidad: normal })
+      // Refrescar desde el servidor para garantizar estado real de la BD
+      await load()
       setSuccess('Inventario cargado correctamente ✅')
       setForm({ cantidadExtra: '', cantidadNormal: '' })
     } catch (e) {
