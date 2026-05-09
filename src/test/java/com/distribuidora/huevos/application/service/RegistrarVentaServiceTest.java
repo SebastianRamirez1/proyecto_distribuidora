@@ -49,12 +49,13 @@ class RegistrarVentaServiceTest {
         clienteNormal = new Cliente(1L, "Juan", TipoCliente.NORMAL, null, null);
 
         PrecioEspecial precioEspecial = new PrecioEspecial(
-                Precio.de("3.50"), Precio.de("2.80"));
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         clienteEspecial = new Cliente(2L, "Bodega Lopez", TipoCliente.ESPECIAL,
                 precioEspecial, null);
 
-        inventario = new Inventario(1L, 100, 100);
-        precioPublico = new PrecioPublico(1L, Precio.de("4.00"), Precio.de("3.00"));
+        inventario  = new Inventario(1L, 100, 100, 100, 100);
+        precioPublico = new PrecioPublico(1L,
+                Precio.de("4.00"), Precio.de("3.60"), Precio.de("3.00"), Precio.de("2.50"));
     }
 
     @Test
@@ -121,7 +122,7 @@ class RegistrarVentaServiceTest {
 
     @Test
     void ventaConStockInsuficienteLanzaExcepcion() {
-        Inventario sinStock = new Inventario(1L, 0, 0);
+        Inventario sinStock = new Inventario(1L, 0, 0, 0, 0);
         RegistrarVentaCommand command = crearCommand(1L, TipoProducto.EXTRA, 5, TipoPago.EFECTIVO);
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));

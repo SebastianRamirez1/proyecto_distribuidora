@@ -6,33 +6,32 @@ import com.distribuidora.huevos.domain.exceptions.ClienteIncompletoException;
 import com.distribuidora.huevos.domain.valueobjects.*;
 import org.junit.jupiter.api.Test;
 
-import java.math.BigDecimal;
-
 import static org.assertj.core.api.Assertions.*;
 
 class ClienteTest {
 
+    // PrecioPublico con los 4 tipos: EXTRA=4.00, AA=3.60, A=3.00, B=2.50
     private final PrecioPublico precioPublico = new PrecioPublico(1L,
-            Precio.de("4.00"), Precio.de("3.00"));
+            Precio.de("4.00"), Precio.de("3.60"), Precio.de("3.00"), Precio.de("2.50"));
 
     @Test
-    void clienteNormalPagaPrecioPublico() {
+    void clienteNormalPagaPrecioPublicoExtra() {
         Cliente cliente = new Cliente(1L, "Juan", TipoCliente.NORMAL, null, null);
         Precio precio = cliente.calcularPrecio(TipoProducto.EXTRA, new Cantidad(1), precioPublico);
         assertThat(precio.getValor()).isEqualByComparingTo("4.00");
     }
 
     @Test
-    void clienteNormalPagaPrecioPublicoParaHuevoNormal() {
+    void clienteNormalPagaPrecioPublicoParaTipoA() {
         Cliente cliente = new Cliente(1L, "Juan", TipoCliente.NORMAL, null, null);
-        Precio precio = cliente.calcularPrecio(TipoProducto.NORMAL, new Cantidad(1), precioPublico);
+        Precio precio = cliente.calcularPrecio(TipoProducto.A, new Cantidad(1), precioPublico);
         assertThat(precio.getValor()).isEqualByComparingTo("3.00");
     }
 
     @Test
     void clienteEspecialPagaSuPrecioEspecial() {
         PrecioEspecial precioEspecial = new PrecioEspecial(
-                Precio.de("3.50"), Precio.de("2.80"));
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         Cliente cliente = new Cliente(1L, "Bodega Lopez", TipoCliente.ESPECIAL,
                 precioEspecial, null);
 
@@ -43,11 +42,10 @@ class ClienteTest {
     @Test
     void clienteEspecialConDescuentoVolumenCalculaPrecioCorrectamente() {
         PrecioEspecial precioEspecial = new PrecioEspecial(
-                Precio.de("3.50"), Precio.de("2.80"));
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         DescuentoPorVolumen descuento = new DescuentoPorVolumen(
                 new Cantidad(5),
-                Precio.de("3.20"),
-                Precio.de("2.50"));
+                Precio.de("3.20"), Precio.de("2.90"), Precio.de("2.50"), Precio.de("2.10"));
         Cliente cliente = new Cliente(1L, "Mayorista Perez", TipoCliente.ESPECIAL,
                 precioEspecial, descuento);
 
@@ -59,11 +57,10 @@ class ClienteTest {
     @Test
     void clienteEspecialSinAlcanzarUmbralNoAplicaDescuento() {
         PrecioEspecial precioEspecial = new PrecioEspecial(
-                Precio.de("3.50"), Precio.de("2.80"));
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         DescuentoPorVolumen descuento = new DescuentoPorVolumen(
                 new Cantidad(5),
-                Precio.de("3.20"),
-                Precio.de("2.50"));
+                Precio.de("3.20"), Precio.de("2.90"), Precio.de("2.50"), Precio.de("2.10"));
         Cliente cliente = new Cliente(1L, "Mayorista Perez", TipoCliente.ESPECIAL,
                 precioEspecial, descuento);
 
@@ -75,7 +72,7 @@ class ClienteTest {
     @Test
     void clienteEspecialSinDescuentoConfigSiemprePagaPrecioEspecial() {
         PrecioEspecial precioEspecial = new PrecioEspecial(
-                Precio.de("3.50"), Precio.de("2.80"));
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         Cliente cliente = new Cliente(1L, "Tienda Gomez", TipoCliente.ESPECIAL,
                 precioEspecial, null);
 
@@ -99,10 +96,12 @@ class ClienteTest {
 
     @Test
     void conPrecioEspecialRetornaClienteConNuevoPrecio() {
-        PrecioEspecial precioInicial = new PrecioEspecial(Precio.de("3.50"), Precio.de("2.80"));
+        PrecioEspecial precioInicial = new PrecioEspecial(
+                Precio.de("3.50"), Precio.de("3.20"), Precio.de("2.80"), Precio.de("2.40"));
         Cliente cliente = new Cliente(1L, "Bodega", TipoCliente.ESPECIAL, precioInicial, null);
 
-        PrecioEspecial nuevoPrecio = new PrecioEspecial(Precio.de("3.00"), Precio.de("2.50"));
+        PrecioEspecial nuevoPrecio = new PrecioEspecial(
+                Precio.de("3.00"), Precio.de("2.70"), Precio.de("2.50"), Precio.de("2.10"));
         Cliente actualizado = cliente.conPrecioEspecial(nuevoPrecio);
 
         assertThat(actualizado.getPrecioEspecial().getPrecioExtra().getValor())

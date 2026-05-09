@@ -11,22 +11,22 @@ class InventarioTest {
 
     @Test
     void descontarReduceElStockCorrectamente() {
-        Inventario inventario = new Inventario(1L, 10, 20);
+        Inventario inventario = new Inventario(1L, 10, 0, 0, 0);
         inventario.descontar(TipoProducto.EXTRA, new Cantidad(3));
         assertThat(inventario.getStockExtra()).isEqualTo(7);
     }
 
     @Test
-    void descontarStockNormalNoAfectaStockExtra() {
-        Inventario inventario = new Inventario(1L, 10, 20);
-        inventario.descontar(TipoProducto.NORMAL, new Cantidad(5));
-        assertThat(inventario.getStockNormal()).isEqualTo(15);
+    void descontarStockANoAfectaStockExtra() {
+        Inventario inventario = new Inventario(1L, 10, 0, 20, 0);
+        inventario.descontar(TipoProducto.A, new Cantidad(5));
+        assertThat(inventario.getStockA()).isEqualTo(15);
         assertThat(inventario.getStockExtra()).isEqualTo(10);
     }
 
     @Test
     void descontarMasDelStockDisponibleLanzaExcepcion() {
-        Inventario inventario = new Inventario(1L, 5, 10);
+        Inventario inventario = new Inventario(1L, 5, 0, 0, 0);
         assertThatThrownBy(() ->
                 inventario.descontar(TipoProducto.EXTRA, new Cantidad(6)))
                 .isInstanceOf(StockInsuficienteException.class)
@@ -35,7 +35,7 @@ class InventarioTest {
 
     @Test
     void descontarExactamenteElStockDisponibleFunciona() {
-        Inventario inventario = new Inventario(1L, 5, 10);
+        Inventario inventario = new Inventario(1L, 5, 0, 0, 0);
         assertThatNoException().isThrownBy(() ->
                 inventario.descontar(TipoProducto.EXTRA, new Cantidad(5)));
         assertThat(inventario.getStockExtra()).isEqualTo(0);
@@ -43,22 +43,22 @@ class InventarioTest {
 
     @Test
     void agregarAumentaElStockCorrectamente() {
-        Inventario inventario = new Inventario(1L, 10, 20);
+        Inventario inventario = new Inventario(1L, 10, 0, 0, 0);
         inventario.agregar(TipoProducto.EXTRA, new Cantidad(5));
         assertThat(inventario.getStockExtra()).isEqualTo(15);
     }
 
     @Test
-    void agregarStockNormalNoAfectaStockExtra() {
-        Inventario inventario = new Inventario(1L, 10, 20);
-        inventario.agregar(TipoProducto.NORMAL, new Cantidad(10));
-        assertThat(inventario.getStockNormal()).isEqualTo(30);
+    void agregarStockAANoAfectaStockExtra() {
+        Inventario inventario = new Inventario(1L, 10, 20, 0, 0);
+        inventario.agregar(TipoProducto.AA, new Cantidad(10));
+        assertThat(inventario.getStockAA()).isEqualTo(30);
         assertThat(inventario.getStockExtra()).isEqualTo(10);
     }
 
     @Test
     void stockInsuficienteConStockEnCeroLanzaExcepcion() {
-        Inventario inventario = new Inventario(1L, 0, 0);
+        Inventario inventario = new Inventario(1L, 0, 0, 0, 0);
         assertThatThrownBy(() ->
                 inventario.descontar(TipoProducto.EXTRA, new Cantidad(1)))
                 .isInstanceOf(StockInsuficienteException.class)

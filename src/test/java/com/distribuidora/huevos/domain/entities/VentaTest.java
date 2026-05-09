@@ -29,7 +29,7 @@ class VentaTest {
 
     @Test
     void calcularTotalParaUnaCanasta() {
-        Venta venta = new Venta(1L, clienteNormal, TipoProducto.NORMAL,
+        Venta venta = new Venta(1L, clienteNormal, TipoProducto.A,
                 new Cantidad(1), Precio.de("3.00"),
                 TipoPago.TRANSFERENCIA, LocalDateTime.now());
 
