@@ -58,14 +58,14 @@ export default function Inventario() {
     setError('')
     try {
       // Una sola llamada atómica: todos los tipos en una transacción
-      const inventarioActualizado = await cargarInventarioBulk({
+      await cargarInventarioBulk({
         extra: valores.EXTRA,
         aa:    valores.AA,
         a:     valores.A,
         b:     valores.B,
       })
-      // Actualizar estado desde la respuesta del servidor (sin GET adicional)
-      setInventario(inventarioActualizado)
+      // Siempre refrescar desde la BD para garantizar datos reales
+      await load()
       setSuccess('Inventario cargado correctamente ✅')
       setForm({ EXTRA: '', AA: '', A: '', B: '' })
     } catch (e) {
@@ -122,18 +122,36 @@ export default function Inventario() {
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">Cargar inventario</h2>
             <Card>
               <form onSubmit={handleCargar}>
-                {TIPOS.map(({ tipo, label }) => (
-                  <Input
-                    key={tipo}
-                    label={`Canastas ${label} a agregar`}
-                    type="number" min="0"
-                    placeholder="Ej: 100"
-                    value={form[tipo]}
-                    onChange={e => setForm(p => ({ ...p, [tipo]: e.target.value }))}
-                  />
-                ))}
+                {TIPOS.map(({ tipo, label, key }) => {
+                  const stockActual = inventario?.[key] ?? 0
+                  const aAgregar   = form[tipo] ? Number(form[tipo]) : 0
+                  const nuevoTotal = stockActual + (aAgregar > 0 ? aAgregar : 0)
+                  return (
+                    <div key={tipo} className="mb-3">
+                      <label className="label">
+                        Canastas {label} a agregar
+                        <span className="ml-2 text-xs font-normal text-slate-400">
+                          (actual: {stockActual})
+                        </span>
+                      </label>
+                      <input
+                        className="input"
+                        type="number" min="0"
+                        placeholder="Ej: 100"
+                        value={form[tipo]}
+                        onChange={e => setForm(p => ({ ...p, [tipo]: e.target.value }))}
+                      />
+                      {aAgregar > 0 && (
+                        <p className="text-xs text-emerald-600 mt-1 font-medium">
+                          {stockActual} + {aAgregar} = <strong>{nuevoTotal}</strong> canastas
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
                 <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 mb-4">
-                  ℹ️ Los valores ingresados se <strong>suman</strong> al stock actual. Para reponer 100 canastas, ingresa 100.
+                  ℹ️ Los valores ingresados se <strong>suman</strong> al stock actual.
+                  Si quieres tener exactamente 100 canastas y ahora tienes 30, ingresa 70.
                 </div>
                 <Button type="submit" loading={saving} className="w-full">
                   📦 Cargar inventario

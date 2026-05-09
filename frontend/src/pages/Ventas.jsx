@@ -10,7 +10,7 @@ import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-const tipoColor = { EXTRA: 'amber', NORMAL: 'slate' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
 const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO' }
