@@ -50,8 +50,11 @@ public class RegistrarVentaService {
         PrecioPublico precioPublico = precioPublicoRepository.findCurrent();
         Cantidad cantidad = new Cantidad(command.getCantidad());
 
-        Precio precioUnitario = cliente.calcularPrecio(
-                command.getTipoProducto(), cantidad, precioPublico);
+        // Si viene precioManual se aplica directamente (rebaja puntual);
+        // de lo contrario se calcula según el perfil del cliente.
+        Precio precioUnitario = (command.getPrecioManual() != null)
+                ? Precio.de(command.getPrecioManual())
+                : cliente.calcularPrecio(command.getTipoProducto(), cantidad, precioPublico);
 
         Inventario inventario = inventarioRepository.findUnico();
         inventario.descontar(command.getTipoProducto(), cantidad);

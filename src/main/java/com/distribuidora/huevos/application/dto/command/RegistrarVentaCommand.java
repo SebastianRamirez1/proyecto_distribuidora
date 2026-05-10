@@ -2,8 +2,11 @@ package com.distribuidora.huevos.application.dto.command;
 
 import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.enums.TipoProducto;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
+
+import java.math.BigDecimal;
 
 public class RegistrarVentaCommand {
 
@@ -19,6 +22,10 @@ public class RegistrarVentaCommand {
     @NotNull(message = "El tipo de pago es obligatorio")
     private TipoPago tipoPago;
 
+    /** Opcional. Si se envía, sobreescribe el precio calculado (rebaja puntual). */
+    @DecimalMin(value = "0.01", message = "El precio manual debe ser mayor a 0")
+    private BigDecimal precioManual;
+
     public RegistrarVentaCommand() {}
 
     public Long getClienteId() { return clienteId; }
@@ -32,4 +39,7 @@ public class RegistrarVentaCommand {
 
     public TipoPago getTipoPago() { return tipoPago; }
     public void setTipoPago(TipoPago tipoPago) { this.tipoPago = tipoPago; }
+
+    public BigDecimal getPrecioManual() { return precioManual; }
+    public void setPrecioManual(BigDecimal precioManual) { this.precioManual = precioManual; }
 }

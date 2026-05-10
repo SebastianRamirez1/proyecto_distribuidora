@@ -13,7 +13,7 @@ const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose
 const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
 const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
-const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO' }
+const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
 const initAbono = { clienteId: '', monto: '' }
 
 export default function Ventas() {
@@ -28,6 +28,7 @@ export default function Ventas() {
   const [savingV, setSavingV] = useState(false)
   const [savingA, setSavingA] = useState(false)
   const [tab, setTab] = useState('venta') // 'venta' | 'abono'
+  const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
 
   const loadVentas = async () => {
     try {
@@ -57,13 +58,18 @@ export default function Ventas() {
     setSavingV(true)
     setError('')
     try {
-      await registrarVenta({
-        clienteId: Number(formVenta.clienteId),
+      const payload = {
+        clienteId:    Number(formVenta.clienteId),
         tipoProducto: formVenta.tipoProducto,
-        cantidad: Number(formVenta.cantidad),
-        tipoPago: formVenta.tipoPago,
-      })
+        cantidad:     Number(formVenta.cantidad),
+        tipoPago:     formVenta.tipoPago,
+      }
+      if (mostrarPrecioManual && formVenta.precioManual !== '') {
+        payload.precioManual = Number(formVenta.precioManual)
+      }
+      await registrarVenta(payload)
       setFormVenta(initVenta)
+      setMostrarPrecioManual(false)
       await loadVentas()
       setSuccess('Venta registrada correctamente ✅')
     } catch (e) {
@@ -90,6 +96,11 @@ export default function Ventas() {
     } finally {
       setSavingA(false)
     }
+  }
+
+  const togglePrecioManual = () => {
+    setMostrarPrecioManual(v => !v)
+    setFormVenta(p => ({ ...p, precioManual: '' }))
   }
 
   const totalHoy = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
@@ -162,7 +173,40 @@ export default function Ventas() {
                   <option value="FIADO">📋 Fiado</option>
                   <option value="ABONO">💳 Abono a deuda</option>
                 </Select>
-                <Button type="submit" loading={savingV} className="w-full mt-2">
+
+                {/* Precio manual — rebaja puntual */}
+                <div className="mt-3 mb-1">
+                  <button
+                    type="button"
+                    onClick={togglePrecioManual}
+                    className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                      mostrarPrecioManual
+                        ? 'bg-orange-100 border-orange-300 text-orange-700'
+                        : 'bg-slate-100 border-slate-300 text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <span>{mostrarPrecioManual ? '✕' : '🏷️'}</span>
+                    {mostrarPrecioManual ? 'Quitar rebaja' : 'Aplicar rebaja puntual'}
+                  </button>
+                </div>
+
+                {mostrarPrecioManual && (
+                  <div className="border border-orange-200 bg-orange-50 rounded-lg p-3 mt-2">
+                    <p className="text-xs text-orange-700 mb-2 font-medium">
+                      🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
+                    </p>
+                    <Input
+                      label="Precio por canasta (S/)"
+                      type="number" step="0.01" min="0.01"
+                      placeholder="0.00"
+                      value={formVenta.precioManual}
+                      onChange={e => setFormVenta(p => ({ ...p, precioManual: e.target.value }))}
+                      required
+                    />
+                  </div>
+                )}
+
+                <Button type="submit" loading={savingV} className="w-full mt-3">
                   Registrar venta
                 </Button>
               </form>
@@ -212,6 +256,7 @@ export default function Ventas() {
                     <th className="px-4 py-3 text-left">Cliente</th>
                     <th className="px-4 py-3 text-left">Tipo</th>
                     <th className="px-4 py-3 text-right">Cant.</th>
+                    <th className="px-4 py-3 text-right">P/U</th>
                     <th className="px-4 py-3 text-right">Total</th>
                     <th className="px-4 py-3 text-left">Pago</th>
                     <th className="px-4 py-3 text-left">Hora</th>
@@ -219,7 +264,7 @@ export default function Ventas() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {ventas.length === 0 ? (
-                    <tr><td colSpan={6} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
+                    <tr><td colSpan={7} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
                   ) : ventas.map((v) => (
                     <tr key={v.id} className="hover:bg-slate-50">
                       <td className="table-cell font-medium">{v.nombreCliente}</td>
@@ -227,6 +272,7 @@ export default function Ventas() {
                         <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
                       </td>
                       <td className="table-cell text-right">{v.cantidad}</td>
+                      <td className="table-cell text-right text-slate-500">{fmt(v.precioUnitario)}</td>
                       <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
                       <td className="table-cell">
                         <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
