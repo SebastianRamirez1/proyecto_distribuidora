@@ -14,7 +14,7 @@ const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
 const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
-const initAbono = { clienteId: '', monto: '' }
+const initAbono = { clienteId: '', monto: '', medioPago: 'EFECTIVO' }
 
 export default function Ventas() {
   const [ventas, setVentas] = useState([])
@@ -86,7 +86,8 @@ export default function Ventas() {
     try {
       await registrarAbono({
         clienteId: Number(formAbono.clienteId),
-        monto: Number(formAbono.monto),
+        monto:     Number(formAbono.monto),
+        medioPago: formAbono.medioPago,
       })
       setFormAbono(initAbono)
       await loadVentas()
@@ -234,7 +235,24 @@ export default function Ventas() {
                   onChange={e => setFormAbono(p => ({ ...p, monto: e.target.value }))}
                   required
                 />
-                <Button type="submit" loading={savingA} variant="success" className="w-full mt-2">
+                <Select
+                  label="¿Cómo pagó?"
+                  value={formAbono.medioPago}
+                  onChange={e => setFormAbono(p => ({ ...p, medioPago: e.target.value }))}
+                >
+                  <option value="EFECTIVO">💵 Efectivo</option>
+                  <option value="TRANSFERENCIA">📲 Transferencia</option>
+                </Select>
+                <div className={`text-xs rounded-lg px-3 py-2 mb-3 ${
+                  formAbono.medioPago === 'EFECTIVO'
+                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                    : 'bg-blue-50 text-blue-700 border border-blue-200'
+                }`}>
+                  {formAbono.medioPago === 'EFECTIVO'
+                    ? '💵 Este abono sumará al efectivo del día'
+                    : '📲 Este abono sumará a las transferencias del día'}
+                </div>
+                <Button type="submit" loading={savingA} variant="success" className="w-full">
                   Registrar abono
                 </Button>
               </form>

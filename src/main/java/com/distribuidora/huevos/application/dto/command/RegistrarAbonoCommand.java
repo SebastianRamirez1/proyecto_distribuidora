@@ -1,5 +1,6 @@
 package com.distribuidora.huevos.application.dto.command;
 
+import com.distribuidora.huevos.domain.enums.TipoPago;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 
@@ -14,6 +15,10 @@ public class RegistrarAbonoCommand {
     @DecimalMin(value = "0.01", message = "El abono debe ser mayor a 0")
     private BigDecimal monto;
 
+    /** Cómo pagó el cliente: EFECTIVO o TRANSFERENCIA. */
+    @NotNull(message = "El medio de pago del abono es obligatorio")
+    private TipoPago medioPago;
+
     public RegistrarAbonoCommand() {}
 
     public Long getClienteId() { return clienteId; }
@@ -21,4 +26,7 @@ public class RegistrarAbonoCommand {
 
     public BigDecimal getMonto() { return monto; }
     public void setMonto(BigDecimal monto) { this.monto = monto; }
+
+    public TipoPago getMedioPago() { return medioPago; }
+    public void setMedioPago(TipoPago medioPago) { this.medioPago = medioPago; }
 }
