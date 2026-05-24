@@ -56,7 +56,7 @@ frontend/dist/
 frontend/.pnp
 frontend/.pnp.js
 frontend/.yarn/
-frontend/pnpm-lock.yaml
+# pnpm-lock.yaml NO ignorado — necesario para CI reproducible
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
