@@ -7,6 +7,7 @@ import com.distribuidora.huevos.domain.entities.*;
 import com.distribuidora.huevos.domain.enums.TipoCliente;
 import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.enums.TipoProducto;
+import com.distribuidora.huevos.domain.exceptions.PrecioInvalidoException;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.exceptions.StockInsuficienteException;
 import com.distribuidora.huevos.domain.repositories.*;
@@ -155,6 +156,23 @@ class RegistrarVentaServiceTest {
         service.ejecutar(command);
 
         verify(creditoRepository).save(any());
+    }
+
+    @Test
+    void ventaConPrecioPublicoCeroLanzaExcepcion() {
+        // precio_publico recién inicializado — todos los tipos en S/ 0.00
+        PrecioPublico preciosCero = new PrecioPublico(1L,
+                Precio.cero(), Precio.cero(), Precio.cero(), Precio.cero());
+
+        RegistrarVentaCommand command = crearCommand(1L, TipoProducto.EXTRA, 2, TipoPago.EFECTIVO);
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));
+        when(precioPublicoRepository.findCurrent()).thenReturn(preciosCero);
+
+        assertThatThrownBy(() -> service.ejecutar(command))
+                .isInstanceOf(PrecioInvalidoException.class)
+                .hasMessageContaining("S/ 0.00")
+                .hasMessageContaining("EXTRA");
     }
 
     private RegistrarVentaCommand crearCommand(Long clienteId, TipoProducto tipo,
