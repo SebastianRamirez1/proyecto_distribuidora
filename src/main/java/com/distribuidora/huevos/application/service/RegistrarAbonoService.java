@@ -1,10 +1,11 @@
 package com.distribuidora.huevos.application.service;
 
 import com.distribuidora.huevos.application.dto.command.RegistrarAbonoCommand;
+import com.distribuidora.huevos.domain.entities.Abono;
 import com.distribuidora.huevos.domain.entities.Caja;
 import com.distribuidora.huevos.domain.entities.Credito;
-import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
+import com.distribuidora.huevos.domain.repositories.AbonoRepository;
 import com.distribuidora.huevos.domain.repositories.CajaRepository;
 import com.distribuidora.huevos.domain.repositories.CreditoRepository;
 import com.distribuidora.huevos.domain.valueobjects.Dinero;
@@ -19,11 +20,14 @@ public class RegistrarAbonoService {
 
     private final CreditoRepository creditoRepository;
     private final CajaRepository cajaRepository;
+    private final AbonoRepository abonoRepository;
 
     public RegistrarAbonoService(CreditoRepository creditoRepository,
-                                 CajaRepository cajaRepository) {
+                                 CajaRepository cajaRepository,
+                                 AbonoRepository abonoRepository) {
         this.creditoRepository = creditoRepository;
-        this.cajaRepository = cajaRepository;
+        this.cajaRepository    = cajaRepository;
+        this.abonoRepository   = abonoRepository;
     }
 
     public void ejecutar(RegistrarAbonoCommand command) {
@@ -42,5 +46,8 @@ public class RegistrarAbonoService {
         Caja caja = cajaRepository.findByFecha(hoy).orElse(Caja.nueva(hoy));
         caja.registrarAbono(command.getMedioPago(), monto);
         cajaRepository.save(caja);
+
+        // Registra el abono individual para poder consultarlo en el historial.
+        abonoRepository.save(Abono.nuevo(command.getClienteId(), monto, command.getMedioPago()));
     }
 }

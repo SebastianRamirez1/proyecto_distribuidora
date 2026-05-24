@@ -1,12 +1,24 @@
 import { useEffect, useState, useMemo } from 'react'
-import { obtenerDeudores } from '../api/creditosApi'
+import { obtenerDeudores, obtenerHistorialAbonos } from '../api/creditosApi'
 import { registrarAbono } from '../api/ventasApi'
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 
-// Formato consistente con el resto de la app: Soles peruanos [P8.1]
 const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
+
+const fmtFecha = (iso) => {
+  if (!iso) return '-'
+  return new Date(iso).toLocaleDateString('es-PE', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  })
+}
+
+const MEDIO_COLOR = {
+  EFECTIVO:      'bg-emerald-100 text-emerald-700',
+  TRANSFERENCIA: 'bg-blue-100 text-blue-700',
+}
 
 export default function Deudores() {
   const [deudores, setDeudores] = useState([])
@@ -20,6 +32,11 @@ export default function Deudores() {
   const [monto, setMonto]         = useState('')
   const [medioPago, setMedioPago] = useState('EFECTIVO')
   const [saving, setSaving]       = useState(false)
+
+  // Modal historial
+  const [historialModal, setHistorialModal]     = useState(null)  // { clienteId, nombre }
+  const [historial, setHistorial]               = useState([])
+  const [loadingHistorial, setLoadingHistorial] = useState(false)
 
   const cargar = async () => {
     setLoading(true)
@@ -45,6 +62,8 @@ export default function Deudores() {
     [filtrados]
   )
 
+  // ── Abono ─────────────────────────────────────────────────────────────────
+
   const abrirModal = (d) => {
     setModal({ clienteId: d.clienteId, nombre: d.nombreCliente, saldo: d.saldoPendiente })
     setMonto('')
@@ -69,6 +88,26 @@ export default function Deudores() {
     }
   }
 
+  // ── Historial ─────────────────────────────────────────────────────────────
+
+  const abrirHistorial = async (d) => {
+    setHistorialModal({ clienteId: d.clienteId, nombre: d.nombreCliente })
+    setHistorial([])
+    setLoadingHistorial(true)
+    try {
+      setHistorial(await obtenerHistorialAbonos(d.clienteId))
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setLoadingHistorial(false)
+    }
+  }
+
+  const totalHistorial = useMemo(
+    () => historial.reduce((s, a) => s + Number(a.monto), 0),
+    [historial]
+  )
+
   return (
     <div>
       <div className="mb-6">
@@ -81,7 +120,7 @@ export default function Deudores() {
 
       {loading ? <Spinner /> : (
         <>
-          {/* Tarjetas resumen — mismo patrón card border-l-4 que Dashboard [P8.3] */}
+          {/* Tarjetas resumen */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div className="card border-l-4 border-l-blue-500">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total deudores</p>
@@ -148,16 +187,25 @@ export default function Deudores() {
                               />
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-red-600">
+                          <td className="px-4 py-3 text-right font-bold text-rose-600">
                             {fmt(d.saldoPendiente)}
                           </td>
-                          <td className="px-4 py-3 text-right">
-                            <button
-                              onClick={() => abrirModal(d)}
-                              className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium px-3 py-1.5 rounded-lg transition-colors"
-                            >
-                              💵 Registrar abono
-                            </button>
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-2">
+                              <button
+                                onClick={() => abrirHistorial(d)}
+                                className="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
+                                title="Ver historial de abonos"
+                              >
+                                📋 Historial
+                              </button>
+                              <button
+                                onClick={() => abrirModal(d)}
+                                className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
+                              >
+                                💵 Abonar
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       )
@@ -174,7 +222,7 @@ export default function Deudores() {
                       <td className="px-4 py-3 text-right font-semibold text-emerald-600">
                         {fmt(filtrados.reduce((s, d) => s + Number(d.montoPagado), 0))}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-red-600">
+                      <td className="px-4 py-3 text-right font-bold text-rose-600">
                         {fmt(totalDeuda)}
                       </td>
                       <td />
@@ -187,7 +235,7 @@ export default function Deudores() {
         </>
       )}
 
-      {/* Modal abono */}
+      {/* ── Modal: registrar abono ─────────────────────────────────────────── */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
@@ -223,7 +271,7 @@ export default function Deudores() {
               min="1"
               max={modal.saldo}
               className="input mb-4"
-              placeholder="Ej: 50000"
+              placeholder="Ej: 50.00"
               value={monto}
               onChange={e => setMonto(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && confirmarAbono()}
@@ -241,6 +289,81 @@ export default function Deudores() {
                 Confirmar abono
               </Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal: historial de abonos ────────────────────────────────────── */}
+      {historialModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[85vh] flex flex-col">
+            {/* Header */}
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h2 className="text-lg font-bold text-slate-800">Historial de abonos</h2>
+                <p className="text-sm text-slate-500">{historialModal.nombre}</p>
+              </div>
+              <button
+                onClick={() => setHistorialModal(null)}
+                className="text-slate-400 hover:text-slate-600 p-1 min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
+                aria-label="Cerrar historial"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Contenido scrolleable */}
+            <div className="overflow-y-auto flex-1">
+              {loadingHistorial ? (
+                <div className="flex justify-center py-10">
+                  <div className="animate-spin h-6 w-6 border-2 border-amber-500 border-t-transparent rounded-full" />
+                </div>
+              ) : historial.length === 0 ? (
+                <div className="text-center text-slate-400 py-10">
+                  <p className="text-3xl mb-2">📭</p>
+                  <p className="text-sm">Este cliente no tiene abonos registrados.</p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {historial.map((a, i) => (
+                    <div
+                      key={a.id}
+                      className="flex items-center justify-between px-4 py-3 rounded-lg bg-slate-50 border border-slate-100"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="text-slate-400 text-xs font-mono w-5 text-right">{i + 1}</span>
+                        <div>
+                          <p className="text-sm font-semibold text-slate-800">{fmt(a.monto)}</p>
+                          <p className="text-xs text-slate-400">{fmtFecha(a.fecha)}</p>
+                        </div>
+                      </div>
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${MEDIO_COLOR[a.medioPago] ?? 'bg-slate-100 text-slate-600'}`}>
+                        {a.medioPago === 'EFECTIVO' ? '💵 Efectivo' : '🏦 Transferencia'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Footer con total */}
+            {historial.length > 0 && (
+              <div className="border-t border-slate-200 pt-4 mt-4 flex justify-between items-center">
+                <span className="text-sm text-slate-500">
+                  {historial.length} abono{historial.length !== 1 ? 's' : ''} registrado{historial.length !== 1 ? 's' : ''}
+                </span>
+                <span className="font-bold text-emerald-600">{fmt(totalHistorial)} pagado</span>
+              </div>
+            )}
+
+            <button
+              onClick={() => setHistorialModal(null)}
+              className="mt-4 w-full py-2 rounded-lg border border-slate-300 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
       )}

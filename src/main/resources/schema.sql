@@ -53,6 +53,14 @@ CREATE TABLE IF NOT EXISTS creditos (
     monto_pagado DECIMAL(12, 2) NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS abonos (
+    id          BIGSERIAL PRIMARY KEY,
+    cliente_id  BIGINT         NOT NULL REFERENCES clientes (id),
+    monto       DECIMAL(12, 2) NOT NULL,
+    medio_pago  VARCHAR(20)    NOT NULL,
+    fecha       TIMESTAMP      NOT NULL DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS precio_publico (
     id           BIGSERIAL PRIMARY KEY,
     precio_extra DECIMAL(12, 2) NOT NULL DEFAULT 0,
