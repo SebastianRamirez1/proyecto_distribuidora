@@ -3,6 +3,7 @@ package com.distribuidora.huevos.infrastructure.controller;
 import com.distribuidora.huevos.application.dto.command.RegistrarAbonoCommand;
 import com.distribuidora.huevos.application.dto.command.RegistrarVentaCommand;
 import com.distribuidora.huevos.application.dto.response.VentaResponse;
+import com.distribuidora.huevos.application.service.AnularVentaService;
 import com.distribuidora.huevos.application.service.ConsultarVentasDiaService;
 import com.distribuidora.huevos.application.service.RegistrarAbonoService;
 import com.distribuidora.huevos.application.service.RegistrarVentaService;
@@ -22,13 +23,16 @@ public class VentaController {
     private final RegistrarVentaService registrarVentaService;
     private final RegistrarAbonoService registrarAbonoService;
     private final ConsultarVentasDiaService consultarVentasDiaService;
+    private final AnularVentaService anularVentaService;
 
     public VentaController(RegistrarVentaService registrarVentaService,
                            RegistrarAbonoService registrarAbonoService,
-                           ConsultarVentasDiaService consultarVentasDiaService) {
+                           ConsultarVentasDiaService consultarVentasDiaService,
+                           AnularVentaService anularVentaService) {
         this.registrarVentaService = registrarVentaService;
         this.registrarAbonoService = registrarAbonoService;
         this.consultarVentasDiaService = consultarVentasDiaService;
+        this.anularVentaService = anularVentaService;
     }
 
     @GetMapping("/hoy")
@@ -54,5 +58,11 @@ public class VentaController {
             @Valid @RequestBody RegistrarAbonoCommand command) {
         registrarAbonoService.ejecutar(command);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> anularVenta(@PathVariable Long id) {
+        anularVentaService.ejecutar(id);
+        return ResponseEntity.noContent().build();
     }
 }

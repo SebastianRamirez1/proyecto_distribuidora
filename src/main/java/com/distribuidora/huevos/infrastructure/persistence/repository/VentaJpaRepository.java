@@ -11,7 +11,8 @@ import java.util.List;
 public interface VentaJpaRepository extends JpaRepository<VentaJpaEntity, Long> {
 
     // DECISIÓN: se usa between para que funcione en PostgreSQL y H2 sin depender del CAST
-    @Query("SELECT v FROM VentaJpaEntity v WHERE v.fecha >= :inicio AND v.fecha < :fin")
+    // Se excluyen ventas anuladas (soft delete)
+    @Query("SELECT v FROM VentaJpaEntity v WHERE v.fecha >= :inicio AND v.fecha < :fin AND v.anulada = false")
     List<VentaJpaEntity> findByFechaRange(
             @Param("inicio") java.time.LocalDateTime inicio,
             @Param("fin") java.time.LocalDateTime fin);

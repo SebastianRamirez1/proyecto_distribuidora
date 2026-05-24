@@ -34,6 +34,11 @@ public class Credito {
         this.montoPagado = this.montoPagado.sumar(monto);
     }
 
+    /** Revierte una deuda registrada por una venta fiado que se anuló. */
+    public void revertirDeuda(Dinero monto) {
+        this.montoTotal = this.montoTotal.restar(monto);
+    }
+
     public Dinero saldoPendiente() {
         return montoTotal.restar(montoPagado);
     }

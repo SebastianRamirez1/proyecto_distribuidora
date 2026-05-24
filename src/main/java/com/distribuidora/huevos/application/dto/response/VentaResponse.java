@@ -17,6 +17,7 @@ public class VentaResponse {
     private BigDecimal total;
     private TipoPago tipoPago;
     private LocalDateTime fecha;
+    private boolean anulada;
 
     public VentaResponse() {}
 
@@ -46,4 +47,7 @@ public class VentaResponse {
 
     public LocalDateTime getFecha() { return fecha; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
+
+    public boolean isAnulada() { return anulada; }
+    public void setAnulada(boolean anulada) { this.anulada = anulada; }
 }
