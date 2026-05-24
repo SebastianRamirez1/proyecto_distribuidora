@@ -366,7 +366,7 @@ export default function Ventas() {
                           <button
                             onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
                             title="Anular venta"
-                            className="text-slate-300 hover:text-rose-500 transition-colors text-base leading-none"
+                            className="text-slate-300 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
                           >
                             🗑️
                           </button>

@@ -5,8 +5,8 @@ import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 
-const fmt = (n) =>
-  new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n)
+// Formato consistente con el resto de la app: Soles peruanos [P8.1]
+const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 export default function Deudores() {
   const [deudores, setDeudores] = useState([])
@@ -81,17 +81,17 @@ export default function Deudores() {
 
       {loading ? <Spinner /> : (
         <>
-          {/* Tarjetas resumen */}
+          {/* Tarjetas resumen — mismo patrón card border-l-4 que Dashboard [P8.3] */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-            <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+            <div className="card border-l-4 border-l-blue-500">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">Total deudores</p>
-              <p className="text-3xl font-bold text-slate-800">{filtrados.length}</p>
+              <p className="text-2xl font-bold text-blue-600">{filtrados.length}</p>
             </div>
-            <div className="bg-white rounded-xl border border-red-100 p-4 shadow-sm sm:col-span-2">
+            <div className="card border-l-4 border-l-rose-500 sm:col-span-2">
               <p className="text-xs text-slate-500 uppercase tracking-wider mb-1">
                 {busqueda ? 'Deuda filtrada' : 'Deuda total pendiente'}
               </p>
-              <p className="text-3xl font-bold text-red-600">{fmt(totalDeuda)}</p>
+              <p className="text-2xl font-bold text-rose-600">{fmt(totalDeuda)}</p>
             </div>
           </div>
 

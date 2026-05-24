@@ -5,12 +5,24 @@
 @layer base {
   body {
     @apply bg-slate-100 text-slate-800 font-sans;
+    overflow-wrap: break-word;
+  }
+}
+
+/* Respeta la preferencia del sistema operativo de reducir movimiento [P8.5] */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 @layer components {
   .btn {
     @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg font-medium text-sm transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed;
+    min-height: 44px; /* touch target mínimo [P7.2] */
   }
   .btn-primary {
     @apply btn bg-amber-500 hover:bg-amber-600 text-white focus:ring-amber-500;
@@ -26,6 +38,7 @@
   }
   .input {
     @apply w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent bg-white;
+    min-height: 44px; /* touch target mínimo [P7.2] */
   }
   .label {
     @apply block text-sm font-medium text-slate-700 mb-1;

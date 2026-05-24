@@ -1,4 +1,4 @@
-import { NavLink, useNavigate } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
 const links = [
@@ -14,6 +14,7 @@ const links = [
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
   const { username, cerrarSesion } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
 
   const handleLogout = () => {
     cerrarSesion()
@@ -69,6 +70,7 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
               to={to}
               onClick={onClose}
               title={collapsed ? label : undefined}
+              aria-current={location.pathname === to ? 'page' : undefined}
               className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg text-sm font-medium transition-all duration-150
                 ${collapsed ? 'lg:justify-center lg:px-0 px-3 py-2.5' : 'px-3 py-2.5'}

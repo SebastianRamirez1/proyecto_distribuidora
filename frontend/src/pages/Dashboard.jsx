@@ -7,23 +7,33 @@ import Spinner from '../components/ui/Spinner'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 
+// StatCard limpia: fondo blanco + borde izquierdo coloreado.
+// Elimina gradientes decorativos que generan carga cognitiva exógena [CLT 1.2].
+// Consistente con .card del sistema de diseño [P8.3].
 function StatCard({ icon, label, value, sub, color = 'amber' }) {
-  const colors = {
-    amber:   'from-amber-400 to-amber-600',
-    emerald: 'from-emerald-400 to-emerald-600',
-    blue:    'from-blue-400 to-blue-600',
-    rose:    'from-rose-400 to-rose-600',
-    purple:  'from-purple-400 to-purple-600',
+  const borders = {
+    amber:   'border-l-amber-500',
+    emerald: 'border-l-emerald-500',
+    blue:    'border-l-blue-500',
+    rose:    'border-l-rose-500',
+    purple:  'border-l-purple-500',
+  }
+  const texts = {
+    amber:   'text-amber-600',
+    emerald: 'text-emerald-600',
+    blue:    'text-blue-600',
+    rose:    'text-rose-600',
+    purple:  'text-purple-600',
   }
   return (
-    <div className={`bg-gradient-to-br ${colors[color]} rounded-xl p-5 text-white shadow-md`}>
+    <div className={`card border-l-4 ${borders[color]}`}>
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-white/80 text-xs font-medium uppercase tracking-wide mb-1">{label}</p>
-          <p className="text-2xl font-bold">{value}</p>
-          {sub && <p className="text-white/70 text-xs mt-1">{sub}</p>}
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wide mb-1">{label}</p>
+          <p className={`text-2xl font-bold ${texts[color]}`}>{value}</p>
+          {sub && <p className="text-slate-400 text-xs mt-1">{sub}</p>}
         </div>
-        <span className="text-3xl opacity-80">{icon}</span>
+        <span className="text-2xl">{icon}</span>
       </div>
     </div>
   )
@@ -90,7 +100,7 @@ export default function Dashboard() {
         <StatCard icon="💳" label="Abonos" value={fmt(caja?.totalAbonos)} color="purple" />
       </div>
       <div className="grid grid-cols-1 gap-4 mb-8">
-        <StatCard icon="🏦" label="Total cobrado hoy" value={fmt(caja?.totalCobrado)} sub="Efectivo + Transferencia + Abonos" color="amber" />
+        <StatCard icon="🏦" label="Total cobrado hoy" value={fmt(caja?.totalCobrado)} sub="Efectivo + Transferencia" color="amber" />
       </div>
 
       {/* Últimas ventas */}
