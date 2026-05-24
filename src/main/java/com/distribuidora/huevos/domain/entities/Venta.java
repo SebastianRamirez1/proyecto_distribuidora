@@ -9,7 +9,8 @@ import com.distribuidora.huevos.domain.valueobjects.Precio;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
-// Venta es inmutable: todos los campos son final, sin setters.
+// Los campos de negocio son inmutables (final).
+// Solo el estado de anulación es mutable (soft delete).
 // El precioUnitario es calculado por el dominio antes de construir esta entidad.
 public final class Venta {
 
@@ -21,9 +22,22 @@ public final class Venta {
     private final TipoPago tipoPago;
     private final LocalDateTime fecha;
 
+    // Soft delete — mutable post-construcción
+    private boolean anulada;
+    private LocalDateTime fechaAnulacion;
+
+    /** Constructor para ventas nuevas (anulada = false por defecto). */
     public Venta(Long id, Cliente cliente, TipoProducto tipoProducto,
                  Cantidad cantidad, Precio precioUnitario,
                  TipoPago tipoPago, LocalDateTime fecha) {
+        this(id, cliente, tipoProducto, cantidad, precioUnitario, tipoPago, fecha, false, null);
+    }
+
+    /** Constructor de reconstitución (usado al cargar desde BD). */
+    public Venta(Long id, Cliente cliente, TipoProducto tipoProducto,
+                 Cantidad cantidad, Precio precioUnitario,
+                 TipoPago tipoPago, LocalDateTime fecha,
+                 boolean anulada, LocalDateTime fechaAnulacion) {
         Objects.requireNonNull(cliente, "El cliente de la venta no puede ser null");
         Objects.requireNonNull(tipoProducto, "El tipo de producto no puede ser null");
         Objects.requireNonNull(cantidad, "La cantidad no puede ser null");
@@ -37,6 +51,14 @@ public final class Venta {
         this.precioUnitario = precioUnitario;
         this.tipoPago = tipoPago;
         this.fecha = fecha;
+        this.anulada = anulada;
+        this.fechaAnulacion = fechaAnulacion;
+    }
+
+    /** Marca esta venta como anulada (soft delete). */
+    public void anular() {
+        this.anulada = true;
+        this.fechaAnulacion = LocalDateTime.now();
     }
 
     public Dinero calcularTotal() {
@@ -70,6 +92,14 @@ public final class Venta {
 
     public LocalDateTime getFecha() {
         return fecha;
+    }
+
+    public boolean isAnulada() {
+        return anulada;
+    }
+
+    public LocalDateTime getFechaAnulacion() {
+        return fechaAnulacion;
     }
 
     @Override

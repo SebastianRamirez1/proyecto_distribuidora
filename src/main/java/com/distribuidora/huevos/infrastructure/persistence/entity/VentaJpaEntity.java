@@ -41,4 +41,10 @@ public class VentaJpaEntity {
 
     @Column(nullable = false)
     private LocalDateTime fecha;
+
+    @Column(nullable = false)
+    private boolean anulada = false;
+
+    @Column(name = "fecha_anulacion")
+    private LocalDateTime fechaAnulacion;
 }

@@ -22,7 +22,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler({StockInsuficienteException.class,
             ClienteIncompletoException.class,
             PrecioInvalidoException.class,
-            CantidadInvalidaException.class})
+            CantidadInvalidaException.class,
+            VentaOperacionException.class})
     public ResponseEntity<ErrorResponse> handleBadRequest(RuntimeException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse(ex.getMessage()));

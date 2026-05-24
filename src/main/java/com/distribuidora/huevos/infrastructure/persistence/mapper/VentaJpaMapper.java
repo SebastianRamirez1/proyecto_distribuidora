@@ -23,7 +23,9 @@ public class VentaJpaMapper {
                 new Cantidad(entity.getCantidad()),
                 Precio.de(entity.getPrecioUnitario()),
                 entity.getTipoPago(),
-                entity.getFecha());
+                entity.getFecha(),
+                entity.isAnulada(),
+                entity.getFechaAnulacion());
     }
 
     public VentaJpaEntity toJpa(Venta venta) {
@@ -35,6 +37,8 @@ public class VentaJpaMapper {
         entity.setPrecioUnitario(venta.getPrecioUnitario().getValor());
         entity.setTipoPago(venta.getTipoPago());
         entity.setFecha(venta.getFecha());
+        entity.setAnulada(venta.isAnulada());
+        entity.setFechaAnulacion(venta.getFechaAnulacion());
         return entity;
     }
 }

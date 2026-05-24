@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ventasHoy, registrarVenta, registrarAbono } from '../api/ventasApi'
+import { ventasHoy, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
 import { listarClientes } from '../api/clientesApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -29,6 +29,8 @@ export default function Ventas() {
   const [savingA, setSavingA] = useState(false)
   const [tab, setTab] = useState('venta') // 'venta' | 'abono'
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
+  const [anulando, setAnulando] = useState(false)
+  const [ventaAAnular, setVentaAAnular] = useState(null) // { id, nombreCliente, total }
 
   const loadVentas = async () => {
     try {
@@ -102,6 +104,23 @@ export default function Ventas() {
   const togglePrecioManual = () => {
     setMostrarPrecioManual(v => !v)
     setFormVenta(p => ({ ...p, precioManual: '' }))
+  }
+
+  const confirmarAnulacion = async () => {
+    if (!ventaAAnular) return
+    setAnulando(true)
+    setError('')
+    try {
+      await anularVenta(ventaAAnular.id)
+      setVentaAAnular(null)
+      await loadVentas()
+      setSuccess(`Venta #${ventaAAnular.id} anulada correctamente ✅`)
+    } catch (e) {
+      setError(e.response?.data?.mensaje || e.message)
+      setVentaAAnular(null)
+    } finally {
+      setAnulando(false)
+    }
   }
 
   const totalHoy = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
@@ -278,13 +297,14 @@ export default function Ventas() {
                     <th className="px-4 py-3 text-right">Total</th>
                     <th className="px-4 py-3 text-left">Pago</th>
                     <th className="px-4 py-3 text-left">Hora</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {ventas.length === 0 ? (
-                    <tr><td colSpan={7} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
+                    <tr><td colSpan={8} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
                   ) : ventas.map((v) => (
-                    <tr key={v.id} className="hover:bg-slate-50">
+                    <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
                       <td className="table-cell font-medium">{v.nombreCliente}</td>
                       <td className="table-cell">
                         <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
@@ -298,6 +318,17 @@ export default function Ventas() {
                       <td className="table-cell text-slate-400 text-xs">
                         {v.fecha ? new Date(v.fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : '-'}
                       </td>
+                      <td className="table-cell">
+                        {!v.anulada && (
+                          <button
+                            onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
+                            title="Anular venta"
+                            className="text-slate-300 hover:text-rose-500 transition-colors text-base leading-none"
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -306,6 +337,46 @@ export default function Ventas() {
           )}
         </div>
       </div>
+
+      {/* Modal confirmación de anulación */}
+      {ventaAAnular && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">⚠️</span>
+              <h3 className="text-lg font-bold text-slate-800">Anular venta</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-1">
+              ¿Estás seguro de anular la venta <span className="font-semibold">#{ventaAAnular.id}</span>?
+            </p>
+            <p className="text-sm text-slate-500 mb-1">
+              Cliente: <span className="font-medium">{ventaAAnular.nombreCliente}</span>
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              Total: <span className="font-medium text-rose-600">{fmt(ventaAAnular.total)}</span>
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700 mb-5">
+              Se revertirá el stock, el movimiento de caja y (si era fiado) el crédito del cliente.
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setVentaAAnular(null)}
+                disabled={anulando}
+                className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarAnulacion}
+                disabled={anulando}
+                className="flex-1 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition-colors disabled:opacity-60"
+              >
+                {anulando ? 'Anulando…' : 'Sí, anular'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

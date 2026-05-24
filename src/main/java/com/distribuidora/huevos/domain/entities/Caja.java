@@ -39,6 +39,15 @@ public class Caja {
         }
     }
 
+    public void revertirPago(TipoPago tipoPago, Dinero monto) {
+        switch (tipoPago) {
+            case EFECTIVO      -> this.totalEfectivo      = this.totalEfectivo.restar(monto);
+            case TRANSFERENCIA -> this.totalTransferencia = this.totalTransferencia.restar(monto);
+            case FIADO         -> this.totalFiado         = this.totalFiado.restar(monto);
+            case ABONO         -> this.totalAbonos        = this.totalAbonos.restar(monto);
+        }
+    }
+
     // Total de dinero físicamente recibido (excluye fiado, que aún no se cobró)
     public Dinero calcularTotalCobrado() {
         return totalEfectivo.sumar(totalTransferencia).sumar(totalAbonos);
