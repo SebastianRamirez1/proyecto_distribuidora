@@ -35,13 +35,12 @@ public class RegistrarAbonoService {
         credito.abonar(monto);
         creditoRepository.save(credito);
 
-        // Los abonos siempre van al cajón ABONO en la caja, independientemente
-        // de si el cliente pagó en efectivo o transferencia.
-        // Así "Efectivo" refleja solo ventas en cash y "Abonos recibidos" refleja
-        // cobros de deuda — sin mezclar en los reportes.
+        // registrarAbono suma al efectivo/transferencia (dinero físico que entró)
+        // Y también a totalAbonos (deuda cobrada hoy — informativo).
+        // calcularTotalCobrado usa solo efectivo+transferencia para no duplicar.
         LocalDate hoy = LocalDate.now();
         Caja caja = cajaRepository.findByFecha(hoy).orElse(Caja.nueva(hoy));
-        caja.registrarPago(TipoPago.ABONO, monto);
+        caja.registrarAbono(command.getMedioPago(), monto);
         cajaRepository.save(caja);
     }
 }

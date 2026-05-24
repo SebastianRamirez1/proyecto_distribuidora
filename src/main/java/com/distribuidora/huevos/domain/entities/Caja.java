@@ -32,11 +32,26 @@ public class Caja {
 
     public void registrarPago(TipoPago tipoPago, Dinero monto) {
         switch (tipoPago) {
-            case EFECTIVO -> this.totalEfectivo = this.totalEfectivo.sumar(monto);
+            case EFECTIVO      -> this.totalEfectivo      = this.totalEfectivo.sumar(monto);
             case TRANSFERENCIA -> this.totalTransferencia = this.totalTransferencia.sumar(monto);
-            case FIADO -> this.totalFiado = this.totalFiado.sumar(monto);
-            case ABONO -> this.totalAbonos = this.totalAbonos.sumar(monto);
+            case FIADO         -> this.totalFiado         = this.totalFiado.sumar(monto);
+            case ABONO         -> this.totalAbonos        = this.totalAbonos.sumar(monto);
         }
+    }
+
+    /**
+     * Registra un abono de deuda:
+     * - Suma al efectivo/transferencia (dinero físico que entró en caja).
+     * - También suma a totalAbonos como indicador de deuda cobrada hoy.
+     * - totalCobrado NO incluye totalAbonos para evitar doble conteo.
+     */
+    public void registrarAbono(TipoPago medioPago, Dinero monto) {
+        switch (medioPago) {
+            case EFECTIVO      -> this.totalEfectivo      = this.totalEfectivo.sumar(monto);
+            case TRANSFERENCIA -> this.totalTransferencia = this.totalTransferencia.sumar(monto);
+            default -> {}  // no aplica otro medio para abonos
+        }
+        this.totalAbonos = this.totalAbonos.sumar(monto);
     }
 
     public void revertirPago(TipoPago tipoPago, Dinero monto) {
@@ -48,9 +63,11 @@ public class Caja {
         }
     }
 
-    // Total de dinero físicamente recibido (excluye fiado, que aún no se cobró)
+    // Total de dinero físicamente recibido (efectivo + transferencia).
+    // Los abonos ya están incluidos en esos dos cajones, así que NO se suman
+    // de nuevo desde totalAbonos para evitar doble conteo.
     public Dinero calcularTotalCobrado() {
-        return totalEfectivo.sumar(totalTransferencia).sumar(totalAbonos);
+        return totalEfectivo.sumar(totalTransferencia);
     }
 
     public Long getId() {
