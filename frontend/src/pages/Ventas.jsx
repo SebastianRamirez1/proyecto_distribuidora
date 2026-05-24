@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ventasHoy, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
+import { ventasPorFecha, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
 import { listarClientes } from '../api/clientesApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -31,10 +31,13 @@ export default function Ventas() {
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
   const [anulando, setAnulando] = useState(false)
   const [ventaAAnular, setVentaAAnular] = useState(null) // { id, nombreCliente, total }
+  const [fechaSeleccionada, setFechaSeleccionada] = useState(
+    new Date().toISOString().split('T')[0]  // hoy en formato YYYY-MM-DD
+  )
 
-  const loadVentas = async () => {
+  const loadVentas = async (fecha = fechaSeleccionada) => {
     try {
-      setVentas(await ventasHoy())
+      setVentas(await ventasPorFecha(fecha))
     } catch (e) {
       setError(e.message)
     }
@@ -43,7 +46,8 @@ export default function Ventas() {
   useEffect(() => {
     const load = async () => {
       try {
-        const [v, c] = await Promise.all([ventasHoy(), listarClientes()])
+        const hoy = new Date().toISOString().split('T')[0]
+        const [v, c] = await Promise.all([ventasPorFecha(hoy), listarClientes()])
         setVentas(v)
         setClientes(c)
       } catch (e) {
@@ -54,6 +58,19 @@ export default function Ventas() {
     }
     load()
   }, [])
+
+  const handleFechaChange = async (e) => {
+    const fecha = e.target.value
+    setFechaSeleccionada(fecha)
+    setLoading(true)
+    try {
+      setVentas(await ventasPorFecha(fecha))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const handleVenta = async (e) => {
     e.preventDefault()
@@ -72,7 +89,8 @@ export default function Ventas() {
       await registrarVenta(payload)
       setFormVenta(initVenta)
       setMostrarPrecioManual(false)
-      await loadVentas()
+      await loadVentas(new Date().toISOString().split('T')[0])
+      setFechaSeleccionada(new Date().toISOString().split('T')[0])
       setSuccess('Venta registrada correctamente ✅')
     } catch (e) {
       setError(e.message)
@@ -123,13 +141,15 @@ export default function Ventas() {
     }
   }
 
-  const totalHoy = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
+  const totalDia = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
+  const hoy = new Date().toISOString().split('T')[0]
+  const esHoy = fechaSeleccionada === hoy
 
   return (
     <div>
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
-        <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos — ventas de hoy</p>
+        <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
       </div>
 
       <Alert type="error"   message={error}   onClose={() => setError('')} />
@@ -281,9 +301,32 @@ export default function Ventas() {
 
         {/* Lista de ventas */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-slate-700">Ventas de hoy</h3>
-            <span className="text-sm text-slate-500">Total: <span className="font-bold text-slate-800">{fmt(totalHoy)}</span></span>
+          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+            <div className="flex items-center gap-3">
+              <h3 className="font-semibold text-slate-700">
+                {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+              </h3>
+              {!esHoy && (
+                <button
+                  onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
+                  className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+                >
+                  ← Volver a hoy
+                </button>
+              )}
+            </div>
+            <div className="flex items-center gap-3">
+              <input
+                type="date"
+                value={fechaSeleccionada}
+                max={hoy}
+                onChange={handleFechaChange}
+                className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+              <span className="text-sm text-slate-500 whitespace-nowrap">
+                Total: <span className="font-bold text-slate-800">{fmt(totalDia)}</span>
+              </span>
+            </div>
           </div>
           {loading ? <Spinner /> : (
             <Card className="p-0 overflow-hidden">
