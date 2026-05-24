@@ -3,6 +3,7 @@ package com.distribuidora.huevos.application.service;
 import com.distribuidora.huevos.application.dto.command.RegistrarAbonoCommand;
 import com.distribuidora.huevos.domain.entities.Caja;
 import com.distribuidora.huevos.domain.entities.Credito;
+import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.repositories.CajaRepository;
 import com.distribuidora.huevos.domain.repositories.CreditoRepository;
@@ -34,11 +35,13 @@ public class RegistrarAbonoService {
         credito.abonar(monto);
         creditoRepository.save(credito);
 
-        // Registrar en caja según cómo pagó el cliente (efectivo sube totalEfectivo,
-        // transferencia sube totalTransferencia — no va al cajón genérico de ABONO).
+        // Los abonos siempre van al cajón ABONO en la caja, independientemente
+        // de si el cliente pagó en efectivo o transferencia.
+        // Así "Efectivo" refleja solo ventas en cash y "Abonos recibidos" refleja
+        // cobros de deuda — sin mezclar en los reportes.
         LocalDate hoy = LocalDate.now();
         Caja caja = cajaRepository.findByFecha(hoy).orElse(Caja.nueva(hoy));
-        caja.registrarPago(command.getMedioPago(), monto);
+        caja.registrarPago(TipoPago.ABONO, monto);
         cajaRepository.save(caja);
     }
 }
