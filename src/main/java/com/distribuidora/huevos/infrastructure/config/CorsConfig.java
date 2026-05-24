@@ -10,11 +10,7 @@ public class CorsConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/api/**")
-                .allowedOrigins(
-                        "http://localhost:5173",   // Vite dev
-                        "http://localhost:4173",   // Vite preview
-                        "http://localhost:3000"    // alternativo
-                )
+                .allowedOriginPatterns("*")        // mismo JAR sirve el frontend → sin riesgo
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .maxAge(3600);
