@@ -1,0 +1,50 @@
+version: '3.9'
+
+services:
+
+  # ── Base de datos PostgreSQL ──────────────────────────────
+  db:
+    image: postgres:16-alpine
+    container_name: distribuidora_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: distribuidora_huevos
+      POSTGRES_USER: ${DB_USERNAME:-distribuidora}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?La variable DB_PASSWORD es requerida}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-distribuidora}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - distribuidora_net
+
+  # ── Aplicación Spring Boot + React ───────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: distribuidora_app
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8080}:8080"
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      DB_URL: jdbc:postgresql://db:5432/distribuidora_huevos
+      DB_USERNAME: ${DB_USERNAME:-distribuidora}
+      DB_PASSWORD: ${DB_PASSWORD}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - distribuidora_net
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  distribuidora_net:
+    driver: bridge

@@ -37,8 +37,14 @@ Thumbs.db
 
 ### Environment ###
 .env
+.env.local
 *.env.local
 application-local.yml
+application-secrets.yml
+
+### Frontend static build (generado por Vite, no versionar) ###
+src/main/resources/static/assets/
+src/main/resources/static/index.html
 
 ### Logs ###
 *.log

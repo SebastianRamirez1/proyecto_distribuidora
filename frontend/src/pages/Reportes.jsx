@@ -1,0 +1,252 @@
+import { useEffect, useState } from 'react'
+import { reporteCajaHoy, reporteCajaPorFecha } from '../api/reportesApi'
+import { ventasHoy, ventasPorFecha } from '../api/ventasApi'
+import Card from '../components/ui/Card'
+import Alert from '../components/ui/Alert'
+import Badge from '../components/ui/Badge'
+import Spinner from '../components/ui/Spinner'
+import Button from '../components/ui/Button'
+
+const fmt = (n) => `S/ ${Number(n ?? 0).toFixed(2)}`
+
+function CajaRow({ icon, label, value, highlight = false }) {
+  return (
+    <div className={`flex items-center justify-between py-3 ${highlight ? 'border-t-2 border-slate-200 mt-2 pt-4' : 'border-b border-slate-100'}`}>
+      <div className="flex items-center gap-2 text-slate-600">
+        <span className="text-lg">{icon}</span>
+        <span className={`text-sm ${highlight ? 'font-semibold text-slate-800' : ''}`}>{label}</span>
+      </div>
+      <span className={`font-bold ${highlight ? 'text-xl text-amber-600' : 'text-slate-800'}`}>{fmt(value)}</span>
+    </div>
+  )
+}
+
+const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
+
+// Formato YYYY-MM-DD para el input type="date"
+const toInputDate = (d) => d.toISOString().slice(0, 10)
+const today = toInputDate(new Date())
+
+export default function Reportes() {
+  const [caja, setCaja]     = useState(null)
+  const [ventas, setVentas] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError]   = useState('')
+  const [fecha, setFecha]   = useState(today)       // fecha seleccionada (YYYY-MM-DD)
+  const [buscando, setBuscando] = useState(false)
+
+  const cargar = async (f) => {
+    setError('')
+    const esHoy = f === today
+    try {
+      const [c, v] = await Promise.all([
+        esHoy ? reporteCajaHoy() : reporteCajaPorFecha(f),
+        esHoy ? ventasHoy()      : ventasPorFecha(f),
+      ])
+      setCaja(c)
+      setVentas(v)
+    } catch (e) {
+      setError(e.message)
+    }
+  }
+
+  // Carga inicial (hoy)
+  useEffect(() => {
+    const init = async () => {
+      await cargar(today)
+      setLoading(false)
+    }
+    init()
+  }, [])
+
+  const handleBuscar = async (e) => {
+    e.preventDefault()
+    setBuscando(true)
+    await cargar(fecha)
+    setBuscando(false)
+  }
+
+  const handleHoy = async () => {
+    setFecha(today)
+    setBuscando(true)
+    await cargar(today)
+    setBuscando(false)
+  }
+
+  // Stats
+  const ventasExtra = ventas.filter(v => v.tipoProducto === 'EXTRA')
+  const ventasAA    = ventas.filter(v => v.tipoProducto === 'AA')
+  const ventasA     = ventas.filter(v => v.tipoProducto === 'A')
+  const ventasB     = ventas.filter(v => v.tipoProducto === 'B')
+  const totalCanastas = ventas.reduce((a, v) => a + v.cantidad, 0)
+
+  const fechaLabel = fecha === today
+    ? new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+    : new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+
+  return (
+    <div>
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-slate-800">Reportes</h1>
+        <p className="text-slate-500 text-sm mt-1 capitalize">{fechaLabel}</p>
+      </div>
+
+      {/* Selector de fecha */}
+      <form onSubmit={handleBuscar} className="flex items-center gap-3 mb-6 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm">
+        <span className="text-slate-500 text-sm font-medium whitespace-nowrap">📅 Ver fecha:</span>
+        <input
+          type="date"
+          max={today}
+          value={fecha}
+          onChange={e => setFecha(e.target.value)}
+          className="input flex-1 max-w-xs"
+        />
+        <Button type="submit" loading={buscando} className="whitespace-nowrap">
+          Buscar
+        </Button>
+        {fecha !== today && (
+          <Button type="button" variant="secondary" onClick={handleHoy} className="whitespace-nowrap">
+            Hoy
+          </Button>
+        )}
+      </form>
+
+      <Alert type="error" message={error} onClose={() => setError('')} />
+
+      {loading ? <Spinner /> : (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Caja */}
+          <div>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">💰 Cierre de caja</h2>
+            <Card>
+              <CajaRow icon="💵" label="Efectivo"          value={caja?.totalEfectivo} />
+              <CajaRow icon="📲" label="Transferencia"     value={caja?.totalTransferencia} />
+              <CajaRow icon="💳" label="Abonos recibidos"  value={caja?.totalAbonos} />
+              <CajaRow icon="📋" label="Fiado (pendiente)" value={caja?.totalFiado} />
+              <CajaRow icon="🏦" label="Total cobrado"     value={caja?.totalCobrado} highlight />
+            </Card>
+          </div>
+
+          {/* Resumen ventas */}
+          <div>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">📦 Resumen de ventas</h2>
+            <Card>
+              {ventas.length === 0 ? (
+                <p className="text-slate-400 text-sm text-center py-6">No hay ventas registradas este día</p>
+              ) : (
+                <>
+                  <div className="grid grid-cols-3 gap-3 mb-4">
+                    <div className="text-center bg-slate-50 rounded-lg p-3">
+                      <p className="text-2xl font-bold text-slate-700">{ventas.length}</p>
+                      <p className="text-xs text-slate-400 mt-1">Ventas</p>
+                    </div>
+                    <div className="text-center bg-slate-50 rounded-lg p-3">
+                      <p className="text-2xl font-bold text-slate-700">{totalCanastas}</p>
+                      <p className="text-xs text-slate-400 mt-1">Total canastas</p>
+                    </div>
+                    <div className="text-center bg-slate-50 rounded-lg p-3">
+                      <p className="text-xl font-bold text-amber-600">
+                        {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
+                      </p>
+                      <p className="text-xs text-slate-400 mt-1">Total S/</p>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-4 gap-2 mb-4">
+                    {[
+                      { label: 'EXTRA', data: ventasExtra, bg: 'bg-amber-50',  text: 'text-amber-600'  },
+                      { label: 'AA',    data: ventasAA,    bg: 'bg-yellow-50', text: 'text-yellow-600' },
+                      { label: 'A',     data: ventasA,     bg: 'bg-blue-50',   text: 'text-blue-600'   },
+                      { label: 'B',     data: ventasB,     bg: 'bg-slate-100', text: 'text-slate-600'  },
+                    ].map(({ label, data, bg, text }) => (
+                      <div key={label} className={`text-center ${bg} rounded-lg p-2`}>
+                        <p className={`text-xl font-bold ${text}`}>{data.reduce((a, v) => a + v.cantidad, 0)}</p>
+                        <p className="text-xs text-slate-400 mt-1">Can. {label}</p>
+                      </div>
+                    ))}
+                  </div>
+                  {/* Desglose por tipo de pago */}
+                  <div className="space-y-2">
+                    {['EFECTIVO', 'TRANSFERENCIA', 'FIADO', 'ABONO'].map(tipo => {
+                      const filtradas = ventas.filter(v => v.tipoPago === tipo)
+                      if (filtradas.length === 0) return null
+                      return (
+                        <div key={tipo} className="flex items-center justify-between text-sm">
+                          <div className="flex items-center gap-2">
+                            <Badge color={tipoPagoColor[tipo]}>{tipo}</Badge>
+                            <span className="text-slate-400">{filtradas.length} venta{filtradas.length !== 1 ? 's' : ''}</span>
+                          </div>
+                          <span className="font-medium text-slate-700">
+                            {fmt(filtradas.reduce((a, v) => a + Number(v.total || 0), 0))}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </Card>
+          </div>
+
+          {/* Detalle ventas */}
+          <div className="lg:col-span-2">
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
+              📋 Detalle de ventas ({ventas.length})
+            </h2>
+            <Card className="p-0 overflow-hidden">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="table-head">
+                    <th className="px-4 py-3 text-left">#</th>
+                    <th className="px-4 py-3 text-left">Cliente</th>
+                    <th className="px-4 py-3 text-left">Tipo</th>
+                    <th className="px-4 py-3 text-right">Cant.</th>
+                    <th className="px-4 py-3 text-right">P/U</th>
+                    <th className="px-4 py-3 text-right">Total</th>
+                    <th className="px-4 py-3 text-left">Pago</th>
+                    <th className="px-4 py-3 text-left">Hora</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {ventas.length === 0 ? (
+                    <tr><td colSpan={8} className="text-center text-slate-400 py-8">No hay ventas registradas este día</td></tr>
+                  ) : ventas.map((v, i) => (
+                    <tr key={v.id} className="hover:bg-slate-50">
+                      <td className="table-cell text-slate-400">{i + 1}</td>
+                      <td className="table-cell font-medium">{v.nombreCliente}</td>
+                      <td className="table-cell">
+                        <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
+                      </td>
+                      <td className="table-cell text-right">{v.cantidad}</td>
+                      <td className="table-cell text-right">{fmt(v.precioUnitario)}</td>
+                      <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
+                      <td className="table-cell">
+                        <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
+                      </td>
+                      <td className="table-cell text-slate-400 text-xs">
+                        {v.fecha ? new Date(v.fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+                {ventas.length > 0 && (
+                  <tfoot>
+                    <tr className="bg-slate-50 font-semibold">
+                      <td colSpan={3} className="px-4 py-3 text-slate-600 text-sm">Total ({totalCanastas} canastas)</td>
+                      <td className="px-4 py-3 text-right text-sm">{totalCanastas}</td>
+                      <td></td>
+                      <td className="px-4 py-3 text-right text-amber-600">
+                        {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
+                      </td>
+                      <td colSpan={2}></td>
+                    </tr>
+                  </tfoot>
+                )}
+              </table>
+            </Card>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}

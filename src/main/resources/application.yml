@@ -78,3 +78,52 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+
+---
+# ============================================================
+# PERFIL prod: Producción real
+# Variables de entorno requeridas:
+#   DB_URL      → jdbc:postgresql://host:5432/distribuidora_huevos
+#   DB_USERNAME → usuario de la base de datos
+#   DB_PASSWORD → contraseña de la base de datos
+#   PORT        → puerto del servidor (default 8080)
+# Activar con: SPRING_PROFILES_ACTIVE=prod
+# ============================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    open-in-view: false
+    defer-datasource-initialization: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: false
+
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: application/json,application/xml,text/html,text/css,application/javascript
+  error:
+    include-message: never
+    include-stacktrace: never

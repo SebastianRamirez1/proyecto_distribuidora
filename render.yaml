@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: distribuidora-huevos
+    runtime: docker
+    dockerfilePath: ./Dockerfile.local
+    plan: free
+    healthCheckPath: /api/inventario
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false

@@ -3,10 +3,14 @@ CREATE TABLE IF NOT EXISTS clientes (
     nombre                   VARCHAR(100)   NOT NULL,
     tipo                     VARCHAR(20)    NOT NULL,
     precio_especial_extra    DECIMAL(12, 2),
-    precio_especial_normal   DECIMAL(12, 2),
+    precio_especial_aa       DECIMAL(12, 2),
+    precio_especial_a        DECIMAL(12, 2),
+    precio_especial_b        DECIMAL(12, 2),
     descuento_desde_canastas INTEGER,
     descuento_precio_extra   DECIMAL(12, 2),
-    descuento_precio_normal  DECIMAL(12, 2)
+    descuento_precio_aa      DECIMAL(12, 2),
+    descuento_precio_a       DECIMAL(12, 2),
+    descuento_precio_b       DECIMAL(12, 2)
 );
 
 CREATE TABLE IF NOT EXISTS ventas (
@@ -20,9 +24,11 @@ CREATE TABLE IF NOT EXISTS ventas (
 );
 
 CREATE TABLE IF NOT EXISTS inventario (
-    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-    stock_extra  INTEGER NOT NULL DEFAULT 0,
-    stock_normal INTEGER NOT NULL DEFAULT 0
+    id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+    stock_extra INTEGER NOT NULL DEFAULT 0,
+    stock_aa    INTEGER NOT NULL DEFAULT 0,
+    stock_a     INTEGER NOT NULL DEFAULT 0,
+    stock_b     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS caja (
@@ -42,15 +48,15 @@ CREATE TABLE IF NOT EXISTS creditos (
 );
 
 CREATE TABLE IF NOT EXISTS precio_publico (
-    id            BIGINT AUTO_INCREMENT PRIMARY KEY,
-    precio_extra  DECIMAL(12, 2) NOT NULL DEFAULT 0,
-    precio_normal DECIMAL(12, 2) NOT NULL DEFAULT 0
+    id           BIGINT AUTO_INCREMENT PRIMARY KEY,
+    precio_extra DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    precio_aa    DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    precio_a     DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    precio_b     DECIMAL(12, 2) NOT NULL DEFAULT 0
 );
 
--- Fila única de inventario (idempotente)
-INSERT INTO inventario (stock_extra, stock_normal)
-    SELECT 0, 0 WHERE NOT EXISTS (SELECT 1 FROM inventario);
+INSERT INTO inventario (stock_extra, stock_aa, stock_a, stock_b)
+    SELECT 0, 0, 0, 0 WHERE NOT EXISTS (SELECT 1 FROM inventario);
 
--- Precio público inicial en 0 (el dueño lo actualiza antes de operar)
-INSERT INTO precio_publico (precio_extra, precio_normal)
-    SELECT 0.00, 0.00 WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
+INSERT INTO precio_publico (precio_extra, precio_aa, precio_a, precio_b)
+    SELECT 0.00, 0.00, 0.00, 0.00 WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
