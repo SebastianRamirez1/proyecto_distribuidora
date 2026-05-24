@@ -1,12 +1,14 @@
 package com.distribuidora.huevos.application.service;
 
 import com.distribuidora.huevos.application.dto.command.RegistrarAbonoCommand;
+import com.distribuidora.huevos.domain.entities.Abono;
 import com.distribuidora.huevos.domain.entities.Caja;
 import com.distribuidora.huevos.domain.entities.Cliente;
 import com.distribuidora.huevos.domain.entities.Credito;
 import com.distribuidora.huevos.domain.enums.TipoCliente;
 import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
+import com.distribuidora.huevos.domain.repositories.AbonoRepository;
 import com.distribuidora.huevos.domain.repositories.CajaRepository;
 import com.distribuidora.huevos.domain.repositories.CreditoRepository;
 import com.distribuidora.huevos.domain.valueobjects.Dinero;
@@ -31,6 +33,7 @@ class RegistrarAbonoServiceTest {
 
     @Mock private CreditoRepository creditoRepository;
     @Mock private CajaRepository cajaRepository;
+    @Mock private AbonoRepository abonoRepository;
 
     @InjectMocks
     private RegistrarAbonoService service;
@@ -51,11 +54,13 @@ class RegistrarAbonoServiceTest {
         when(creditoRepository.findByClienteId(1L)).thenReturn(Optional.of(credito));
         when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
         when(cajaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(abonoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.ejecutar(crearCommand(1L, "40000.00", TipoPago.EFECTIVO));
 
         verify(creditoRepository).save(any(Credito.class));
         verify(cajaRepository).save(any(Caja.class));
+        verify(abonoRepository).save(any(Abono.class));
     }
 
     // ── contabilidad de caja: regla de negocio crítica ────────────────────────
@@ -70,6 +75,7 @@ class RegistrarAbonoServiceTest {
 
         ArgumentCaptor<Caja> cajaCaptor = ArgumentCaptor.forClass(Caja.class);
         when(cajaRepository.save(cajaCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+        when(abonoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.ejecutar(crearCommand(1L, "20000.00", TipoPago.EFECTIVO));
 
@@ -92,6 +98,7 @@ class RegistrarAbonoServiceTest {
 
         ArgumentCaptor<Caja> cajaCaptor = ArgumentCaptor.forClass(Caja.class);
         when(cajaRepository.save(cajaCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+        when(abonoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.ejecutar(crearCommand(1L, "15000.00", TipoPago.TRANSFERENCIA));
 
@@ -113,6 +120,7 @@ class RegistrarAbonoServiceTest {
 
         ArgumentCaptor<Caja> cajaCaptor = ArgumentCaptor.forClass(Caja.class);
         when(cajaRepository.save(cajaCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+        when(abonoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         service.ejecutar(crearCommand(1L, "20000.00", TipoPago.EFECTIVO));
 
