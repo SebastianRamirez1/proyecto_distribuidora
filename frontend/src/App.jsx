@@ -6,6 +6,7 @@ import Ventas from './pages/Ventas'
 import Inventario from './pages/Inventario'
 import Precios from './pages/Precios'
 import Reportes from './pages/Reportes'
+import Deudores from './pages/Deudores'
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Route path="inventario" element={<Inventario />} />
           <Route path="precios" element={<Precios />} />
           <Route path="reportes" element={<Reportes />} />
+          <Route path="deudores" element={<Deudores />} />
         </Route>
       </Routes>
     </BrowserRouter>

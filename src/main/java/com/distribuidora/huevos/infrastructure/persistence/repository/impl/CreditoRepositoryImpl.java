@@ -6,6 +6,7 @@ import com.distribuidora.huevos.infrastructure.persistence.mapper.CreditoJpaMapp
 import com.distribuidora.huevos.infrastructure.persistence.repository.CreditoJpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -22,6 +23,13 @@ public class CreditoRepositoryImpl implements CreditoRepository {
     @Override
     public Optional<Credito> findByClienteId(Long clienteId) {
         return jpaRepository.findByClienteId(clienteId).map(mapper::toDomain);
+    }
+
+    @Override
+    public List<Credito> findDeudores() {
+        return jpaRepository.findDeudores().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override
