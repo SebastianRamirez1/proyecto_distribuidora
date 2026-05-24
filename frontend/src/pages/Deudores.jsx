@@ -16,9 +16,10 @@ export default function Deudores() {
   const [busqueda, setBusqueda] = useState('')
 
   // Modal abono
-  const [modal, setModal]     = useState(null)   // { clienteId, nombre, saldo }
-  const [monto, setMonto]     = useState('')
-  const [saving, setSaving]   = useState(false)
+  const [modal, setModal]         = useState(null)   // { clienteId, nombre, saldo }
+  const [monto, setMonto]         = useState('')
+  const [medioPago, setMedioPago] = useState('EFECTIVO')
+  const [saving, setSaving]       = useState(false)
 
   const cargar = async () => {
     setLoading(true)
@@ -47,6 +48,7 @@ export default function Deudores() {
   const abrirModal = (d) => {
     setModal({ clienteId: d.clienteId, nombre: d.nombreCliente, saldo: d.saldoPendiente })
     setMonto('')
+    setMedioPago('EFECTIVO')
   }
 
   const confirmarAbono = async () => {
@@ -56,7 +58,7 @@ export default function Deudores() {
     setSaving(true)
     setError('')
     try {
-      await registrarAbono({ clienteId: modal.clienteId, monto: valor })
+      await registrarAbono({ clienteId: modal.clienteId, monto: valor, medioPago })
       setSuccess(`Abono de ${fmt(valor)} registrado para ${modal.nombre} ✅`)
       setModal(null)
       await cargar()
@@ -195,6 +197,24 @@ export default function Deudores() {
             <div className="bg-red-50 rounded-lg px-4 py-2 mb-4 flex justify-between items-center">
               <span className="text-sm text-slate-600">Saldo pendiente</span>
               <span className="font-bold text-red-600 text-lg">{fmt(modal.saldo)}</span>
+            </div>
+
+            <label className="label">Medio de pago</label>
+            <div className="flex gap-2 mb-4">
+              {['EFECTIVO', 'TRANSFERENCIA'].map(op => (
+                <button
+                  key={op}
+                  type="button"
+                  onClick={() => setMedioPago(op)}
+                  className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${
+                    medioPago === op
+                      ? 'bg-amber-500 border-amber-500 text-white'
+                      : 'border-slate-300 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  {op === 'EFECTIVO' ? '💵 Efectivo' : '🏦 Transferencia'}
+                </button>
+              ))}
             </div>
 
             <label className="label">Monto del abono</label>
