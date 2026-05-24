@@ -5,12 +5,14 @@ import com.distribuidora.huevos.application.dto.response.VentaResponse;
 import com.distribuidora.huevos.application.mapper.VentaMapper;
 import com.distribuidora.huevos.domain.entities.*;
 import com.distribuidora.huevos.domain.enums.TipoPago;
+import com.distribuidora.huevos.domain.exceptions.PrecioInvalidoException;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.repositories.*;
 import com.distribuidora.huevos.domain.valueobjects.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -55,6 +57,14 @@ public class RegistrarVentaService {
         Precio precioUnitario = (command.getPrecioManual() != null)
                 ? Precio.de(command.getPrecioManual())
                 : cliente.calcularPrecio(command.getTipoProducto(), cantidad, precioPublico);
+
+        // Guardia: precio cero indica que los precios públicos no han sido configurados.
+        // Evita registrar ventas a S/ 0.00 por error de configuración.
+        if (precioUnitario.getValor().compareTo(BigDecimal.ZERO) == 0) {
+            throw new PrecioInvalidoException(
+                    "El precio para canastas " + command.getTipoProducto().name() +
+                    " es S/ 0.00. Configura los precios en el módulo de Precios antes de registrar ventas.");
+        }
 
         Inventario inventario = inventarioRepository.findUnico();
         inventario.descontar(command.getTipoProducto(), cantidad);

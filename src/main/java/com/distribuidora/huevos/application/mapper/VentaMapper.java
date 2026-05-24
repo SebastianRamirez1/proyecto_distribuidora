@@ -18,6 +18,7 @@ public class VentaMapper {
         response.setTotal(venta.calcularTotal().getValor());
         response.setTipoPago(venta.getTipoPago());
         response.setFecha(venta.getFecha());
+        response.setAnulada(venta.isAnulada());
         return response;
     }
 }

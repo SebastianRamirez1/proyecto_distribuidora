@@ -86,6 +86,10 @@ ALTER TABLE clientes ADD COLUMN IF NOT EXISTS descuento_precio_b    DECIMAL(12, 
 -- ventas existentes con tipo_producto = 'NORMAL' se migran a 'A'
 UPDATE ventas SET tipo_producto = 'A' WHERE tipo_producto = 'NORMAL';
 
+-- anulación de ventas (soft delete)
+ALTER TABLE ventas ADD COLUMN IF NOT EXISTS anulada         BOOLEAN   NOT NULL DEFAULT FALSE;
+ALTER TABLE ventas ADD COLUMN IF NOT EXISTS fecha_anulacion TIMESTAMP;
+
 -- ============================================================
 -- Datos iniciales (idempotentes)
 -- ============================================================
