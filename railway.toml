@@ -2,7 +2,7 @@
 builder = "NIXPACKS"
 # 1. Instala pnpm, compila el frontend (sale en src/main/resources/static/)
 # 2. Compila el backend con Maven (incluye los estáticos en el JAR)
-buildCommand = "npm install -g pnpm@8 && cd frontend && pnpm install --frozen-lockfile && pnpm run build && cd .. && mvn package -DskipTests -B"
+buildCommand = "npm install -g pnpm@8 && export PATH=$(npm config get prefix)/bin:$PATH && cd frontend && pnpm install --frozen-lockfile && pnpm run build && cd .. && mvn package -DskipTests -B"
 
 [deploy]
 startCommand = "java -jar target/huevos-1.0.0-SNAPSHOT.jar"
