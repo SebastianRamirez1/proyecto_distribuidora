@@ -28,6 +28,13 @@ spring:
 server:
   port: 8080
 
+app:
+  username: ${APP_USERNAME:admin}
+  password: ${APP_PASSWORD:admin123}
+  jwt:
+    secret: ${JWT_SECRET:3d8f2a1b9c4e7f0a2b5d8e1c4f7a0b3d6e9f2a5b8c1d4e7f0a3b6c9d2e5f8a1b}
+    expiration: 86400000  # 24 horas
+
 ---
 # ============================================================
 # PERFIL postgres: PostgreSQL real via Docker

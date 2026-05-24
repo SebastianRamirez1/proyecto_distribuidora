@@ -6,7 +6,7 @@ buildCommand = "export PATH=/tmp/apache-maven-3.9.6/bin:$PATH && corepack enable
 
 [deploy]
 startCommand = "java -jar target/huevos-1.0.0-SNAPSHOT.jar"
-healthcheckPath = "/api/inventario"
+healthcheckPath = "/api/health"
 healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 3
