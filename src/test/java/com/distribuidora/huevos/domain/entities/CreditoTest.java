@@ -121,4 +121,20 @@ class CreditoTest {
         // montoTotal = 200 - 100 = 100; montoPagado = 80; saldo = 20
         assertThat(credito.saldoPendiente().getValor()).isEqualByComparingTo("20.00");
     }
+
+    @Test
+    void revertirDeudaCuandoAbonosSuperanNuevoTotalNoProcuceSaldoNegativo() {
+        // Caso borde: cliente tenía S/100 de deuda, pagó S/60 (abonos),
+        // y luego se anula la venta entera (S/100).
+        // Antes del fix: saldoPendiente = S/0 - S/60 = S/-60 (negativo)
+        // Con el fix: montoPagado se ajusta a S/0 → saldoPendiente = S/0
+        Credito credito = Credito.nuevo(cliente, Dinero.de(new BigDecimal("100.00")));
+        credito.abonar(Dinero.de(new BigDecimal("60.00")));
+        credito.revertirDeuda(Dinero.de(new BigDecimal("100.00")));
+
+        assertThat(credito.saldoPendiente().getValor())
+                .isEqualByComparingTo("0.00");
+        assertThat(credito.getMontoTotal().getValor())
+                .isEqualByComparingTo("0.00");
+    }
 }

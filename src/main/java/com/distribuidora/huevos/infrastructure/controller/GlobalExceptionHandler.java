@@ -52,8 +52,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
         log.error("[500] {} - {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Error interno del servidor: "
-                        + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
+                .body(new ErrorResponse("Error interno del servidor. Intenta de nuevo."));
     }
 
     public static class ErrorResponse {
