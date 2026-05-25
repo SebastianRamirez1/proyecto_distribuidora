@@ -34,9 +34,16 @@ public class Credito {
         this.montoPagado = this.montoPagado.sumar(monto);
     }
 
-    /** Revierte una deuda registrada por una venta fiado que se anuló. */
+    /**
+     * Revierte una deuda registrada por una venta fiado que se anuló.
+     * Si el cliente ya hizo abonos parciales, montoPagado se ajusta al nuevo
+     * montoTotal para evitar saldo negativo en pantalla.
+     */
     public void revertirDeuda(Dinero monto) {
         this.montoTotal = this.montoTotal.restar(monto);
+        if (this.montoPagado.esMayorQue(this.montoTotal)) {
+            this.montoPagado = this.montoTotal;
+        }
     }
 
     public Dinero saldoPendiente() {

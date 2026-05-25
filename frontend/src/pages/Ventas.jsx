@@ -398,14 +398,14 @@ export default function Ventas() {
                             <button
                               onClick={() => setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
                               title="Generar factura"
-                              className="text-slate-300 hover:text-amber-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center rounded"
+                              className="text-slate-300 hover:text-amber-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
                             >
                               🧾
                             </button>
                             <button
                               onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
                               title="Anular venta"
-                              className="text-slate-300 hover:text-rose-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center rounded"
+                              className="text-slate-300 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
                             >
                               🗑️
                             </button>
