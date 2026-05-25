@@ -1,6 +1,8 @@
 package com.distribuidora.huevos.infrastructure.controller;
 
 import com.distribuidora.huevos.domain.exceptions.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -12,6 +14,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RecursoNoEncontradoException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(RecursoNoEncontradoException ex) {
@@ -46,8 +50,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneric(Exception ex) {
+        log.error("[500] {} - {}", ex.getClass().getSimpleName(), ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ErrorResponse("Error interno del servidor: " + ex.getMessage()));
+                .body(new ErrorResponse("Error interno del servidor: "
+                        + ex.getClass().getSimpleName() + ": " + ex.getMessage()));
     }
 
     public static class ErrorResponse {
