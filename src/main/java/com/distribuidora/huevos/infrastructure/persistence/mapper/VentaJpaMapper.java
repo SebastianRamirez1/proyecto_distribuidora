@@ -16,12 +16,17 @@ public class VentaJpaMapper {
     }
 
     public Venta toDomain(VentaJpaEntity entity) {
+        // costoUnitario puede ser null en ventas anteriores a esta feature → Precio.cero()
+        Precio costo = entity.getCostoUnitario() != null
+                ? Precio.de(entity.getCostoUnitario())
+                : Precio.cero();
         return new Venta(
                 entity.getId(),
                 clienteJpaMapper.toDomain(entity.getCliente()),
                 entity.getTipoProducto(),
                 new Cantidad(entity.getCantidad()),
                 Precio.de(entity.getPrecioUnitario()),
+                costo,
                 entity.getTipoPago(),
                 entity.getFecha(),
                 entity.isAnulada(),
@@ -35,6 +40,7 @@ public class VentaJpaMapper {
         entity.setTipoProducto(venta.getTipoProducto());
         entity.setCantidad(venta.getCantidad().getValor());
         entity.setPrecioUnitario(venta.getPrecioUnitario().getValor());
+        entity.setCostoUnitario(venta.getCostoUnitario().getValor());
         entity.setTipoPago(venta.getTipoPago());
         entity.setFecha(venta.getFecha());
         entity.setAnulada(venta.isAnulada());

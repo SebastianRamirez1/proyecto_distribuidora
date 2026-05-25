@@ -26,6 +26,7 @@ public class RegistrarVentaService {
     private final CajaRepository cajaRepository;
     private final CreditoRepository creditoRepository;
     private final PrecioPublicoRepository precioPublicoRepository;
+    private final PrecioCostoRepository precioCostoRepository;
     private final VentaMapper ventaMapper;
 
     public RegistrarVentaService(ClienteRepository clienteRepository,
@@ -34,6 +35,7 @@ public class RegistrarVentaService {
                                  CajaRepository cajaRepository,
                                  CreditoRepository creditoRepository,
                                  PrecioPublicoRepository precioPublicoRepository,
+                                 PrecioCostoRepository precioCostoRepository,
                                  VentaMapper ventaMapper) {
         this.clienteRepository = clienteRepository;
         this.ventaRepository = ventaRepository;
@@ -41,6 +43,7 @@ public class RegistrarVentaService {
         this.cajaRepository = cajaRepository;
         this.creditoRepository = creditoRepository;
         this.precioPublicoRepository = precioPublicoRepository;
+        this.precioCostoRepository = precioCostoRepository;
         this.ventaMapper = ventaMapper;
     }
 
@@ -50,6 +53,7 @@ public class RegistrarVentaService {
                         "Cliente no encontrado con ID: " + command.getClienteId()));
 
         PrecioPublico precioPublico = precioPublicoRepository.findCurrent();
+        PrecioCosto precioCosto = precioCostoRepository.findCurrent();
         Cantidad cantidad = new Cantidad(command.getCantidad());
 
         // Si viene precioManual se aplica directamente (rebaja puntual);
@@ -59,19 +63,21 @@ public class RegistrarVentaService {
                 : cliente.calcularPrecio(command.getTipoProducto(), cantidad, precioPublico);
 
         // Guardia: precio cero indica que los precios públicos no han sido configurados.
-        // Evita registrar ventas a S/ 0.00 por error de configuración.
         if (precioUnitario.getValor().compareTo(BigDecimal.ZERO) == 0) {
             throw new PrecioInvalidoException(
                     "El precio para canastas " + command.getTipoProducto().name() +
                     " es S/ 0.00. Configura los precios en el módulo de Precios antes de registrar ventas.");
         }
 
+        // Costo de liquidación vigente al momento de la venta (puede ser 0 si no configurado)
+        Precio costoUnitario = precioCosto.obtenerCosto(command.getTipoProducto());
+
         Inventario inventario = inventarioRepository.findUnico();
         inventario.descontar(command.getTipoProducto(), cantidad);
         inventarioRepository.save(inventario);
 
         Venta venta = new Venta(null, cliente, command.getTipoProducto(), cantidad,
-                precioUnitario, command.getTipoPago(), LocalDateTime.now());
+                precioUnitario, costoUnitario, command.getTipoPago(), LocalDateTime.now());
         venta = ventaRepository.save(venta);
 
         registrarEnCaja(venta);

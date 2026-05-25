@@ -35,6 +35,7 @@ class RegistrarVentaServiceTest {
     @Mock private CajaRepository cajaRepository;
     @Mock private CreditoRepository creditoRepository;
     @Mock private PrecioPublicoRepository precioPublicoRepository;
+    @Mock private PrecioCostoRepository precioCostoRepository;
     @Mock private VentaMapper ventaMapper;
 
     @InjectMocks
@@ -44,6 +45,7 @@ class RegistrarVentaServiceTest {
     private Cliente clienteEspecial;
     private Inventario inventario;
     private PrecioPublico precioPublico;
+    private PrecioCosto precioCosto;
 
     @BeforeEach
     void setUp() {
@@ -57,6 +59,8 @@ class RegistrarVentaServiceTest {
         inventario  = new Inventario(1L, 100, 100, 100, 100);
         precioPublico = new PrecioPublico(1L,
                 Precio.de("4.00"), Precio.de("3.60"), Precio.de("3.00"), Precio.de("2.50"));
+        precioCosto = new PrecioCosto(1L,
+                Precio.cero(), Precio.cero(), Precio.cero(), Precio.cero());
     }
 
     @Test
@@ -65,13 +69,14 @@ class RegistrarVentaServiceTest {
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));
         when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
         when(inventarioRepository.findUnico()).thenReturn(inventario);
         when(inventarioRepository.save(any())).thenReturn(inventario);
         when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
         when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
 
         Venta ventaSaved = new Venta(10L, clienteNormal, TipoProducto.EXTRA,
-                new Cantidad(2), Precio.de("4.00"), TipoPago.EFECTIVO, LocalDateTime.now());
+                new Cantidad(2), Precio.de("4.00"), Precio.cero(), TipoPago.EFECTIVO, LocalDateTime.now());
         when(ventaRepository.save(any())).thenReturn(ventaSaved);
 
         VentaResponse response = new VentaResponse();
@@ -92,13 +97,14 @@ class RegistrarVentaServiceTest {
 
         when(clienteRepository.findById(2L)).thenReturn(Optional.of(clienteEspecial));
         when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
         when(inventarioRepository.findUnico()).thenReturn(inventario);
         when(inventarioRepository.save(any())).thenReturn(inventario);
         when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
         when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
 
         Venta ventaSaved = new Venta(11L, clienteEspecial, TipoProducto.EXTRA,
-                new Cantidad(2), Precio.de("3.50"), TipoPago.TRANSFERENCIA, LocalDateTime.now());
+                new Cantidad(2), Precio.de("3.50"), Precio.cero(), TipoPago.TRANSFERENCIA, LocalDateTime.now());
         when(ventaRepository.save(any())).thenReturn(ventaSaved);
 
         VentaResponse response = new VentaResponse();
@@ -128,6 +134,7 @@ class RegistrarVentaServiceTest {
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));
         when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
         when(inventarioRepository.findUnico()).thenReturn(sinStock);
 
         assertThatThrownBy(() -> service.ejecutar(command))
@@ -140,6 +147,7 @@ class RegistrarVentaServiceTest {
 
         when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));
         when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
         when(inventarioRepository.findUnico()).thenReturn(inventario);
         when(inventarioRepository.save(any())).thenReturn(inventario);
         when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
@@ -149,7 +157,7 @@ class RegistrarVentaServiceTest {
                 Credito.nuevo(clienteNormal, Dinero.de(new java.math.BigDecimal("8.00"))));
 
         Venta ventaSaved = new Venta(12L, clienteNormal, TipoProducto.EXTRA,
-                new Cantidad(2), Precio.de("4.00"), TipoPago.FIADO, LocalDateTime.now());
+                new Cantidad(2), Precio.de("4.00"), Precio.cero(), TipoPago.FIADO, LocalDateTime.now());
         when(ventaRepository.save(any())).thenReturn(ventaSaved);
         when(ventaMapper.toResponse(any())).thenReturn(new VentaResponse());
 

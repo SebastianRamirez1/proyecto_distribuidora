@@ -369,6 +369,7 @@ export default function Ventas() {
                     <th className="px-4 py-3 text-right">Cant.</th>
                     <th className="px-4 py-3 text-right">P/U</th>
                     <th className="px-4 py-3 text-right">Total</th>
+                    <th className="px-4 py-3 text-right">Ganancia</th>
                     <th className="px-4 py-3 text-left">Pago</th>
                     <th className="px-4 py-3 text-left">Hora</th>
                     <th className="px-4 py-3"></th>
@@ -376,7 +377,7 @@ export default function Ventas() {
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {ventas.length === 0 ? (
-                    <tr><td colSpan={8} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
+                    <tr><td colSpan={9} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
                   ) : ventas.map((v) => (
                     <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
                       <td className="table-cell font-medium">{v.nombreCliente}</td>
@@ -386,6 +387,9 @@ export default function Ventas() {
                       <td className="table-cell text-right">{v.cantidad}</td>
                       <td className="table-cell text-right text-slate-500">{fmt(v.precioUnitario)}</td>
                       <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
+                      <td className="table-cell text-right text-emerald-600 text-xs">
+                        {v.ganancia != null ? fmt(v.ganancia) : <span className="text-slate-300">—</span>}
+                      </td>
                       <td className="table-cell">
                         <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
                       </td>

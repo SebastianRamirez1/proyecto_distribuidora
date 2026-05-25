@@ -14,6 +14,8 @@ public class VentaResponse {
     private TipoProducto tipoProducto;
     private int cantidad;
     private BigDecimal precioUnitario;
+    private BigDecimal costoUnitario;
+    private BigDecimal ganancia;
     private BigDecimal total;
     private TipoPago tipoPago;
     private LocalDateTime fecha;
@@ -38,6 +40,12 @@ public class VentaResponse {
 
     public BigDecimal getPrecioUnitario() { return precioUnitario; }
     public void setPrecioUnitario(BigDecimal precioUnitario) { this.precioUnitario = precioUnitario; }
+
+    public BigDecimal getCostoUnitario() { return costoUnitario; }
+    public void setCostoUnitario(BigDecimal costoUnitario) { this.costoUnitario = costoUnitario; }
+
+    public BigDecimal getGanancia() { return ganancia; }
+    public void setGanancia(BigDecimal ganancia) { this.ganancia = ganancia; }
 
     public BigDecimal getTotal() { return total; }
     public void setTotal(BigDecimal total) { this.total = total; }

@@ -6,12 +6,14 @@ import com.distribuidora.huevos.domain.valueobjects.Cantidad;
 import com.distribuidora.huevos.domain.valueobjects.Dinero;
 import com.distribuidora.huevos.domain.valueobjects.Precio;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
 // Los campos de negocio son inmutables (final).
 // Solo el estado de anulación es mutable (soft delete).
 // El precioUnitario es calculado por el dominio antes de construir esta entidad.
+// El costoUnitario refleja el precio de liquidación vigente al momento de la venta.
 public final class Venta {
 
     private final Long id;
@@ -19,6 +21,7 @@ public final class Venta {
     private final TipoProducto tipoProducto;
     private final Cantidad cantidad;
     private final Precio precioUnitario;
+    private final Precio costoUnitario;
     private final TipoPago tipoPago;
     private final LocalDateTime fecha;
 
@@ -28,20 +31,22 @@ public final class Venta {
 
     /** Constructor para ventas nuevas (anulada = false por defecto). */
     public Venta(Long id, Cliente cliente, TipoProducto tipoProducto,
-                 Cantidad cantidad, Precio precioUnitario,
+                 Cantidad cantidad, Precio precioUnitario, Precio costoUnitario,
                  TipoPago tipoPago, LocalDateTime fecha) {
-        this(id, cliente, tipoProducto, cantidad, precioUnitario, tipoPago, fecha, false, null);
+        this(id, cliente, tipoProducto, cantidad, precioUnitario, costoUnitario,
+             tipoPago, fecha, false, null);
     }
 
     /** Constructor de reconstitución (usado al cargar desde BD). */
     public Venta(Long id, Cliente cliente, TipoProducto tipoProducto,
-                 Cantidad cantidad, Precio precioUnitario,
+                 Cantidad cantidad, Precio precioUnitario, Precio costoUnitario,
                  TipoPago tipoPago, LocalDateTime fecha,
                  boolean anulada, LocalDateTime fechaAnulacion) {
         Objects.requireNonNull(cliente, "El cliente de la venta no puede ser null");
         Objects.requireNonNull(tipoProducto, "El tipo de producto no puede ser null");
         Objects.requireNonNull(cantidad, "La cantidad no puede ser null");
         Objects.requireNonNull(precioUnitario, "El precio unitario no puede ser null");
+        Objects.requireNonNull(costoUnitario, "El costo unitario no puede ser null");
         Objects.requireNonNull(tipoPago, "El tipo de pago no puede ser null");
         Objects.requireNonNull(fecha, "La fecha de la venta no puede ser null");
         this.id = id;
@@ -49,6 +54,7 @@ public final class Venta {
         this.tipoProducto = tipoProducto;
         this.cantidad = cantidad;
         this.precioUnitario = precioUnitario;
+        this.costoUnitario = costoUnitario;
         this.tipoPago = tipoPago;
         this.fecha = fecha;
         this.anulada = anulada;
@@ -64,6 +70,12 @@ public final class Venta {
     public Dinero calcularTotal() {
         Precio total = precioUnitario.multiplicar(cantidad.getValor());
         return Dinero.de(total.getValor());
+    }
+
+    /** Ganancia neta = (precioVenta - costoLiquidacion) × cantidad. Puede ser negativa. */
+    public Dinero calcularGanancia() {
+        BigDecimal gananciaUnitaria = precioUnitario.getValor().subtract(costoUnitario.getValor());
+        return Dinero.de(gananciaUnitaria.multiply(BigDecimal.valueOf(cantidad.getValor())));
     }
 
     public Long getId() {
@@ -84,6 +96,10 @@ public final class Venta {
 
     public Precio getPrecioUnitario() {
         return precioUnitario;
+    }
+
+    public Precio getCostoUnitario() {
+        return costoUnitario;
     }
 
     public TipoPago getTipoPago() {

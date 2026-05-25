@@ -125,6 +125,9 @@ export default function Reportes() {
               <CajaRow icon="💳" label="Abonos recibidos"  value={caja?.totalAbonos} />
               <CajaRow icon="📋" label="Fiado (pendiente)" value={caja?.totalFiado} />
               <CajaRow icon="🏦" label="Total cobrado"     value={caja?.totalCobrado} highlight />
+              {caja?.totalGanancia != null && Number(caja.totalGanancia) > 0 && (
+                <CajaRow icon="📈" label="Ganancia neta"   value={caja.totalGanancia} />
+              )}
             </Card>
           </div>
 
@@ -203,13 +206,14 @@ export default function Reportes() {
                     <th className="px-4 py-3 text-right">Cant.</th>
                     <th className="px-4 py-3 text-right">P/U</th>
                     <th className="px-4 py-3 text-right">Total</th>
+                    <th className="px-4 py-3 text-right">Ganancia</th>
                     <th className="px-4 py-3 text-left">Pago</th>
                     <th className="px-4 py-3 text-left">Hora</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {ventas.length === 0 ? (
-                    <tr><td colSpan={8} className="text-center text-slate-400 py-8">No hay ventas registradas este día</td></tr>
+                    <tr><td colSpan={9} className="text-center text-slate-400 py-8">No hay ventas registradas este día</td></tr>
                   ) : ventas.map((v, i) => (
                     <tr key={v.id} className="hover:bg-slate-50">
                       <td className="table-cell text-slate-400">{i + 1}</td>
@@ -220,6 +224,9 @@ export default function Reportes() {
                       <td className="table-cell text-right">{v.cantidad}</td>
                       <td className="table-cell text-right">{fmt(v.precioUnitario)}</td>
                       <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
+                      <td className="table-cell text-right text-emerald-600 text-xs">
+                        {v.ganancia != null ? fmt(v.ganancia) : <span className="text-slate-300">—</span>}
+                      </td>
                       <td className="table-cell">
                         <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
                       </td>
@@ -237,6 +244,11 @@ export default function Reportes() {
                       <td></td>
                       <td className="px-4 py-3 text-right text-amber-600">
                         {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
+                      </td>
+                      <td className="px-4 py-3 text-right text-emerald-600 text-xs">
+                        {ventas.some(v => v.ganancia != null)
+                          ? fmt(ventas.filter(v => v.ganancia != null).reduce((a, v) => a + Number(v.ganancia), 0))
+                          : <span className="text-slate-300">—</span>}
                       </td>
                       <td colSpan={2}></td>
                     </tr>

@@ -3,6 +3,7 @@ package com.distribuidora.huevos.application.service;
 import com.distribuidora.huevos.application.dto.response.ReporteCajaResponse;
 import com.distribuidora.huevos.domain.entities.Caja;
 import com.distribuidora.huevos.domain.repositories.CajaRepository;
+import com.distribuidora.huevos.domain.repositories.VentaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,18 +15,22 @@ import java.time.LocalDate;
 public class GenerarReporteCajaService {
 
     private final CajaRepository cajaRepository;
+    private final VentaRepository ventaRepository;
 
-    public GenerarReporteCajaService(CajaRepository cajaRepository) {
+    public GenerarReporteCajaService(CajaRepository cajaRepository,
+                                     VentaRepository ventaRepository) {
         this.cajaRepository = cajaRepository;
+        this.ventaRepository = ventaRepository;
     }
 
     public ReporteCajaResponse ejecutar(LocalDate fecha) {
+        BigDecimal ganancia = ventaRepository.calcularGananciaPorFecha(fecha);
         return cajaRepository.findByFecha(fecha)
-                .map(this::toResponse)
+                .map(caja -> toResponse(caja, ganancia))
                 .orElse(cajaVacia(fecha));
     }
 
-    private ReporteCajaResponse toResponse(Caja caja) {
+    private ReporteCajaResponse toResponse(Caja caja, BigDecimal totalGanancia) {
         ReporteCajaResponse response = new ReporteCajaResponse();
         response.setFecha(caja.getFecha());
         response.setTotalEfectivo(caja.getTotalEfectivo().getValor());
@@ -33,6 +38,7 @@ public class GenerarReporteCajaService {
         response.setTotalFiado(caja.getTotalFiado().getValor());
         response.setTotalAbonos(caja.getTotalAbonos().getValor());
         response.setTotalCobrado(caja.calcularTotalCobrado().getValor());
+        response.setTotalGanancia(totalGanancia);
         return response;
     }
 
@@ -44,6 +50,7 @@ public class GenerarReporteCajaService {
         response.setTotalFiado(BigDecimal.ZERO);
         response.setTotalAbonos(BigDecimal.ZERO);
         response.setTotalCobrado(BigDecimal.ZERO);
+        response.setTotalGanancia(BigDecimal.ZERO);
         return response;
     }
 }

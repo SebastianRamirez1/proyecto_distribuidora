@@ -5,20 +5,32 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface VentaJpaRepository extends JpaRepository<VentaJpaEntity, Long> {
 
-    // DECISIÓN: se usa between para que funcione en PostgreSQL y H2 sin depender del CAST
-    // Se excluyen ventas anuladas (soft delete)
     @Query("SELECT v FROM VentaJpaEntity v WHERE v.fecha >= :inicio AND v.fecha < :fin AND v.anulada = false")
     List<VentaJpaEntity> findByFechaRange(
-            @Param("inicio") java.time.LocalDateTime inicio,
-            @Param("fin") java.time.LocalDateTime fin);
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin);
 
-    // Método de conveniencia usado por el repositorio
+    // Solo ventas con costo configurado (> 0) para no inflar la ganancia con ventas sin costo
+    @Query("SELECT COALESCE(SUM((v.precioUnitario - v.costoUnitario) * v.cantidad), 0) " +
+           "FROM VentaJpaEntity v " +
+           "WHERE v.fecha >= :inicio AND v.fecha < :fin " +
+           "AND v.anulada = false AND v.costoUnitario IS NOT NULL AND v.costoUnitario > 0")
+    BigDecimal calcularGananciaByFechaRange(
+            @Param("inicio") LocalDateTime inicio,
+            @Param("fin") LocalDateTime fin);
+
     default List<VentaJpaEntity> findByFecha(LocalDate fecha) {
         return findByFechaRange(fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay());
+    }
+
+    default BigDecimal calcularGananciaPorFecha(LocalDate fecha) {
+        return calcularGananciaByFechaRange(fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay());
     }
 }

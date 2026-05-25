@@ -168,11 +168,11 @@ class AnularVentaServiceTest {
 
     private Venta ventaEfectivo(Long id, TipoProducto tipo, int cantidad, String precio) {
         return new Venta(id, cliente, tipo, new Cantidad(cantidad),
-                Precio.de(precio), TipoPago.EFECTIVO, LocalDateTime.now());
+                Precio.de(precio), Precio.cero(), TipoPago.EFECTIVO, LocalDateTime.now());
     }
 
     private Venta ventaFiado(Long id, TipoProducto tipo, int cantidad, String precio) {
         return new Venta(id, cliente, tipo, new Cantidad(cantidad),
-                Precio.de(precio), TipoPago.FIADO, LocalDateTime.now());
+                Precio.de(precio), Precio.cero(), TipoPago.FIADO, LocalDateTime.now());
     }
 }
