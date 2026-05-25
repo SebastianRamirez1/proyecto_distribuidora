@@ -12,6 +12,7 @@ import com.distribuidora.huevos.domain.repositories.ConfiguracionFacturaReposito
 import com.distribuidora.huevos.domain.repositories.FacturaRepository;
 import com.distribuidora.huevos.infrastructure.pdf.FacturaPdfGenerator;
 import jakarta.validation.Valid;
+import org.springframework.http.ContentDisposition;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -87,8 +88,10 @@ public class FacturaController {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_PDF);
-        headers.setContentDispositionFormData("attachment",
-                "factura-" + factura.getNumero() + ".pdf");
+        headers.setContentDisposition(
+                ContentDisposition.attachment()
+                        .filename("factura-" + factura.getNumero() + ".pdf")
+                        .build());
         headers.setContentLength(pdf.length);
 
         return ResponseEntity.ok().headers(headers).body(pdf);

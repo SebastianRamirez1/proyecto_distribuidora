@@ -17,18 +17,17 @@ public class ConfiguracionFacturaRepositoryImpl implements ConfiguracionFacturaR
 
     @Override
     public ConfiguracionFactura findUnica() {
-        // Usa lock pesimista solo si estamos en una transacción activa (al generar factura)
         ConfiguracionFacturaJpaEntity e = jpa.findFirst()
                 .orElseThrow(() -> new IllegalStateException(
-                        "No existe configuración de factura. Revisa el schema.sql."));
+                        "No existe configuración de factura. Configúrala desde la sección Facturas."));
         return toDomain(e);
     }
 
-    /** Versión con lock pesimista para uso en GenerarFacturaService. */
-    public ConfiguracionFactura findUnicaParaFacturar() {
+    @Override
+    public ConfiguracionFactura findUnicaParaActualizar() {
         ConfiguracionFacturaJpaEntity e = jpa.findFirstForUpdate()
                 .orElseThrow(() -> new IllegalStateException(
-                        "No existe configuración de factura. Revisa el schema.sql."));
+                        "No existe configuración de factura. Configúrala desde la sección Facturas."));
         return toDomain(e);
     }
 

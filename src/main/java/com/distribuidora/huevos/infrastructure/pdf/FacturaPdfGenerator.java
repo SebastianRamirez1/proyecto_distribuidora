@@ -27,8 +27,8 @@ public class FacturaPdfGenerator {
             DateTimeFormatter.ofPattern("dd/MM/yyyy", new Locale("es", "CO"));
 
     public byte[] generar(Factura factura, ConfiguracionFactura cfg) {
-        String html = construirHtml(factura, cfg);
         try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            String html = construirHtml(factura, cfg);   // dentro del try: cualquier excepción queda capturada
             PdfRendererBuilder builder = new PdfRendererBuilder();
             builder.useFastMode();
             builder.withHtmlContent(html, null);

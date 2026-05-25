@@ -506,7 +506,7 @@ export default function Ventas() {
                   try {
                     await descargarPdfFactura(facturaGenerada.id, facturaGenerada.numero)
                   } catch (e) {
-                    setError('Error al descargar el PDF')
+                    setError('Error al descargar PDF: ' + (e.message || 'Error desconocido'))
                   }
                 }}
                 className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
