@@ -211,7 +211,6 @@ export default function Ventas() {
                   <option value="EFECTIVO">💵 Efectivo</option>
                   <option value="TRANSFERENCIA">📲 Transferencia</option>
                   <option value="FIADO">📋 Fiado</option>
-                  <option value="ABONO">💳 Abono a deuda</option>
                 </Select>
 
                 {/* Precio manual — rebaja puntual */}
