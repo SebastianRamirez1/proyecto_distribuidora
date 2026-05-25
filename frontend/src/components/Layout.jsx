@@ -28,8 +28,8 @@ export default function Layout() {
         </button>
         <span className="text-2xl">🥚</span>
         <div>
-          <p className="text-white font-bold text-sm leading-tight">Distribuidora</p>
-          <p className="text-amber-400 font-semibold text-xs">de Huevos</p>
+          <p className="text-white font-bold text-sm leading-tight">La Golondrina</p>
+          <p className="text-amber-400 font-semibold text-xs">Dist. de Huevos</p>
         </div>
       </div>
 

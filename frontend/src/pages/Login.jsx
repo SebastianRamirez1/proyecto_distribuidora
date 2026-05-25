@@ -38,8 +38,8 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-2xl shadow-lg mb-4">
             <span className="text-4xl">🥚</span>
           </div>
-          <h1 className="text-2xl font-bold text-white">Distribuidora</h1>
-          <p className="text-amber-400 font-semibold text-sm">de Huevos</p>
+          <h1 className="text-2xl font-bold text-white">La Golondrina</h1>
+          <p className="text-amber-400 font-semibold text-sm">Distribuidora de Huevos</p>
         </div>
 
         {/* Card */}
@@ -94,7 +94,7 @@ export default function Login() {
         </div>
 
         <p className="text-center text-slate-500 text-xs mt-6">
-          © 2025 Distribuidora de Huevos
+          © 2026 Distribuidora de Huevos La Golondrina
         </p>
       </div>
     </div>

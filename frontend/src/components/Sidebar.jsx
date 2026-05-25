@@ -47,8 +47,8 @@ export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {
         }`}>
           <span className="text-3xl flex-shrink-0">🥚</span>
           <div className={`${collapsed ? 'lg:hidden' : ''}`}>
-            <p className="text-white font-bold text-sm leading-tight">Distribuidora</p>
-            <p className="text-amber-400 font-semibold text-xs">de Huevos</p>
+            <p className="text-white font-bold text-sm leading-tight">La Golondrina</p>
+            <p className="text-amber-400 font-semibold text-xs">Dist. de Huevos</p>
           </div>
           {/* Botón cerrar — solo móvil */}
           <button
