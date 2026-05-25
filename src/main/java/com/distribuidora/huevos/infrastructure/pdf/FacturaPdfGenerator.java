@@ -225,7 +225,7 @@ public class FacturaPdfGenerator {
                       <td style="text-align:right;">$ %s</td>
                     </tr>
                   </table>
-                  <div class="iva-nota">* Excluido de IVA &mdash; Art. 424 E.T. (canasta familiar)</div>
+                  <div class="iva-nota">* Excluido de IVA &#8212; Art. 424 E.T. (canasta familiar)</div>
 
                   <!-- Forma de pago -->
                   <div class="pago-box">
@@ -235,8 +235,8 @@ public class FacturaPdfGenerator {
                   <!-- Footer -->
                   <div class="footer">
                     <p>Esta factura es un documento equivalente segun la normatividad tributaria colombiana.</p>
-                    <p>Conserve esta factura como soporte contable &mdash; Res. 042/2020 DIAN.</p>
-                    <p style="margin-top:5pt; font-size:7pt;">%s &mdash; %s</p>
+                    <p>Conserve esta factura como soporte contable &#8212; Res. 042/2020 DIAN.</p>
+                    <p style="margin-top:5pt; font-size:7pt;">%s &#8212; %s</p>
                   </div>
 
                 </div>
