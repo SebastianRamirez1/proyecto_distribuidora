@@ -47,8 +47,8 @@ public class GenerarFacturaService {
             throw new IllegalStateException("No se puede facturar una venta anulada.");
         }
 
-        // 3. Obtener y actualizar el consecutivo de forma atómica
-        ConfiguracionFactura cfg = configRepo.findUnica();
+        // 3. Obtener y actualizar el consecutivo con lock pesimista (evita duplicados en concurrencia)
+        ConfiguracionFactura cfg = configRepo.findUnicaParaActualizar();
         String numero = cfg.generarYAvanzarConsecutivo();
         configRepo.save(cfg);
 
