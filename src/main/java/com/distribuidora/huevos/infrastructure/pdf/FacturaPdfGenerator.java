@@ -47,9 +47,9 @@ public class FacturaPdfGenerator {
         BigDecimal subtotal = f.getTotal();  // Huevos: excluidos de IVA
 
         String resolucionInfo = cfg.getResolucionNumero() != null && !cfg.getResolucionNumero().isBlank()
-                ? String.format("Resolución DIAN N° %s del %s — Del %05d al %05d",
+                ? String.format("Resolución DIAN No. %s del %s - Del %05d al %05d",
                     cfg.getResolucionNumero(),
-                    cfg.getResolucionFecha() != null ? cfg.getResolucionFecha().format(FECHA_CORTA) : "—",
+                    cfg.getResolucionFecha() != null ? cfg.getResolucionFecha().format(FECHA_CORTA) : "-",
                     cfg.getResolucionDesde(),
                     cfg.getResolucionHasta())
                 : "Resolución DIAN: pendiente de trámite";
@@ -145,7 +145,7 @@ public class FacturaPdfGenerator {
                     <div class="empresa">
                       <h1>%s</h1>
                       <p>NIT: %s</p>
-                      <p>%s — %s</p>
+                      <p>%s, %s</p>
                       <p>Tel: %s</p>
                       <p style="margin-top:4px;">%s</p>
                     </div>
@@ -157,7 +157,7 @@ public class FacturaPdfGenerator {
                   </div>
 
                   <!-- Resolución DIAN -->
-                  <div class="resolucion">📋 %s</div>
+                  <div class="resolucion">%s</div>
 
                   <!-- Emisor / Receptor -->
                   <div class="partes">
@@ -209,7 +209,7 @@ public class FacturaPdfGenerator {
                       <span>TOTAL</span>
                       <span>$ %s</span>
                     </div>
-                    <p class="iva-nota">* Excluido de IVA — Art. 424 E.T. (canasta familiar)</p>
+                    <p class="iva-nota">* Excluido de IVA &mdash; Art. 424 E.T. (canasta familiar)</p>
                   </div>
 
                   <!-- Forma de pago -->
@@ -220,8 +220,8 @@ public class FacturaPdfGenerator {
                   <!-- Footer -->
                   <div class="footer">
                     <p>Esta factura es un documento equivalente según la normatividad tributaria colombiana.</p>
-                    <p>Conserve esta factura como soporte contable — Res. 042/2020 DIAN.</p>
-                    <p style="margin-top:6px; font-size:8px;">%s — %s</p>
+                    <p>Conserve esta factura como soporte contable &mdash; Res. 042/2020 DIAN.</p>
+                    <p style="margin-top:6px; font-size:8px;">%s &mdash; %s</p>
                   </div>
 
                 </div>
@@ -264,7 +264,7 @@ public class FacturaPdfGenerator {
     }
 
     private String esc(String s) {
-        if (s == null || s.isBlank()) return "—";
+        if (s == null || s.isBlank()) return "-";
         return s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
     }
 }
