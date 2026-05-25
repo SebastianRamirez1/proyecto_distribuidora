@@ -9,6 +9,7 @@ const links = [
   { to: '/precios',    label: 'Precios',     icon: '💰' },
   { to: '/deudores',   label: 'Deudores',    icon: '🏦' },
   { to: '/reportes',   label: 'Reportes',    icon: '📈' },
+  { to: '/facturas',   label: 'Facturas',    icon: '🧾' },
 ]
 
 export default function Sidebar({ collapsed, onToggle, mobileOpen, onClose }) {

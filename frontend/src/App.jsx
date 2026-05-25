@@ -9,6 +9,7 @@ import Inventario from './pages/Inventario'
 import Precios from './pages/Precios'
 import Reportes from './pages/Reportes'
 import Deudores from './pages/Deudores'
+import Facturas from './pages/Facturas'
 
 function RutaProtegida({ children }) {
   const { estaAutenticado } = useAuth()
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="precios"    element={<Precios />} />
             <Route path="deudores"   element={<Deudores />} />
             <Route path="reportes"   element={<Reportes />} />
+            <Route path="facturas"   element={<Facturas />} />
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { ventasPorFecha, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
 import { listarClientes } from '../api/clientesApi'
+import { generarFactura, descargarPdfFactura } from '../api/facturasApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Select from '../components/ui/Select'
@@ -30,7 +31,11 @@ export default function Ventas() {
   const [tab, setTab] = useState('venta') // 'venta' | 'abono'
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
   const [anulando, setAnulando] = useState(false)
-  const [ventaAAnular, setVentaAAnular] = useState(null) // { id, nombreCliente, total }
+  const [ventaAAnular, setVentaAAnular]   = useState(null)  // { id, nombreCliente, total }
+  const [ventaAFacturar, setVentaAFacturar] = useState(null) // { id, nombreCliente, total }
+  const [facturaForm, setFacturaForm]     = useState({ nitCliente: '', tipo: 'MANUAL' })
+  const [generandoFactura, setGenerandoFactura] = useState(false)
+  const [facturaGenerada, setFacturaGenerada]   = useState(null) // { id, numero }
   const [fechaSeleccionada, setFechaSeleccionada] = useState(
     new Date().toISOString().split('T')[0]  // hoy en formato YYYY-MM-DD
   )
@@ -139,6 +144,33 @@ export default function Ventas() {
     } finally {
       setAnulando(false)
     }
+  }
+
+  const handleFacturar = async (e) => {
+    e.preventDefault()
+    if (!ventaAFacturar) return
+    setGenerandoFactura(true)
+    setError('')
+    try {
+      const result = await generarFactura({
+        ventaId:    ventaAFacturar.id,
+        nitCliente: facturaForm.nitCliente || null,
+        tipo:       facturaForm.tipo,
+      })
+      setFacturaGenerada({ id: result.id, numero: result.numero })
+    } catch (e) {
+      setError(e.response?.data?.mensaje || e.message)
+      setVentaAFacturar(null)
+      setFacturaGenerada(null)
+    } finally {
+      setGenerandoFactura(false)
+    }
+  }
+
+  const cerrarModalFactura = () => {
+    setVentaAFacturar(null)
+    setFacturaGenerada(null)
+    setFacturaForm({ nitCliente: '', tipo: 'MANUAL' })
   }
 
   const totalDia = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
@@ -362,13 +394,22 @@ export default function Ventas() {
                       </td>
                       <td className="table-cell">
                         {!v.anulada && (
-                          <button
-                            onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
-                            title="Anular venta"
-                            className="text-slate-300 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
-                          >
-                            🗑️
-                          </button>
+                          <div className="flex items-center gap-1">
+                            <button
+                              onClick={() => setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
+                              title="Generar factura"
+                              className="text-slate-300 hover:text-amber-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center rounded"
+                            >
+                              🧾
+                            </button>
+                            <button
+                              onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
+                              title="Anular venta"
+                              className="text-slate-300 hover:text-rose-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center rounded"
+                            >
+                              🗑️
+                            </button>
+                          </div>
                         )}
                       </td>
                     </tr>
@@ -379,6 +420,103 @@ export default function Ventas() {
           )}
         </div>
       </div>
+
+      {/* Modal generar factura */}
+      {ventaAFacturar && !facturaGenerada && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">🧾</span>
+              <h3 className="text-lg font-bold text-slate-800">Generar factura</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-1">
+              Cliente: <span className="font-semibold">{ventaAFacturar.nombreCliente}</span>
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              Total: <span className="font-semibold text-amber-600">{fmt(ventaAFacturar.total)}</span>
+            </p>
+            <form onSubmit={handleFacturar} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  NIT / CC del comprador <span className="text-slate-400">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder="Ej: 900123456-1"
+                  value={facturaForm.nitCliente}
+                  onChange={e => setFacturaForm(p => ({ ...p, nitCliente: e.target.value }))}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">Tipo de factura</label>
+                <select
+                  value={facturaForm.tipo}
+                  onChange={e => setFacturaForm(p => ({ ...p, tipo: e.target.value }))}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                >
+                  <option value="MANUAL">📄 Factura de venta (manual)</option>
+                  <option value="ELECTRONICA">💻 Factura electrónica (DIAN)</option>
+                </select>
+                {facturaForm.tipo === 'ELECTRONICA' && (
+                  <p className="text-xs text-blue-600 mt-1">
+                    ℹ️ Se genera el PDF. La transmisión a la DIAN requiere un PTH habilitado.
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-3 pt-1">
+                <button
+                  type="button"
+                  onClick={cerrarModalFactura}
+                  disabled={generandoFactura}
+                  className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={generandoFactura}
+                  className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors disabled:opacity-60"
+                >
+                  {generandoFactura ? 'Generando…' : 'Generar factura'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal factura generada — descargar PDF */}
+      {facturaGenerada && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
+            <div className="text-4xl mb-3">✅</div>
+            <h3 className="text-lg font-bold text-slate-800 mb-1">¡Factura generada!</h3>
+            <p className="text-sm text-slate-500 mb-1">Número de factura:</p>
+            <p className="text-xl font-bold text-amber-600 mb-5">{facturaGenerada.numero}</p>
+            <div className="flex gap-3">
+              <button
+                onClick={cerrarModalFactura}
+                className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Cerrar
+              </button>
+              <button
+                onClick={async () => {
+                  try {
+                    await descargarPdfFactura(facturaGenerada.id, facturaGenerada.numero)
+                  } catch (e) {
+                    setError('Error al descargar el PDF')
+                  }
+                }}
+                className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
+              >
+                📥 Descargar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal confirmación de anulación */}
       {ventaAAnular && (

@@ -98,6 +98,39 @@ UPDATE ventas SET tipo_producto = 'A' WHERE tipo_producto = 'NORMAL';
 ALTER TABLE ventas ADD COLUMN IF NOT EXISTS anulada         BOOLEAN   NOT NULL DEFAULT FALSE;
 ALTER TABLE ventas ADD COLUMN IF NOT EXISTS fecha_anulacion TIMESTAMP;
 
+CREATE TABLE IF NOT EXISTS configuracion_factura (
+    id                 BIGSERIAL    PRIMARY KEY,
+    razon_social       VARCHAR(200) NOT NULL DEFAULT '',
+    nit                VARCHAR(20)  NOT NULL DEFAULT '',
+    direccion          VARCHAR(200) NOT NULL DEFAULT '',
+    ciudad             VARCHAR(100) NOT NULL DEFAULT '',
+    telefono           VARCHAR(50)  NOT NULL DEFAULT '',
+    regimen            VARCHAR(150) NOT NULL DEFAULT 'No responsable de IVA',
+    resolucion_numero  VARCHAR(50)  NOT NULL DEFAULT '',
+    resolucion_fecha   DATE,
+    resolucion_prefijo VARCHAR(10)  NOT NULL DEFAULT 'FAC',
+    resolucion_desde   INTEGER      NOT NULL DEFAULT 1,
+    resolucion_hasta   INTEGER      NOT NULL DEFAULT 9999,
+    consecutivo_actual INTEGER      NOT NULL DEFAULT 1
+);
+
+CREATE TABLE IF NOT EXISTS facturas (
+    id              BIGSERIAL     PRIMARY KEY,
+    numero          VARCHAR(20)   NOT NULL UNIQUE,
+    venta_id        BIGINT        REFERENCES ventas(id),
+    cliente_id      BIGINT        NOT NULL REFERENCES clientes(id),
+    fecha_emision   TIMESTAMP     NOT NULL DEFAULT NOW(),
+    tipo            VARCHAR(20)   NOT NULL DEFAULT 'MANUAL',
+    estado          VARCHAR(20)   NOT NULL DEFAULT 'EMITIDA',
+    nombre_cliente  VARCHAR(200)  NOT NULL,
+    nit_cliente     VARCHAR(30)   NOT NULL DEFAULT 'Sin NIT',
+    tipo_producto   VARCHAR(20)   NOT NULL,
+    cantidad        INTEGER       NOT NULL,
+    precio_unitario DECIMAL(12,2) NOT NULL,
+    total           DECIMAL(12,2) NOT NULL,
+    tipo_pago       VARCHAR(20)   NOT NULL
+);
+
 -- ============================================================
 -- Datos iniciales (idempotentes)
 -- ============================================================
@@ -119,3 +152,11 @@ WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
 -- ============================================================
 DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
 DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);
+
+-- Fila única de configuracion_factura
+INSERT INTO configuracion_factura (razon_social, nit, direccion, ciudad, telefono, regimen,
+    resolucion_numero, resolucion_prefijo, resolucion_desde, resolucion_hasta, consecutivo_actual)
+SELECT '', '', '', '', '', 'No responsable de IVA', '', 'FAC', 1, 9999, 1
+WHERE NOT EXISTS (SELECT 1 FROM configuracion_factura);
+
+DELETE FROM configuracion_factura WHERE id NOT IN (SELECT MIN(id) FROM configuracion_factura);
