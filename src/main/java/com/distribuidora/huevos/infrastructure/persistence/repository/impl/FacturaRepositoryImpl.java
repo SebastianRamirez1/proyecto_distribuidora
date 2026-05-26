@@ -43,6 +43,11 @@ public class FacturaRepositoryImpl implements FacturaRepository {
         return jpa.findByClienteIdOrderByFechaDesc(clienteId).stream().map(this::toDomain).toList();
     }
 
+    @Override
+    public void deleteByClienteId(Long clienteId) {
+        jpa.deleteByClienteId(clienteId);
+    }
+
     // ── Mappers ───────────────────────────────────────────────────────────────
 
     private FacturaJpaEntity toEntity(Factura f) {

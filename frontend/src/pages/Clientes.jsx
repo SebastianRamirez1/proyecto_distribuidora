@@ -366,10 +366,7 @@ export default function Clientes() {
       <Modal isOpen={modalEliminar} onClose={() => setModalEliminar(false)} title="Eliminar cliente">
         <p className="text-slate-600 mb-4">
           ¿Estás seguro de que deseas eliminar al cliente <span className="font-semibold">{selectedCliente?.nombre}</span>?
-          Esta acción no se puede deshacer.
-        </p>
-        <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 text-sm mb-4">
-          Solo se pueden eliminar clientes sin ventas registradas.
+          Se eliminarán también todas sus ventas, facturas, abonos y crédito. Esta acción no se puede deshacer.
         </p>
         <div className="flex gap-3 justify-end">
           <Button type="button" variant="secondary" onClick={() => setModalEliminar(false)}>Cancelar</Button>

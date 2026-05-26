@@ -49,4 +49,9 @@ public class VentaRepositoryImpl implements VentaRepository {
     public boolean existsByClienteId(Long clienteId) {
         return jpaRepository.existsByClienteId(clienteId);
     }
+
+    @Override
+    public void deleteByClienteId(Long clienteId) {
+        jpaRepository.deleteByClienteId(clienteId);
+    }
 }

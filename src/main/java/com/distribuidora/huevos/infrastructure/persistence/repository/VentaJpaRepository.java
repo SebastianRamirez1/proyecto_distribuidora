@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import jakarta.transaction.Transactional;
+import org.springframework.data.jpa.repository.Modifying;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -35,4 +37,9 @@ public interface VentaJpaRepository extends JpaRepository<VentaJpaEntity, Long> 
     }
 
     boolean existsByClienteId(Long clienteId);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM VentaJpaEntity v WHERE v.cliente.id = :clienteId")
+    void deleteByClienteId(@Param("clienteId") Long clienteId);
 }
