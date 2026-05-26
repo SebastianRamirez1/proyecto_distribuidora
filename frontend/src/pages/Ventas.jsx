@@ -9,7 +9,7 @@ import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
-import { fmt } from '../utils/fmt'
+import { fmt, parsePrecio } from '../utils/fmt'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
 const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
@@ -89,7 +89,7 @@ export default function Ventas() {
         tipoPago:     formVenta.tipoPago,
       }
       if (mostrarPrecioManual && formVenta.precioManual !== '') {
-        payload.precioManual = Number(formVenta.precioManual)
+        payload.precioManual = parsePrecio(formVenta.precioManual)
       }
       await registrarVenta(payload)
       setFormVenta(initVenta)
@@ -361,6 +361,7 @@ export default function Ventas() {
           </div>
           {loading ? <Spinner /> : (
             <Card className="p-0 overflow-hidden">
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead>
                   <tr className="table-head">
@@ -425,6 +426,7 @@ export default function Ventas() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </Card>
           )}
         </div>
