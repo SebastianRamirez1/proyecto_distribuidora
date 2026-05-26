@@ -141,6 +141,45 @@ class AnularVentaServiceTest {
         verify(creditoRepository, never()).save(any());
     }
 
+    // ── público general (cliente null) ───────────────────────────────────────
+
+    @Test
+    void anularVentaPublicoGeneralNoTocaCreditos() {
+        // Venta al público general: cliente es null → no existe crédito que revertir
+        Venta venta = new Venta(5L, null, TipoProducto.EXTRA,
+                new Cantidad(2), Precio.de("4.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+
+        when(ventaRepository.findById(5L)).thenReturn(Optional.of(venta));
+        when(inventarioRepository.findUnico()).thenReturn(inventario);
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+
+        service.ejecutar(5L);
+
+        // Al no haber cliente no debe intentarse acceder al repositorio de créditos
+        verify(creditoRepository, never()).findByClienteId(any());
+        verify(creditoRepository, never()).save(any());
+    }
+
+    @Test
+    void anularVentaPublicoGeneralRestauraStockCorrectamente() {
+        Venta venta = new Venta(6L, null, TipoProducto.AA,
+                new Cantidad(4), Precio.de("3.60"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+
+        when(ventaRepository.findById(6L)).thenReturn(Optional.of(venta));
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+
+        ArgumentCaptor<Inventario> invCaptor = ArgumentCaptor.forClass(Inventario.class);
+        when(inventarioRepository.findUnico()).thenReturn(inventario);  // stockAA = 10
+        when(inventarioRepository.save(invCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.ejecutar(6L);
+
+        // 10 AA + 4 revertidas = 14
+        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(14);
+    }
+
     // ── error paths ───────────────────────────────────────────────────────────
 
     @Test

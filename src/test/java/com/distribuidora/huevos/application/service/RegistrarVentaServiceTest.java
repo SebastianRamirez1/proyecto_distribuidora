@@ -166,6 +166,81 @@ class RegistrarVentaServiceTest {
         verify(creditoRepository).save(any());
     }
 
+    // ── público general (clienteId null) ─────────────────────────────────────
+
+    @Test
+    void ventaPublicoGeneralUsaPrecioPublico() {
+        // clienteId null → no se busca cliente en repo, se usa precioPublico directamente
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.EXTRA, 3, TipoPago.EFECTIVO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario);
+        when(inventarioRepository.save(any())).thenReturn(inventario);
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        Venta ventaSaved = new Venta(13L, null, TipoProducto.EXTRA,
+                new Cantidad(3), Precio.de("4.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+        when(ventaRepository.save(any())).thenReturn(ventaSaved);
+
+        VentaResponse response = new VentaResponse();
+        response.setId(13L);
+        response.setPrecioUnitario(new java.math.BigDecimal("4.00"));
+        when(ventaMapper.toResponse(any())).thenReturn(response);
+
+        VentaResponse resultado = service.ejecutar(command);
+
+        // Nunca debió consultarse el repositorio de clientes
+        verify(clienteRepository, never()).findById(any());
+        assertThat(resultado.getPrecioUnitario()).isEqualByComparingTo("4.00");
+    }
+
+    @Test
+    void ventaPublicoGeneralConFiadoLanzaOperacionNoPermitida() {
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.EXTRA, 1, TipoPago.FIADO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+
+        assertThatThrownBy(() -> service.ejecutar(command))
+                .isInstanceOf(com.distribuidora.huevos.domain.exceptions.OperacionNoPermitidaException.class)
+                .hasMessageContaining("fiado");
+    }
+
+    // ── precio manual (rebaja puntual) ────────────────────────────────────────
+
+    @Test
+    void ventaConPrecioManualIgnoraCalculoDeCliente() {
+        // precioManual = 3.00, pero el precio público de EXTRA es 4.00
+        // y el cliente es NORMAL → sin rebaja debería pagar 4.00; con rebaja paga 3.00.
+        RegistrarVentaCommand command = crearCommand(1L, TipoProducto.EXTRA, 2, TipoPago.EFECTIVO);
+        command.setPrecioManual(new java.math.BigDecimal("3.00"));
+
+        when(clienteRepository.findById(1L)).thenReturn(Optional.of(clienteNormal));
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario);
+        when(inventarioRepository.save(any())).thenReturn(inventario);
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        Venta ventaSaved = new Venta(14L, clienteNormal, TipoProducto.EXTRA,
+                new Cantidad(2), Precio.de("3.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+        when(ventaRepository.save(any())).thenReturn(ventaSaved);
+
+        VentaResponse response = new VentaResponse();
+        response.setId(14L);
+        response.setPrecioUnitario(new java.math.BigDecimal("3.00"));
+        when(ventaMapper.toResponse(any())).thenReturn(response);
+
+        VentaResponse resultado = service.ejecutar(command);
+
+        assertThat(resultado.getPrecioUnitario()).isEqualByComparingTo("3.00");
+    }
+
     @Test
     void ventaConPrecioPublicoCeroLanzaExcepcion() {
         // precio_publico recién inicializado — todos los tipos en S/ 0.00
