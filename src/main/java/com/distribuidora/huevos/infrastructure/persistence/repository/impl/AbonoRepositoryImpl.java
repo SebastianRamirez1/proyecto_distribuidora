@@ -33,6 +33,11 @@ public class AbonoRepositoryImpl implements AbonoRepository {
                 .toList();
     }
 
+    @Override
+    public void deleteByClienteId(Long clienteId) {
+        jpaRepository.deleteByClienteId(clienteId);
+    }
+
     // ── mappers privados ──────────────────────────────────────────────────────
 
     private AbonoJpaEntity toEntity(Abono a) {

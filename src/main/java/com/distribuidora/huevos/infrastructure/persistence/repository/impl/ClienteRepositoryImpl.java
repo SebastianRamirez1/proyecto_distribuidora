@@ -37,4 +37,9 @@ public class ClienteRepositoryImpl implements ClienteRepository {
                 .map(mapper::toDomain)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteById(Long id) {
+        jpaRepository.deleteById(id);
+    }
 }

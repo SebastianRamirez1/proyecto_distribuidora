@@ -12,4 +12,6 @@ public interface ClienteRepository {
     Optional<Cliente> findById(Long id);
 
     List<Cliente> findAll();
+
+    void deleteById(Long id);
 }

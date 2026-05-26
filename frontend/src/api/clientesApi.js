@@ -9,3 +9,6 @@ export const actualizarCliente = (id, data) =>
 
 export const actualizarPrecioEspecial = (id, data) =>
   api.put(`/clientes/${id}/precio-especial`, data).then(r => r.data)
+
+export const eliminarCliente = (id) =>
+  api.delete(`/clientes/${id}`).then(r => r.data)

@@ -13,4 +13,6 @@ public interface CreditoJpaRepository extends JpaRepository<CreditoJpaEntity, Lo
 
     @Query("SELECT c FROM CreditoJpaEntity c WHERE c.montoTotal > c.montoPagado ORDER BY (c.montoTotal - c.montoPagado) DESC")
     List<CreditoJpaEntity> findDeudores();
+
+    void deleteByClienteId(Long clienteId);
 }

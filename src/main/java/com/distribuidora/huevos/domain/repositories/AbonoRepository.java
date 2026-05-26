@@ -10,4 +10,6 @@ public interface AbonoRepository {
 
     /** Devuelve los abonos del cliente ordenados del más reciente al más antiguo. */
     List<Abono> findByClienteIdOrderByFechaDesc(Long clienteId);
+
+    void deleteByClienteId(Long clienteId);
 }
