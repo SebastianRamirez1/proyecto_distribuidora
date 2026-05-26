@@ -1,5 +1,6 @@
 package com.distribuidora.huevos.infrastructure.persistence.mapper;
 
+import com.distribuidora.huevos.domain.entities.Cliente;
 import com.distribuidora.huevos.domain.entities.Venta;
 import com.distribuidora.huevos.domain.valueobjects.Cantidad;
 import com.distribuidora.huevos.domain.valueobjects.Precio;
