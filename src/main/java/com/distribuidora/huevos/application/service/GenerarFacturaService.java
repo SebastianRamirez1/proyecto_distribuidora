@@ -52,21 +52,33 @@ public class GenerarFacturaService {
         String numero = cfg.generarYAvanzarConsecutivo();
         configRepo.save(cfg);
 
-        // 4. Determinar NIT del cliente
+        // 4. Datos del comprador
         String nitCliente = (cmd.getNitCliente() != null && !cmd.getNitCliente().isBlank())
                 ? cmd.getNitCliente()
                 : "Sin NIT";
+
+        // Nombre en factura: prioridad al nombre personalizado del comando;
+        // si no, nombre del cliente registrado; si no hay cliente (público general), "Consumidor Final".
+        Long clienteId = venta.getCliente() != null ? venta.getCliente().getId() : null;
+        String nombreEnFactura;
+        if (cmd.getNombreCliente() != null && !cmd.getNombreCliente().isBlank()) {
+            nombreEnFactura = cmd.getNombreCliente().trim();
+        } else if (venta.getCliente() != null) {
+            nombreEnFactura = venta.getCliente().getNombre();
+        } else {
+            nombreEnFactura = "Consumidor Final";
+        }
 
         // 5. Construir y persistir la factura
         Factura factura = new Factura(
                 null,
                 numero,
                 venta.getId(),
-                venta.getCliente().getId(),
+                clienteId,
                 LocalDateTime.now(),
                 cmd.getTipo(),
                 EstadoFactura.EMITIDA,
-                venta.getCliente().getNombre(),
+                nombreEnFactura,
                 nitCliente,
                 venta.getTipoProducto(),
                 venta.getCantidad().getValor(),

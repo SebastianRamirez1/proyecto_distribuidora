@@ -29,7 +29,7 @@ public class FacturaJpaEntity {
     @Column(name = "venta_id")
     private Long ventaId;
 
-    @Column(name = "cliente_id", nullable = false)
+    @Column(name = "cliente_id", nullable = true)
     private Long clienteId;
 
     @Column(name = "fecha_emision", nullable = false)
