@@ -49,11 +49,13 @@ class VentaTest {
     }
 
     @Test
-    void ventaConClienteNuloLanzaExcepcion() {
-        assertThatThrownBy(() ->
-                new Venta(1L, null, TipoProducto.EXTRA,
-                        new Cantidad(1), Precio.de("4.00"), Precio.cero(),
-                        TipoPago.EFECTIVO, LocalDateTime.now()))
-                .isInstanceOf(NullPointerException.class);
+    void ventaConClienteNuloEsValida() {
+        // cliente null = venta al público general (sin registro en BD)
+        Venta venta = new Venta(1L, null, TipoProducto.EXTRA,
+                new Cantidad(1), Precio.de("4.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+
+        assertThat(venta.getCliente()).isNull();
+        assertThat(venta.calcularTotal().getValor()).isEqualByComparingTo("4.00");
     }
 }
