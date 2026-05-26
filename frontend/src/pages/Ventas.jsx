@@ -55,6 +55,8 @@ export default function Ventas() {
         const [v, c] = await Promise.all([ventasPorFecha(hoy), listarClientes()])
         setVentas(v)
         setClientes(c)
+        const general = c.find(cl => cl.nombre === 'Público General')
+        if (general) setFormVenta(p => ({ ...p, clienteId: String(general.id) }))
       } catch (e) {
         setError(e.message)
       } finally {
