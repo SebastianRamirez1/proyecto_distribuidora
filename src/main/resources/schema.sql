@@ -161,6 +161,11 @@ INSERT INTO precio_costo (costo_extra, costo_aa, costo_a, costo_b)
 SELECT 0.00, 0.00, 0.00, 0.00
 WHERE NOT EXISTS (SELECT 1 FROM precio_costo);
 
+-- Cliente por defecto para ventas al público general (precio público)
+INSERT INTO clientes (nombre, tipo)
+SELECT 'Público General', 'NORMAL'
+WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE nombre = 'Público General');
+
 -- ============================================================
 -- Limpieza de filas duplicadas en tablas singleton
 -- Conserva solo la fila de menor id para garantizar
