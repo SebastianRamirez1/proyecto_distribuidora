@@ -13,4 +13,6 @@ public interface CreditoRepository {
     List<Credito> findDeudores();
 
     Credito save(Credito credito);
+
+    void deleteByClienteId(Long clienteId);
 }

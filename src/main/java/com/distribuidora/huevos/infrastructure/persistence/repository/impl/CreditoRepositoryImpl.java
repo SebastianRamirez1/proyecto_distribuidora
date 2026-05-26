@@ -36,4 +36,9 @@ public class CreditoRepositoryImpl implements CreditoRepository {
     public Credito save(Credito credito) {
         return mapper.toDomain(jpaRepository.save(mapper.toJpa(credito)));
     }
+
+    @Override
+    public void deleteByClienteId(Long clienteId) {
+        jpaRepository.deleteByClienteId(clienteId);
+    }
 }

@@ -16,4 +16,6 @@ public interface VentaRepository {
     Optional<Venta> findById(Long id);
 
     BigDecimal calcularGananciaPorFecha(LocalDate fecha);
+
+    boolean existsByClienteId(Long clienteId);
 }

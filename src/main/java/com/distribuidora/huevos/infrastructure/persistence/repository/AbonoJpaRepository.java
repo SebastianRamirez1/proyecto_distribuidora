@@ -8,4 +8,6 @@ import java.util.List;
 public interface AbonoJpaRepository extends JpaRepository<AbonoJpaEntity, Long> {
 
     List<AbonoJpaEntity> findByClienteIdOrderByFechaDesc(Long clienteId);
+
+    void deleteByClienteId(Long clienteId);
 }

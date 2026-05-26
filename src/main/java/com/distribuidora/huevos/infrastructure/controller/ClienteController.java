@@ -8,6 +8,7 @@ import com.distribuidora.huevos.application.mapper.ClienteMapper;
 import com.distribuidora.huevos.application.service.ActualizarClienteService;
 import com.distribuidora.huevos.application.service.ActualizarPrecioClienteService;
 import com.distribuidora.huevos.application.service.CrearClienteService;
+import com.distribuidora.huevos.application.service.EliminarClienteService;
 import com.distribuidora.huevos.domain.repositories.ClienteRepository;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -24,17 +25,20 @@ public class ClienteController {
     private final CrearClienteService crearClienteService;
     private final ActualizarClienteService actualizarClienteService;
     private final ActualizarPrecioClienteService actualizarPrecioClienteService;
+    private final EliminarClienteService eliminarClienteService;
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
 
     public ClienteController(CrearClienteService crearClienteService,
                              ActualizarClienteService actualizarClienteService,
                              ActualizarPrecioClienteService actualizarPrecioClienteService,
+                             EliminarClienteService eliminarClienteService,
                              ClienteRepository clienteRepository,
                              ClienteMapper clienteMapper) {
         this.crearClienteService = crearClienteService;
         this.actualizarClienteService = actualizarClienteService;
         this.actualizarPrecioClienteService = actualizarPrecioClienteService;
+        this.eliminarClienteService = eliminarClienteService;
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
     }
@@ -65,5 +69,11 @@ public class ClienteController {
             @PathVariable Long id,
             @Valid @RequestBody ActualizarPrecioCommand command) {
         return ResponseEntity.ok(actualizarPrecioClienteService.ejecutar(id, command));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+        eliminarClienteService.ejecutar(id);
+        return ResponseEntity.noContent().build();
     }
 }

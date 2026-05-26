@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listarClientes, crearCliente, actualizarCliente, actualizarPrecioEspecial } from '../api/clientesApi'
+import { listarClientes, crearCliente, actualizarCliente, actualizarPrecioEspecial, eliminarCliente } from '../api/clientesApi'
 import { obtenerCredito } from '../api/creditosApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -28,6 +28,7 @@ export default function Clientes() {
   const [modalEditar, setModalEditar] = useState(false)
   const [modalPrecio, setModalPrecio] = useState(false)
   const [modalCredito, setModalCredito] = useState(false)
+  const [modalEliminar, setModalEliminar] = useState(false)
   const [selectedCliente, setSelectedCliente] = useState(null)
   const [credito, setCredito] = useState(null)
 
@@ -149,6 +150,21 @@ export default function Clientes() {
     }
   }
 
+  const handleEliminar = async () => {
+    setSaving(true)
+    try {
+      await eliminarCliente(selectedCliente.id)
+      setModalEliminar(false)
+      await load()
+      setSuccess(`Cliente "${selectedCliente.nombre}" eliminado correctamente`)
+    } catch (e) {
+      setModalEliminar(false)
+      setError(e.response?.data?.mensaje || e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : '-'
 
   return (
@@ -206,6 +222,15 @@ export default function Clientes() {
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCredito(c)}>
                         📋 Crédito
                       </Button>
+                      {c.nombre !== 'Público General' && (
+                        <Button
+                          variant="secondary"
+                          className="text-xs py-1 px-2 text-red-600 hover:bg-red-50"
+                          onClick={() => { setSelectedCliente(c); setModalEliminar(true) }}
+                        >
+                          🗑️ Eliminar
+                        </Button>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -335,6 +360,28 @@ export default function Clientes() {
             <Button type="submit" loading={saving}>Guardar precios</Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Modal Eliminar */}
+      <Modal isOpen={modalEliminar} onClose={() => setModalEliminar(false)} title="Eliminar cliente">
+        <p className="text-slate-600 mb-4">
+          ¿Estás seguro de que deseas eliminar al cliente <span className="font-semibold">{selectedCliente?.nombre}</span>?
+          Esta acción no se puede deshacer.
+        </p>
+        <p className="text-amber-700 bg-amber-50 border border-amber-200 rounded p-3 text-sm mb-4">
+          Solo se pueden eliminar clientes sin ventas registradas.
+        </p>
+        <div className="flex gap-3 justify-end">
+          <Button type="button" variant="secondary" onClick={() => setModalEliminar(false)}>Cancelar</Button>
+          <Button
+            type="button"
+            variant="danger"
+            loading={saving}
+            onClick={handleEliminar}
+          >
+            Eliminar
+          </Button>
+        </div>
       </Modal>
 
       {/* Modal Crédito */}

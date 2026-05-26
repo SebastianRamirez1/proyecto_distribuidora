@@ -44,4 +44,9 @@ public class VentaRepositoryImpl implements VentaRepository {
     public BigDecimal calcularGananciaPorFecha(LocalDate fecha) {
         return jpaRepository.calcularGananciaPorFecha(fecha);
     }
+
+    @Override
+    public boolean existsByClienteId(Long clienteId) {
+        return jpaRepository.existsByClienteId(clienteId);
+    }
 }

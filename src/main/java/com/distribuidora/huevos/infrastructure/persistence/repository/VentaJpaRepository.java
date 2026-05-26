@@ -33,4 +33,6 @@ public interface VentaJpaRepository extends JpaRepository<VentaJpaEntity, Long> 
     default BigDecimal calcularGananciaPorFecha(LocalDate fecha) {
         return calcularGananciaByFechaRange(fecha.atStartOfDay(), fecha.plusDays(1).atStartOfDay());
     }
+
+    boolean existsByClienteId(Long clienteId);
 }
