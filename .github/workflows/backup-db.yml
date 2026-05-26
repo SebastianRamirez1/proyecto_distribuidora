@@ -1,0 +1,59 @@
+name: Backup PostgreSQL
+
+on:
+  # Cada domingo a las 3:00 AM UTC (10 PM Colombia, hora en que menos tráfico hay)
+  schedule:
+    - cron: '0 3 * * 0'
+  # Ejecución manual desde GitHub → Actions → "Run workflow"
+  workflow_dispatch:
+
+jobs:
+  backup:
+    name: Dump y subir backup
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Instalar cliente PostgreSQL
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y postgresql-client
+
+      - name: Generar nombre de archivo con fecha
+        id: nombre
+        run: echo "ARCHIVO=backup_$(date +%Y%m%d_%H%M%S).dump" >> "$GITHUB_OUTPUT"
+
+      - name: Volcar base de datos (pg_dump)
+        env:
+          DATABASE_URL: ${{ secrets.RAILWAY_DATABASE_URL }}
+        run: |
+          pg_dump "$DATABASE_URL" \
+            --format=custom \
+            --no-acl \
+            --no-owner \
+            -f "${{ steps.nombre.outputs.ARCHIVO }}"
+
+      - name: Verificar que el archivo se generó correctamente
+        run: |
+          ARCHIVO="${{ steps.nombre.outputs.ARCHIVO }}"
+          if [ ! -s "$ARCHIVO" ]; then
+            echo "ERROR: el archivo de backup está vacío o no existe."
+            exit 1
+          fi
+          echo "Backup generado: $ARCHIVO ($(du -h "$ARCHIVO" | cut -f1))"
+
+      - name: Subir backup como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-backup-${{ github.run_number }}-${{ github.run_attempt }}
+          path: "*.dump"
+          # Se conserva 30 días; después GitHub lo borra automáticamente
+          retention-days: 30
+
+      - name: Resumen del backup
+        run: |
+          echo "### Backup completado ✅" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Archivo:** \`${{ steps.nombre.outputs.ARCHIVO }}\`" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Tamaño:** $(du -h "${{ steps.nombre.outputs.ARCHIVO }}" | cut -f1)" >> "$GITHUB_STEP_SUMMARY"
+          echo "- **Retención:** 30 días" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "> Para restaurar: descarga el artefacto y ejecuta \`pg_restore\`." >> "$GITHUB_STEP_SUMMARY"
