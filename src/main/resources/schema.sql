@@ -161,11 +161,6 @@ INSERT INTO precio_costo (costo_extra, costo_aa, costo_a, costo_b)
 SELECT 0.00, 0.00, 0.00, 0.00
 WHERE NOT EXISTS (SELECT 1 FROM precio_costo);
 
--- Cliente por defecto para ventas al público general (precio público)
-INSERT INTO clientes (nombre, tipo)
-SELECT 'Público General', 'NORMAL'
-WHERE NOT EXISTS (SELECT 1 FROM clientes WHERE nombre = 'Público General');
-
 -- ============================================================
 -- Limpieza de filas duplicadas en tablas singleton
 -- Conserva solo la fila de menor id para garantizar
@@ -175,25 +170,19 @@ DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
 DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);
 DELETE FROM precio_costo   WHERE id NOT IN (SELECT MIN(id) FROM precio_costo);
 
--- Limpieza de clientes 'Público General' duplicados (conserva solo el de menor id)
-DELETE FROM facturas WHERE cliente_id IN (
-    SELECT id FROM clientes WHERE nombre = 'Público General'
-    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
-);
-DELETE FROM ventas WHERE cliente_id IN (
-    SELECT id FROM clientes WHERE nombre = 'Público General'
-    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
-);
-DELETE FROM abonos WHERE cliente_id IN (
-    SELECT id FROM clientes WHERE nombre = 'Público General'
-    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
-);
-DELETE FROM creditos WHERE cliente_id IN (
-    SELECT id FROM clientes WHERE nombre = 'Público General'
-    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
-);
-DELETE FROM clientes WHERE nombre = 'Público General'
-    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General');
+-- Migración: hacer cliente_id nullable en ventas para permitir ventas al público general
+-- sin necesidad de registrar ese cliente en la BD.
+ALTER TABLE ventas ALTER COLUMN cliente_id DROP NOT NULL;
+
+-- Migración: eliminar el cliente 'Público General' de la BD (ahora es solo un concepto de UI).
+-- Primero desasociar las ventas que lo referenciaban (pasan a ser ventas sin cliente = público).
+UPDATE ventas SET cliente_id = NULL
+    WHERE cliente_id IN (SELECT id FROM clientes WHERE nombre = 'Público General');
+-- Luego borrar sus dependencias y el registro.
+DELETE FROM facturas WHERE cliente_id IN (SELECT id FROM clientes WHERE nombre = 'Público General');
+DELETE FROM abonos   WHERE cliente_id IN (SELECT id FROM clientes WHERE nombre = 'Público General');
+DELETE FROM creditos WHERE cliente_id IN (SELECT id FROM clientes WHERE nombre = 'Público General');
+DELETE FROM clientes WHERE nombre = 'Público General';
 
 -- Fila única de configuracion_factura
 INSERT INTO configuracion_factura (razon_social, nit, direccion, ciudad, telefono, regimen,

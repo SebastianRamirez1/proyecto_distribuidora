@@ -1,5 +1,6 @@
 package com.distribuidora.huevos.infrastructure.persistence.mapper;
 
+import com.distribuidora.huevos.domain.entities.Cliente;
 import com.distribuidora.huevos.domain.entities.Venta;
 import com.distribuidora.huevos.domain.valueobjects.Cantidad;
 import com.distribuidora.huevos.domain.valueobjects.Precio;
@@ -20,9 +21,13 @@ public class VentaJpaMapper {
         Precio costo = entity.getCostoUnitario() != null
                 ? Precio.de(entity.getCostoUnitario())
                 : Precio.cero();
+        // cliente puede ser null para ventas al público general (sin cliente registrado)
+        Cliente cliente = entity.getCliente() != null
+                ? clienteJpaMapper.toDomain(entity.getCliente())
+                : null;
         return new Venta(
                 entity.getId(),
-                clienteJpaMapper.toDomain(entity.getCliente()),
+                cliente,
                 entity.getTipoProducto(),
                 new Cantidad(entity.getCantidad()),
                 Precio.de(entity.getPrecioUnitario()),
@@ -36,7 +41,7 @@ public class VentaJpaMapper {
     public VentaJpaEntity toJpa(Venta venta) {
         VentaJpaEntity entity = new VentaJpaEntity();
         entity.setId(venta.getId());
-        entity.setCliente(clienteJpaMapper.toJpa(venta.getCliente()));
+        entity.setCliente(venta.getCliente() != null ? clienteJpaMapper.toJpa(venta.getCliente()) : null);
         entity.setTipoProducto(venta.getTipoProducto());
         entity.setCantidad(venta.getCantidad().getValor());
         entity.setPrecioUnitario(venta.getPrecioUnitario().getValor());

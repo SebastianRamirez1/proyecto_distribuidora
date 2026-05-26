@@ -57,8 +57,8 @@ public class AnularVentaService {
             cajaRepository.save(caja);
         });
 
-        // 6. Si era fiado, revertir deuda del crédito
-        if (venta.getTipoPago() == TipoPago.FIADO) {
+        // 6. Si era fiado, revertir deuda del crédito (cliente puede ser null si es público general)
+        if (venta.getTipoPago() == TipoPago.FIADO && venta.getCliente() != null) {
             creditoRepository.findByClienteId(venta.getCliente().getId())
                     .ifPresent(credito -> {
                         credito.revertirDeuda(venta.calcularTotal());
