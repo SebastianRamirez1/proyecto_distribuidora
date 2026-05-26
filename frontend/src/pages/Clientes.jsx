@@ -222,15 +222,13 @@ export default function Clientes() {
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCredito(c)}>
                         📋 Crédito
                       </Button>
-                      {c.nombre !== 'Público General' && (
-                        <Button
-                          variant="secondary"
-                          className="text-xs py-1 px-2 text-red-600 hover:bg-red-50"
-                          onClick={() => { setSelectedCliente(c); setModalEliminar(true) }}
-                        >
-                          🗑️ Eliminar
-                        </Button>
-                      )}
+                      <Button
+                        variant="secondary"
+                        className="text-xs py-1 px-2 text-red-600 hover:bg-red-50"
+                        onClick={() => { setSelectedCliente(c); setModalEliminar(true) }}
+                      >
+                        🗑️ Eliminar
+                      </Button>
                     </div>
                   </td>
                 </tr>

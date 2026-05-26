@@ -175,6 +175,26 @@ DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
 DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);
 DELETE FROM precio_costo   WHERE id NOT IN (SELECT MIN(id) FROM precio_costo);
 
+-- Limpieza de clientes 'Público General' duplicados (conserva solo el de menor id)
+DELETE FROM facturas WHERE cliente_id IN (
+    SELECT id FROM clientes WHERE nombre = 'Público General'
+    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
+);
+DELETE FROM ventas WHERE cliente_id IN (
+    SELECT id FROM clientes WHERE nombre = 'Público General'
+    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
+);
+DELETE FROM abonos WHERE cliente_id IN (
+    SELECT id FROM clientes WHERE nombre = 'Público General'
+    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
+);
+DELETE FROM creditos WHERE cliente_id IN (
+    SELECT id FROM clientes WHERE nombre = 'Público General'
+    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General')
+);
+DELETE FROM clientes WHERE nombre = 'Público General'
+    AND id NOT IN (SELECT MIN(id) FROM clientes WHERE nombre = 'Público General');
+
 -- Fila única de configuracion_factura
 INSERT INTO configuracion_factura (razon_social, nit, direccion, ciudad, telefono, regimen,
     resolucion_numero, resolucion_prefijo, resolucion_desde, resolucion_hasta, consecutivo_actual)
