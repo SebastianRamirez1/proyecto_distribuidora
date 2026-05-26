@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listarClientes, crearCliente, actualizarCliente, actualizarPrecioEspecial, eliminarCliente } from '../api/clientesApi'
-import { fmt } from '../utils/fmt'
+import { fmt, parsePrecio } from '../utils/fmt'
 import { obtenerCredito } from '../api/creditosApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -57,10 +57,10 @@ export default function Clientes() {
     try {
       const payload = { nombre: formCrear.nombre, tipo: formCrear.tipo }
       if (formCrear.tipo === 'ESPECIAL') {
-        payload.precioEspecialExtra = Number(formCrear.precioEspecialExtra)
-        payload.precioEspecialAA    = Number(formCrear.precioEspecialAA)
-        payload.precioEspecialA     = Number(formCrear.precioEspecialA)
-        payload.precioEspecialB     = Number(formCrear.precioEspecialB)
+        payload.precioEspecialExtra = parsePrecio(formCrear.precioEspecialExtra)
+        payload.precioEspecialAA    = parsePrecio(formCrear.precioEspecialAA)
+        payload.precioEspecialA     = parsePrecio(formCrear.precioEspecialA)
+        payload.precioEspecialB     = parsePrecio(formCrear.precioEspecialB)
       }
       await crearCliente(payload)
       setModalCrear(false)
@@ -79,10 +79,10 @@ export default function Clientes() {
     setSaving(true)
     try {
       await actualizarPrecioEspecial(selectedCliente.id, {
-        precioEspecialExtra: Number(formPrecio.precioEspecialExtra),
-        precioEspecialAA:    Number(formPrecio.precioEspecialAA),
-        precioEspecialA:     Number(formPrecio.precioEspecialA),
-        precioEspecialB:     Number(formPrecio.precioEspecialB),
+        precioEspecialExtra: parsePrecio(formPrecio.precioEspecialExtra),
+        precioEspecialAA:    parsePrecio(formPrecio.precioEspecialAA),
+        precioEspecialA:     parsePrecio(formPrecio.precioEspecialA),
+        precioEspecialB:     parsePrecio(formPrecio.precioEspecialB),
       })
       setModalPrecio(false)
       await load()
@@ -124,10 +124,10 @@ export default function Clientes() {
     try {
       const payload = { nombre: formEditar.nombre, tipo: formEditar.tipo }
       if (formEditar.tipo === 'ESPECIAL') {
-        payload.precioEspecialExtra = Number(formEditar.precioEspecialExtra)
-        payload.precioEspecialAA    = Number(formEditar.precioEspecialAA)
-        payload.precioEspecialA     = Number(formEditar.precioEspecialA)
-        payload.precioEspecialB     = Number(formEditar.precioEspecialB)
+        payload.precioEspecialExtra = parsePrecio(formEditar.precioEspecialExtra)
+        payload.precioEspecialAA    = parsePrecio(formEditar.precioEspecialAA)
+        payload.precioEspecialA     = parsePrecio(formEditar.precioEspecialA)
+        payload.precioEspecialB     = parsePrecio(formEditar.precioEspecialB)
       }
       await actualizarCliente(selectedCliente.id, payload)
       setModalEditar(false)

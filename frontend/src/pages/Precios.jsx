@@ -8,7 +8,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
-import { fmt } from '../utils/fmt'
+import { fmt, parsePrecio } from '../utils/fmt'
 
 const TIPOS_PUBLICO = [
   { key: 'precioExtra', field: 'precioExtra', label: 'EXTRA', color: 'amber',  emoji: '💛' },
@@ -77,10 +77,10 @@ export default function Precios() {
     setError('')
     try {
       const guardados = await actualizarPrecioPublico({
-        precioExtra: Number(form.precioExtra),
-        precioAA:    Number(form.precioAA),
-        precioA:     Number(form.precioA),
-        precioB:     Number(form.precioB),
+        precioExtra: parsePrecio(form.precioExtra),
+        precioAA:    parsePrecio(form.precioAA),
+        precioA:     parsePrecio(form.precioA),
+        precioB:     parsePrecio(form.precioB),
       })
       setPrecios(guardados)
       setSuccess('Precios públicos actualizados correctamente ✅')
@@ -97,10 +97,10 @@ export default function Precios() {
     setError('')
     try {
       const guardados = await actualizarPrecioCosto({
-        costoExtra: Number(formC.costoExtra),
-        costoAA:    Number(formC.costoAA),
-        costoA:     Number(formC.costoA),
-        costoB:     Number(formC.costoB),
+        costoExtra: parsePrecio(formC.costoExtra),
+        costoAA:    parsePrecio(formC.costoAA),
+        costoA:     parsePrecio(formC.costoA),
+        costoB:     parsePrecio(formC.costoB),
       })
       setCostos(guardados)
       setSuccess('Precios de liquidación actualizados correctamente ✅')
