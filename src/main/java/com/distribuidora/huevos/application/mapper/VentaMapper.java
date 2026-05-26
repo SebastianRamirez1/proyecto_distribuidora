@@ -12,8 +12,8 @@ public class VentaMapper {
     public VentaResponse toResponse(Venta venta) {
         VentaResponse response = new VentaResponse();
         response.setId(venta.getId());
-        response.setClienteId(venta.getCliente().getId());
-        response.setNombreCliente(venta.getCliente().getNombre());
+        response.setClienteId(venta.getCliente() != null ? venta.getCliente().getId() : null);
+        response.setNombreCliente(venta.getCliente() != null ? venta.getCliente().getNombre() : "Público General");
         response.setTipoProducto(venta.getTipoProducto());
         response.setCantidad(venta.getCantidad().getValor());
         response.setPrecioUnitario(venta.getPrecioUnitario().getValor());

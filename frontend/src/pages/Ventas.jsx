@@ -55,8 +55,6 @@ export default function Ventas() {
         const [v, c] = await Promise.all([ventasPorFecha(hoy), listarClientes()])
         setVentas(v)
         setClientes(c)
-        const general = c.find(cl => cl.nombre === 'Público General')
-        if (general) setFormVenta(p => ({ ...p, clienteId: String(general.id) }))
       } catch (e) {
         setError(e.message)
       } finally {
@@ -85,7 +83,7 @@ export default function Ventas() {
     setError('')
     try {
       const payload = {
-        clienteId:    Number(formVenta.clienteId),
+        clienteId:    formVenta.clienteId !== '' ? Number(formVenta.clienteId) : null,
         tipoProducto: formVenta.tipoProducto,
         cantidad:     Number(formVenta.cantidad),
         tipoPago:     formVenta.tipoPago,
@@ -212,9 +210,8 @@ export default function Ventas() {
                   label="Cliente"
                   value={formVenta.clienteId}
                   onChange={e => setFormVenta(p => ({ ...p, clienteId: e.target.value }))}
-                  required
                 >
-                  <option value="">— Seleccionar cliente —</option>
+                  <option value="">Público General (precio público)</option>
                   {clientes.map(c => (
                     <option key={c.id} value={c.id}>{c.nombre} ({c.tipo})</option>
                   ))}

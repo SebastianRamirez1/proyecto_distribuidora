@@ -42,7 +42,6 @@ public final class Venta {
                  Cantidad cantidad, Precio precioUnitario, Precio costoUnitario,
                  TipoPago tipoPago, LocalDateTime fecha,
                  boolean anulada, LocalDateTime fechaAnulacion) {
-        Objects.requireNonNull(cliente, "El cliente de la venta no puede ser null");
         Objects.requireNonNull(tipoProducto, "El tipo de producto no puede ser null");
         Objects.requireNonNull(cantidad, "La cantidad no puede ser null");
         Objects.requireNonNull(precioUnitario, "El precio unitario no puede ser null");

@@ -22,7 +22,7 @@ public class VentaJpaEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "cliente_id", nullable = false)
+    @JoinColumn(name = "cliente_id", nullable = true)
     private ClienteJpaEntity cliente;
 
     @Enumerated(EnumType.STRING)

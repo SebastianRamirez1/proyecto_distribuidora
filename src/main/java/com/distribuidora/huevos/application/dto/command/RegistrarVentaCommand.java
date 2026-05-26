@@ -10,7 +10,6 @@ import java.math.BigDecimal;
 
 public class RegistrarVentaCommand {
 
-    @NotNull(message = "El ID del cliente es obligatorio")
     private Long clienteId;
 
     @NotNull(message = "El tipo de producto es obligatorio")

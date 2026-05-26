@@ -5,6 +5,7 @@ import com.distribuidora.huevos.application.dto.response.VentaResponse;
 import com.distribuidora.huevos.application.mapper.VentaMapper;
 import com.distribuidora.huevos.domain.entities.*;
 import com.distribuidora.huevos.domain.enums.TipoPago;
+import com.distribuidora.huevos.domain.exceptions.OperacionNoPermitidaException;
 import com.distribuidora.huevos.domain.exceptions.PrecioInvalidoException;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.repositories.*;
@@ -48,19 +49,30 @@ public class RegistrarVentaService {
     }
 
     public VentaResponse ejecutar(RegistrarVentaCommand command) {
-        Cliente cliente = clienteRepository.findById(command.getClienteId())
-                .orElseThrow(() -> new RecursoNoEncontradoException(
-                        "Cliente no encontrado con ID: " + command.getClienteId()));
-
         PrecioPublico precioPublico = precioPublicoRepository.findCurrent();
         PrecioCosto precioCosto = precioCostoRepository.findCurrent();
         Cantidad cantidad = new Cantidad(command.getCantidad());
 
+        // clienteId null = venta al público general (precio público, sin fiado)
+        Cliente cliente = null;
+        if (command.getClienteId() != null) {
+            cliente = clienteRepository.findById(command.getClienteId())
+                    .orElseThrow(() -> new RecursoNoEncontradoException(
+                            "Cliente no encontrado con ID: " + command.getClienteId()));
+        }
+
+        if (cliente == null && command.getTipoPago() == TipoPago.FIADO) {
+            throw new OperacionNoPermitidaException(
+                    "No se puede registrar una venta a crédito (fiado) sin seleccionar un cliente.");
+        }
+
         // Si viene precioManual se aplica directamente (rebaja puntual);
-        // de lo contrario se calcula según el perfil del cliente.
+        // de lo contrario: cliente especial usa su precio, null usa precio público.
         Precio precioUnitario = (command.getPrecioManual() != null)
                 ? Precio.de(command.getPrecioManual())
-                : cliente.calcularPrecio(command.getTipoProducto(), cantidad, precioPublico);
+                : (cliente != null)
+                    ? cliente.calcularPrecio(command.getTipoProducto(), cantidad, precioPublico)
+                    : precioPublico.obtenerPrecio(command.getTipoProducto());
 
         // Guardia: precio cero indica que los precios públicos no han sido configurados.
         if (precioUnitario.getValor().compareTo(BigDecimal.ZERO) == 0) {
