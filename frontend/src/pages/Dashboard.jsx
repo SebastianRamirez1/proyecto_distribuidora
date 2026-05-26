@@ -6,6 +6,7 @@ import Card from '../components/ui/Card'
 import Spinner from '../components/ui/Spinner'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
+import { fmt } from '../utils/fmt'
 
 // StatCard limpia: fondo blanco + borde izquierdo coloreado.
 // Elimina gradientes decorativos que generan carga cognitiva exógena [CLT 1.2].
@@ -38,8 +39,6 @@ function StatCard({ icon, label, value, sub, color = 'amber' }) {
     </div>
   )
 }
-
-const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 export default function Dashboard() {
   const [inventario, setInventario] = useState(null)

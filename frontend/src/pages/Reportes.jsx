@@ -6,8 +6,7 @@ import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
-
-const fmt = (n) => `S/ ${Number(n ?? 0).toFixed(2)}`
+import { fmt } from '../utils/fmt'
 
 function CajaRow({ icon, label, value, highlight = false }) {
   return (
@@ -164,7 +163,7 @@ export default function Reportes() {
                       <p className="text-xl font-bold text-amber-600">
                         {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
                       </p>
-                      <p className="text-xs text-slate-400 mt-1">Total S/</p>
+                      <p className="text-xs text-slate-400 mt-1">Total $</p>
                     </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2 mb-4">

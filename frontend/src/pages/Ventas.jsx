@@ -9,10 +9,10 @@ import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
+import { fmt } from '../utils/fmt'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
 const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
-const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
 const initAbono = { clienteId: '', monto: '', medioPago: 'EFECTIVO' }
@@ -267,7 +267,7 @@ export default function Ventas() {
                       🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
                     </p>
                     <Input
-                      label="Precio por canasta (S/)"
+                      label="Precio por canasta ($)"
                       type="number" step="0.01" min="0.01"
                       placeholder="0.00"
                       value={formVenta.precioManual}
@@ -298,7 +298,7 @@ export default function Ventas() {
                   ))}
                 </Select>
                 <Input
-                  label="Monto del abono (S/)"
+                  label="Monto del abono ($)"
                   type="number" step="0.01" min="0.01"
                   placeholder="0.00"
                   value={formAbono.monto}
