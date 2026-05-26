@@ -1,7 +1,6 @@
 package com.distribuidora.huevos.application.service;
 
 import com.distribuidora.huevos.domain.entities.Cliente;
-import com.distribuidora.huevos.domain.exceptions.OperacionNoPermitidaException;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.repositories.AbonoRepository;
 import com.distribuidora.huevos.domain.repositories.ClienteRepository;
@@ -37,11 +36,6 @@ public class EliminarClienteService {
         Cliente cliente = clienteRepository.findById(id)
                 .orElseThrow(() -> new RecursoNoEncontradoException(
                         "Cliente no encontrado con ID: " + id));
-
-        if ("Público General".equals(cliente.getNombre())) {
-            throw new OperacionNoPermitidaException(
-                    "El cliente 'Público General' no puede ser eliminado.");
-        }
 
         // Eliminar en orden respetando FKs: facturas → ventas → abonos → crédito → cliente
         facturaRepository.deleteByClienteId(id);
