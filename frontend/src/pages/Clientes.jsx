@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { listarClientes, crearCliente, actualizarPrecioEspecial } from '../api/clientesApi'
+import { listarClientes, crearCliente, actualizarCliente, actualizarPrecioEspecial } from '../api/clientesApi'
 import { obtenerCredito } from '../api/creditosApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -25,12 +25,14 @@ export default function Clientes() {
   const [success, setSuccess] = useState('')
 
   const [modalCrear, setModalCrear] = useState(false)
+  const [modalEditar, setModalEditar] = useState(false)
   const [modalPrecio, setModalPrecio] = useState(false)
   const [modalCredito, setModalCredito] = useState(false)
   const [selectedCliente, setSelectedCliente] = useState(null)
   const [credito, setCredito] = useState(null)
 
   const [formCrear, setFormCrear] = useState(initCrear)
+  const [formEditar, setFormEditar] = useState(initCrear)
   const [formPrecio, setFormPrecio] = useState(initPrecio)
   const [saving, setSaving] = useState(false)
 
@@ -101,6 +103,41 @@ export default function Clientes() {
     setModalPrecio(true)
   }
 
+  const openEditar = (c) => {
+    setSelectedCliente(c)
+    setFormEditar({
+      nombre: c.nombre,
+      tipo:   c.tipo,
+      precioEspecialExtra: c.precioEspecialExtra ?? '',
+      precioEspecialAA:    c.precioEspecialAA    ?? '',
+      precioEspecialA:     c.precioEspecialA     ?? '',
+      precioEspecialB:     c.precioEspecialB     ?? '',
+    })
+    setModalEditar(true)
+  }
+
+  const handleEditar = async (e) => {
+    e.preventDefault()
+    setSaving(true)
+    try {
+      const payload = { nombre: formEditar.nombre, tipo: formEditar.tipo }
+      if (formEditar.tipo === 'ESPECIAL') {
+        payload.precioEspecialExtra = Number(formEditar.precioEspecialExtra)
+        payload.precioEspecialAA    = Number(formEditar.precioEspecialAA)
+        payload.precioEspecialA     = Number(formEditar.precioEspecialA)
+        payload.precioEspecialB     = Number(formEditar.precioEspecialB)
+      }
+      await actualizarCliente(selectedCliente.id, payload)
+      setModalEditar(false)
+      await load()
+      setSuccess('Cliente actualizado correctamente')
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const openCredito = async (c) => {
     setSelectedCliente(c)
     setCredito(null)
@@ -158,6 +195,9 @@ export default function Clientes() {
                   <td className="table-cell text-right">{fmt(c.precioEspecialB)}</td>
                   <td className="table-cell text-center">
                     <div className="flex gap-2 justify-center">
+                      <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openEditar(c)}>
+                        ✏️ Editar
+                      </Button>
                       {c.tipo === 'ESPECIAL' && (
                         <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openPrecio(c)}>
                           💲 Precio
@@ -174,6 +214,54 @@ export default function Clientes() {
           </table>
         </Card>
       )}
+
+      {/* Modal Editar */}
+      <Modal isOpen={modalEditar} onClose={() => setModalEditar(false)} title={`Editar — ${selectedCliente?.nombre}`}>
+        <form onSubmit={handleEditar}>
+          <Input
+            label="Nombre del cliente"
+            placeholder="Ej: Tienda La Esperanza"
+            value={formEditar.nombre}
+            onChange={e => setFormEditar(p => ({ ...p, nombre: e.target.value }))}
+            required
+          />
+          <Select
+            label="Tipo de cliente"
+            value={formEditar.tipo}
+            onChange={e => setFormEditar(p => ({ ...p, tipo: e.target.value }))}
+          >
+            <option value="NORMAL">NORMAL (precio público)</option>
+            <option value="ESPECIAL">ESPECIAL (precio personalizado)</option>
+          </Select>
+
+          {formEditar.tipo === 'ESPECIAL' && (
+            <div className="mt-3 border border-amber-200 bg-amber-50 rounded-lg p-3">
+              <p className="text-xs font-semibold text-amber-700 mb-3">💲 Precios personalizados por canasta</p>
+              {[
+                { field: 'precioEspecialExtra', label: 'EXTRA' },
+                { field: 'precioEspecialAA',    label: 'AA'    },
+                { field: 'precioEspecialA',     label: 'A'     },
+                { field: 'precioEspecialB',     label: 'B'     },
+              ].map(({ field, label }) => (
+                <Input
+                  key={field}
+                  label={`Precio canasta ${label} (S/)`}
+                  type="number" step="0.01" min="0"
+                  placeholder="0.00"
+                  value={formEditar[field]}
+                  onChange={e => setFormEditar(p => ({ ...p, [field]: e.target.value }))}
+                  required
+                />
+              ))}
+            </div>
+          )}
+
+          <div className="flex gap-3 justify-end mt-4">
+            <Button type="button" variant="secondary" onClick={() => setModalEditar(false)}>Cancelar</Button>
+            <Button type="submit" loading={saving}>Guardar cambios</Button>
+          </div>
+        </form>
+      </Modal>
 
       {/* Modal Crear */}
       <Modal isOpen={modalCrear} onClose={() => setModalCrear(false)} title="Nuevo cliente">

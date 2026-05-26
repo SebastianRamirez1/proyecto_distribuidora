@@ -1,9 +1,11 @@
 package com.distribuidora.huevos.infrastructure.controller;
 
+import com.distribuidora.huevos.application.dto.command.ActualizarClienteCommand;
 import com.distribuidora.huevos.application.dto.command.ActualizarPrecioCommand;
 import com.distribuidora.huevos.application.dto.command.CrearClienteCommand;
 import com.distribuidora.huevos.application.dto.response.ClienteResponse;
 import com.distribuidora.huevos.application.mapper.ClienteMapper;
+import com.distribuidora.huevos.application.service.ActualizarClienteService;
 import com.distribuidora.huevos.application.service.ActualizarPrecioClienteService;
 import com.distribuidora.huevos.application.service.CrearClienteService;
 import com.distribuidora.huevos.domain.repositories.ClienteRepository;
@@ -20,15 +22,18 @@ import java.util.stream.Collectors;
 public class ClienteController {
 
     private final CrearClienteService crearClienteService;
+    private final ActualizarClienteService actualizarClienteService;
     private final ActualizarPrecioClienteService actualizarPrecioClienteService;
     private final ClienteRepository clienteRepository;
     private final ClienteMapper clienteMapper;
 
     public ClienteController(CrearClienteService crearClienteService,
+                             ActualizarClienteService actualizarClienteService,
                              ActualizarPrecioClienteService actualizarPrecioClienteService,
                              ClienteRepository clienteRepository,
                              ClienteMapper clienteMapper) {
         this.crearClienteService = crearClienteService;
+        this.actualizarClienteService = actualizarClienteService;
         this.actualizarPrecioClienteService = actualizarPrecioClienteService;
         this.clienteRepository = clienteRepository;
         this.clienteMapper = clienteMapper;
@@ -46,6 +51,13 @@ public class ClienteController {
     public ResponseEntity<ClienteResponse> crear(@Valid @RequestBody CrearClienteCommand command) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(crearClienteService.ejecutar(command));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ClienteResponse> actualizar(
+            @PathVariable Long id,
+            @Valid @RequestBody ActualizarClienteCommand command) {
+        return ResponseEntity.ok(actualizarClienteService.ejecutar(id, command));
     }
 
     @PutMapping("/{id}/precio-especial")
