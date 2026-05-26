@@ -81,6 +81,18 @@ export default function Reportes() {
   const ventasB     = ventas.filter(v => v.tipoProducto === 'B')
   const totalCanastas = ventas.reduce((a, v) => a + v.cantidad, 0)
 
+  // Ganancia por tipo: null si ninguna venta de ese tipo tiene costo configurado
+  const gananciaArr = (arr) => {
+    const c = arr.filter(v => !v.anulada && v.ganancia != null)
+    return c.length > 0 ? c.reduce((a, v) => a + Number(v.ganancia), 0) : null
+  }
+  const gananciasPorTipo = {
+    EXTRA: gananciaArr(ventasExtra),
+    AA:    gananciaArr(ventasAA),
+    A:     gananciaArr(ventasA),
+    B:     gananciaArr(ventasB),
+  }
+
   const fechaLabel = fecha === today
     ? new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
     : new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -161,12 +173,22 @@ export default function Reportes() {
                       { label: 'AA',    data: ventasAA,    bg: 'bg-yellow-50', text: 'text-yellow-600' },
                       { label: 'A',     data: ventasA,     bg: 'bg-blue-50',   text: 'text-blue-600'   },
                       { label: 'B',     data: ventasB,     bg: 'bg-slate-100', text: 'text-slate-600'  },
-                    ].map(({ label, data, bg, text }) => (
-                      <div key={label} className={`text-center ${bg} rounded-lg p-2`}>
-                        <p className={`text-xl font-bold ${text}`}>{data.reduce((a, v) => a + v.cantidad, 0)}</p>
-                        <p className="text-xs text-slate-400 mt-1">Can. {label}</p>
-                      </div>
-                    ))}
+                    ].map(({ label, data, bg, text }) => {
+                      const gan = gananciasPorTipo[label]
+                      return (
+                        <div key={label} className={`text-center ${bg} rounded-lg p-2`}>
+                          <p className={`text-xl font-bold ${text}`}>{data.reduce((a, v) => a + v.cantidad, 0)}</p>
+                          <p className="text-xs text-slate-400 mt-1">Can. {label}</p>
+                          {gan != null && (
+                            <>
+                              <div className="border-t border-white/60 my-1.5" />
+                              <p className="text-xs font-semibold text-emerald-600">{fmt(gan)}</p>
+                              <p className="text-xs text-slate-400">ganancia</p>
+                            </>
+                          )}
+                        </div>
+                      )
+                    })}
                   </div>
                   {/* Desglose por tipo de pago */}
                   <div className="space-y-2">
