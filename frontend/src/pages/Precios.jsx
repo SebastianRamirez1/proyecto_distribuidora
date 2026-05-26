@@ -8,6 +8,7 @@ import Button from '../components/ui/Button'
 import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
+import { fmt } from '../utils/fmt'
 
 const TIPOS_PUBLICO = [
   { key: 'precioExtra', field: 'precioExtra', label: 'EXTRA', color: 'amber',  emoji: '💛' },
@@ -139,7 +140,7 @@ export default function Precios() {
                       <div>
                         <p className="text-slate-500 text-sm">Canasta {label}</p>
                         <p className={`text-3xl font-bold ${text}`}>
-                          S/ {Number(precios?.[key] ?? 0).toFixed(2)}
+                          {fmt(precios?.[key] ?? 0)}
                         </p>
                         <p className="text-xs text-slate-400 mt-1">precio por canasta</p>
                       </div>
@@ -158,7 +159,7 @@ export default function Precios() {
                     {TIPOS_PUBLICO.map(({ field, label }) => (
                       <Input
                         key={field}
-                        label={`Precio canasta ${label} (S/)`}
+                        label={`Precio canasta ${label} ($)`}
                         type="number" step="0.01" min="0"
                         placeholder="0.00"
                         value={form[field]}
@@ -194,7 +195,7 @@ export default function Precios() {
                       <div>
                         <p className="text-slate-500 text-sm">Canasta {label}</p>
                         <p className={`text-3xl font-bold ${text}`}>
-                          S/ {Number(costos?.[key] ?? 0).toFixed(2)}
+                          {fmt(costos?.[key] ?? 0)}
                         </p>
                         <p className="text-xs text-slate-400 mt-1">costo por canasta</p>
                       </div>
@@ -213,7 +214,7 @@ export default function Precios() {
                     {TIPOS_COSTO.map(({ field, label }) => (
                       <Input
                         key={field}
-                        label={`Costo canasta ${label} (S/)`}
+                        label={`Costo canasta ${label} ($)`}
                         type="number" step="0.01" min="0"
                         placeholder="0.00"
                         value={formC[field]}

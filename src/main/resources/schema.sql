@@ -170,9 +170,10 @@ DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
 DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);
 DELETE FROM precio_costo   WHERE id NOT IN (SELECT MIN(id) FROM precio_costo);
 
--- Migración: hacer cliente_id nullable en ventas para permitir ventas al público general
--- sin necesidad de registrar ese cliente en la BD.
-ALTER TABLE ventas ALTER COLUMN cliente_id DROP NOT NULL;
+-- Migración: hacer cliente_id nullable en ventas y facturas para permitir ventas
+-- al público general sin necesidad de registrar ese cliente en la BD.
+ALTER TABLE ventas    ALTER COLUMN cliente_id DROP NOT NULL;
+ALTER TABLE facturas  ALTER COLUMN cliente_id DROP NOT NULL;
 
 -- Migración: eliminar el cliente 'Público General' de la BD (ahora es solo un concepto de UI).
 -- Primero desasociar las ventas que lo referenciaban (pasan a ser ventas sin cliente = público).

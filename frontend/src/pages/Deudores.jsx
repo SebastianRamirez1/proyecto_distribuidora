@@ -4,8 +4,7 @@ import { registrarAbono } from '../api/ventasApi'
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
-
-const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
+import { fmt } from '../utils/fmt'
 
 const fmtFecha = (iso) => {
   if (!iso) return '-'

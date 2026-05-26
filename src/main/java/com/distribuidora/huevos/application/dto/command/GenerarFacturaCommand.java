@@ -8,7 +8,8 @@ public class GenerarFacturaCommand {
     @NotNull(message = "El ID de la venta es obligatorio")
     private Long ventaId;
 
-    private String nitCliente;   // opcional, si el cliente lo proporciona
+    private String nitCliente;       // opcional
+    private String nombreCliente;   // opcional — sobreescribe el nombre del cliente registrado
 
     @NotNull(message = "El tipo de factura es obligatorio")
     private TipoFactura tipo = TipoFactura.MANUAL;
@@ -20,6 +21,9 @@ public class GenerarFacturaCommand {
 
     public String getNitCliente() { return nitCliente; }
     public void setNitCliente(String nitCliente) { this.nitCliente = nitCliente; }
+
+    public String getNombreCliente() { return nombreCliente; }
+    public void setNombreCliente(String nombreCliente) { this.nombreCliente = nombreCliente; }
 
     public TipoFactura getTipo() { return tipo; }
     public void setTipo(TipoFactura tipo) { this.tipo = tipo; }

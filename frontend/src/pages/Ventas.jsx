@@ -9,10 +9,10 @@ import Input from '../components/ui/Input'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 import Spinner from '../components/ui/Spinner'
+import { fmt } from '../utils/fmt'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
 const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
-const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : 'S/ 0.00'
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
 const initAbono = { clienteId: '', monto: '', medioPago: 'EFECTIVO' }
@@ -33,7 +33,7 @@ export default function Ventas() {
   const [anulando, setAnulando] = useState(false)
   const [ventaAAnular, setVentaAAnular]   = useState(null)  // { id, nombreCliente, total }
   const [ventaAFacturar, setVentaAFacturar] = useState(null) // { id, nombreCliente, total }
-  const [facturaForm, setFacturaForm]     = useState({ nitCliente: '', tipo: 'MANUAL' })
+  const [facturaForm, setFacturaForm]     = useState({ nombreCliente: '', nitCliente: '', tipo: 'MANUAL' })
   const [generandoFactura, setGenerandoFactura] = useState(false)
   const [facturaGenerada, setFacturaGenerada]   = useState(null) // { id, numero }
   const [fechaSeleccionada, setFechaSeleccionada] = useState(
@@ -153,9 +153,10 @@ export default function Ventas() {
     setError('')
     try {
       const result = await generarFactura({
-        ventaId:    ventaAFacturar.id,
-        nitCliente: facturaForm.nitCliente || null,
-        tipo:       facturaForm.tipo,
+        ventaId:        ventaAFacturar.id,
+        nombreCliente:  facturaForm.nombreCliente || null,
+        nitCliente:     facturaForm.nitCliente || null,
+        tipo:           facturaForm.tipo,
       })
       setFacturaGenerada({ id: result.id, numero: result.numero })
     } catch (e) {
@@ -170,7 +171,7 @@ export default function Ventas() {
   const cerrarModalFactura = () => {
     setVentaAFacturar(null)
     setFacturaGenerada(null)
-    setFacturaForm({ nitCliente: '', tipo: 'MANUAL' })
+    setFacturaForm({ nombreCliente: '', nitCliente: '', tipo: 'MANUAL' })
   }
 
   const totalDia = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
@@ -266,7 +267,7 @@ export default function Ventas() {
                       🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
                     </p>
                     <Input
-                      label="Precio por canasta (S/)"
+                      label="Precio por canasta ($)"
                       type="number" step="0.01" min="0.01"
                       placeholder="0.00"
                       value={formVenta.precioManual}
@@ -297,7 +298,7 @@ export default function Ventas() {
                   ))}
                 </Select>
                 <Input
-                  label="Monto del abono (S/)"
+                  label="Monto del abono ($)"
                   type="number" step="0.01" min="0.01"
                   placeholder="0.00"
                   value={formAbono.monto}
@@ -399,7 +400,12 @@ export default function Ventas() {
                         {!v.anulada && (
                           <div className="flex items-center gap-1">
                             <button
-                              onClick={() => setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
+                              onClick={() => {
+                                setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })
+                                // Pre-llenar con el nombre del cliente registrado si no es público general
+                                const esPublico = !v.clienteId
+                                setFacturaForm(f => ({ ...f, nombreCliente: esPublico ? '' : (v.nombreCliente || '') }))
+                              }}
                               title="Generar factura"
                               className="text-slate-300 hover:text-amber-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
                             >
@@ -439,6 +445,21 @@ export default function Ventas() {
               Total: <span className="font-semibold text-amber-600">{fmt(ventaAFacturar.total)}</span>
             </p>
             <form onSubmit={handleFacturar} className="space-y-3">
+              <div>
+                <label className="block text-xs font-medium text-slate-600 mb-1">
+                  Nombre en la factura <span className="text-slate-400">(opcional)</span>
+                </label>
+                <input
+                  type="text"
+                  placeholder={!ventaAFacturar?.clienteId ? 'Consumidor Final' : ventaAFacturar.nombreCliente}
+                  value={facturaForm.nombreCliente}
+                  onChange={e => setFacturaForm(p => ({ ...p, nombreCliente: e.target.value }))}
+                  className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <p className="text-xs text-slate-400 mt-1">
+                  Si lo dejas vacío se usará "{!ventaAFacturar?.clienteId ? 'Consumidor Final' : ventaAFacturar?.nombreCliente}"
+                </p>
+              </div>
               <div>
                 <label className="block text-xs font-medium text-slate-600 mb-1">
                   NIT / CC del comprador <span className="text-slate-400">(opcional)</span>

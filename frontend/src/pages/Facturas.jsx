@@ -6,8 +6,8 @@ import {
 import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
+import { fmt } from '../utils/fmt'
 
-const fmt = (n) => n != null ? `$ ${Number(n).toLocaleString('es-CO', { minimumFractionDigits: 2 })}` : '$ 0,00'
 const fmtFecha = (iso) => iso ? new Date(iso).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' }) : '—'
 
 const TIPO_COLOR  = { MANUAL: 'bg-slate-100 text-slate-700', ELECTRONICA: 'bg-blue-100 text-blue-700' }

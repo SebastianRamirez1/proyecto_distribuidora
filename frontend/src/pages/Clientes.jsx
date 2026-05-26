@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { listarClientes, crearCliente, actualizarCliente, actualizarPrecioEspecial, eliminarCliente } from '../api/clientesApi'
+import { fmt } from '../utils/fmt'
 import { obtenerCredito } from '../api/creditosApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
@@ -165,8 +166,6 @@ export default function Clientes() {
     }
   }
 
-  const fmt = (n) => n != null ? `S/ ${Number(n).toFixed(2)}` : '-'
-
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -205,20 +204,15 @@ export default function Clientes() {
                   <td className="table-cell">
                     <Badge color={tipoColor[c.tipo]}>{c.tipo}</Badge>
                   </td>
-                  <td className="table-cell text-right">{fmt(c.precioEspecialExtra)}</td>
-                  <td className="table-cell text-right">{fmt(c.precioEspecialAA)}</td>
-                  <td className="table-cell text-right">{fmt(c.precioEspecialA)}</td>
-                  <td className="table-cell text-right">{fmt(c.precioEspecialB)}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialExtra, '—')}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialAA, '—')}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialA, '—')}</td>
+                  <td className="table-cell text-right">{fmt(c.precioEspecialB, '—')}</td>
                   <td className="table-cell text-center">
                     <div className="flex gap-2 justify-center">
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openEditar(c)}>
                         ✏️ Editar
                       </Button>
-                      {c.tipo === 'ESPECIAL' && (
-                        <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openPrecio(c)}>
-                          💲 Precio
-                        </Button>
-                      )}
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCredito(c)}>
                         📋 Crédito
                       </Button>
@@ -268,7 +262,7 @@ export default function Clientes() {
               ].map(({ field, label }) => (
                 <Input
                   key={field}
-                  label={`Precio canasta ${label} (S/)`}
+                  label={`Precio canasta ${label} ($)`}
                   type="number" step="0.01" min="0"
                   placeholder="0.00"
                   value={formEditar[field]}
@@ -316,7 +310,7 @@ export default function Clientes() {
               ].map(({ field, label }) => (
                 <Input
                   key={field}
-                  label={`Precio canasta ${label} (S/)`}
+                  label={`Precio canasta ${label} ($)`}
                   type="number" step="0.01" min="0"
                   placeholder="0.00"
                   value={formCrear[field]}
@@ -345,7 +339,7 @@ export default function Clientes() {
           ].map(({ field, label }) => (
             <Input
               key={field}
-              label={`Precio por canasta ${label} (S/)`}
+              label={`Precio por canasta ${label} ($)`}
               type="number" step="0.01" min="0"
               placeholder="0.00"
               value={formPrecio[field]}
@@ -387,16 +381,16 @@ export default function Clientes() {
           <div className="space-y-3">
             <div className="flex justify-between py-2 border-b">
               <span className="text-slate-500">Monto total fiado</span>
-              <span className="font-semibold">S/ {Number(credito.montoTotal).toFixed(2)}</span>
+              <span className="font-semibold">{fmt(credito.montoTotal)}</span>
             </div>
             <div className="flex justify-between py-2 border-b">
               <span className="text-slate-500">Monto pagado</span>
-              <span className="font-semibold text-emerald-600">S/ {Number(credito.montoPagado).toFixed(2)}</span>
+              <span className="font-semibold text-emerald-600">{fmt(credito.montoPagado)}</span>
             </div>
             <div className="flex justify-between py-2">
               <span className="text-slate-700 font-medium">Saldo pendiente</span>
               <span className={`text-lg font-bold ${Number(credito.saldoPendiente) > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
-                S/ {Number(credito.saldoPendiente).toFixed(2)}
+                {fmt(credito.saldoPendiente)}
               </span>
             </div>
           </div>
