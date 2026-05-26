@@ -16,4 +16,6 @@ public interface FacturaRepository {
     List<Factura> findAllOrderByFechaDesc();
 
     List<Factura> findByClienteIdOrderByFechaDesc(Long clienteId);
+
+    void deleteByClienteId(Long clienteId);
 }

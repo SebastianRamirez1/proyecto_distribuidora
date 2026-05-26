@@ -18,4 +18,6 @@ public interface VentaRepository {
     BigDecimal calcularGananciaPorFecha(LocalDate fecha);
 
     boolean existsByClienteId(Long clienteId);
+
+    void deleteByClienteId(Long clienteId);
 }
