@@ -214,11 +214,6 @@ export default function Clientes() {
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openEditar(c)}>
                         ✏️ Editar
                       </Button>
-                      {c.tipo === 'ESPECIAL' && (
-                        <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openPrecio(c)}>
-                          💲 Precio
-                        </Button>
-                      )}
                       <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCredito(c)}>
                         📋 Crédito
                       </Button>
