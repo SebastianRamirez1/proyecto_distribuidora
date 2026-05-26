@@ -69,6 +69,14 @@ CREATE TABLE IF NOT EXISTS precio_publico (
     precio_b     DECIMAL(12, 2) NOT NULL DEFAULT 0
 );
 
+CREATE TABLE IF NOT EXISTS precio_costo (
+    id           BIGSERIAL PRIMARY KEY,
+    costo_extra  DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    costo_aa     DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    costo_a      DECIMAL(12, 2) NOT NULL DEFAULT 0,
+    costo_b      DECIMAL(12, 2) NOT NULL DEFAULT 0
+);
+
 -- ============================================================
 -- Migración idempotente: agregar columnas nuevas en BD existente
 -- ============================================================
@@ -97,6 +105,9 @@ UPDATE ventas SET tipo_producto = 'A' WHERE tipo_producto = 'NORMAL';
 -- anulación de ventas (soft delete)
 ALTER TABLE ventas ADD COLUMN IF NOT EXISTS anulada         BOOLEAN   NOT NULL DEFAULT FALSE;
 ALTER TABLE ventas ADD COLUMN IF NOT EXISTS fecha_anulacion TIMESTAMP;
+
+-- costo de liquidación por venta (nullable para compatibilidad con registros anteriores)
+ALTER TABLE ventas ADD COLUMN IF NOT EXISTS costo_unitario DECIMAL(12, 2);
 
 CREATE TABLE IF NOT EXISTS configuracion_factura (
     id                 BIGSERIAL    PRIMARY KEY,
@@ -145,6 +156,11 @@ INSERT INTO precio_publico (precio_extra, precio_aa, precio_a, precio_b)
 SELECT 0.00, 0.00, 0.00, 0.00
 WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
 
+-- Precio de liquidación/costo inicial en 0 (configurable)
+INSERT INTO precio_costo (costo_extra, costo_aa, costo_a, costo_b)
+SELECT 0.00, 0.00, 0.00, 0.00
+WHERE NOT EXISTS (SELECT 1 FROM precio_costo);
+
 -- ============================================================
 -- Limpieza de filas duplicadas en tablas singleton
 -- Conserva solo la fila de menor id para garantizar
@@ -152,6 +168,7 @@ WHERE NOT EXISTS (SELECT 1 FROM precio_publico);
 -- ============================================================
 DELETE FROM inventario    WHERE id NOT IN (SELECT MIN(id) FROM inventario);
 DELETE FROM precio_publico WHERE id NOT IN (SELECT MIN(id) FROM precio_publico);
+DELETE FROM precio_costo   WHERE id NOT IN (SELECT MIN(id) FROM precio_costo);
 
 -- Fila única de configuracion_factura
 INSERT INTO configuracion_factura (razon_social, nit, direccion, ciudad, telefono, regimen,

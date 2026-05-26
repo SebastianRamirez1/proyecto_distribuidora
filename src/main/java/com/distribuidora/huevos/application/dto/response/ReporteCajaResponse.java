@@ -11,6 +11,7 @@ public class ReporteCajaResponse {
     private BigDecimal totalFiado;
     private BigDecimal totalAbonos;
     private BigDecimal totalCobrado;
+    private BigDecimal totalGanancia;
 
     public ReporteCajaResponse() {}
 
@@ -31,4 +32,7 @@ public class ReporteCajaResponse {
 
     public BigDecimal getTotalCobrado() { return totalCobrado; }
     public void setTotalCobrado(BigDecimal totalCobrado) { this.totalCobrado = totalCobrado; }
+
+    public BigDecimal getTotalGanancia() { return totalGanancia; }
+    public void setTotalGanancia(BigDecimal totalGanancia) { this.totalGanancia = totalGanancia; }
 }

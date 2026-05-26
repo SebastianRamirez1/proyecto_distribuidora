@@ -20,7 +20,7 @@ class VentaTest {
     @Test
     void calcularTotalMultiplicaCantidadPorPrecioUnitario() {
         Venta venta = new Venta(1L, clienteNormal, TipoProducto.EXTRA,
-                new Cantidad(3), Precio.de("4.00"),
+                new Cantidad(3), Precio.de("4.00"), Precio.cero(),
                 TipoPago.EFECTIVO, LocalDateTime.now());
 
         Dinero total = venta.calcularTotal();
@@ -30,7 +30,7 @@ class VentaTest {
     @Test
     void calcularTotalParaUnaCanasta() {
         Venta venta = new Venta(1L, clienteNormal, TipoProducto.A,
-                new Cantidad(1), Precio.de("3.00"),
+                new Cantidad(1), Precio.de("3.00"), Precio.cero(),
                 TipoPago.TRANSFERENCIA, LocalDateTime.now());
 
         Dinero total = venta.calcularTotal();
@@ -39,10 +39,8 @@ class VentaTest {
 
     @Test
     void ventaNoExponeSetters() {
-        // Verificación en tiempo de compilación: Venta es final y sus campos son final.
-        // Si este test compila, la inmutabilidad está garantizada estructuralmente.
         Venta venta = new Venta(1L, clienteNormal, TipoProducto.EXTRA,
-                new Cantidad(2), Precio.de("4.50"),
+                new Cantidad(2), Precio.de("4.50"), Precio.cero(),
                 TipoPago.FIADO, LocalDateTime.now());
 
         assertThat(venta.getId()).isEqualTo(1L);
@@ -54,7 +52,7 @@ class VentaTest {
     void ventaConClienteNuloLanzaExcepcion() {
         assertThatThrownBy(() ->
                 new Venta(1L, null, TipoProducto.EXTRA,
-                        new Cantidad(1), Precio.de("4.00"),
+                        new Cantidad(1), Precio.de("4.00"), Precio.cero(),
                         TipoPago.EFECTIVO, LocalDateTime.now()))
                 .isInstanceOf(NullPointerException.class);
     }

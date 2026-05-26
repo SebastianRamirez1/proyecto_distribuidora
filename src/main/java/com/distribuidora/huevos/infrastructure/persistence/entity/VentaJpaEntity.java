@@ -35,6 +35,9 @@ public class VentaJpaEntity {
     @Column(name = "precio_unitario", nullable = false, precision = 12, scale = 2)
     private BigDecimal precioUnitario;
 
+    @Column(name = "costo_unitario", precision = 12, scale = 2)
+    private BigDecimal costoUnitario;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "tipo_pago", nullable = false, length = 20)
     private TipoPago tipoPago;
