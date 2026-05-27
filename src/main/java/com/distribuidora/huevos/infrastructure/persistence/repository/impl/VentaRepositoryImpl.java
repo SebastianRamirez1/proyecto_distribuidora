@@ -51,6 +51,13 @@ public class VentaRepositoryImpl implements VentaRepository {
     }
 
     @Override
+    public List<Venta> findFiadasByClienteId(Long clienteId) {
+        return jpaRepository.findFiadasByClienteId(clienteId).stream()
+                .map(mapper::toDomain)
+                .toList();
+    }
+
+    @Override
     public void deleteByClienteId(Long clienteId) {
         jpaRepository.deleteByClienteId(clienteId);
     }

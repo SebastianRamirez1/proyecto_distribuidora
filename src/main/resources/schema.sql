@@ -143,6 +143,22 @@ CREATE TABLE IF NOT EXISTS facturas (
 );
 
 -- ============================================================
+-- Feature: notas internas por cliente
+-- ============================================================
+ALTER TABLE clientes ADD COLUMN IF NOT EXISTS notas TEXT;
+
+-- ============================================================
+-- Feature: carga de saldo anterior (migración digital)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS carga_saldo (
+    id          BIGSERIAL     PRIMARY KEY,
+    cliente_id  BIGINT        NOT NULL REFERENCES clientes(id),
+    monto       DECIMAL(12,2) NOT NULL,
+    descripcion VARCHAR(300),
+    fecha       TIMESTAMP     NOT NULL DEFAULT NOW()
+);
+
+-- ============================================================
 -- Datos iniciales (idempotentes)
 -- ============================================================
 
