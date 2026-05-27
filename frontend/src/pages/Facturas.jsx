@@ -185,36 +185,36 @@ export default function Facturas() {
                   <table className="w-full text-sm">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">N° Factura</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
-                        <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
-                        <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
-                        <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
-                        <th className="text-center px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
-                        <th className="px-4 py-3"></th>
+                        <th className="text-left px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">N° Factura</th>
+                        <th className="text-left px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
+                        <th className="text-left px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Fecha</th>
+                        <th className="text-right px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Total</th>
+                        <th className="text-center px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Tipo</th>
+                        <th className="text-center px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Estado</th>
+                        <th className="px-2 py-2.5"></th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100">
                       {filtradas.map((f, i) => (
                         <tr key={f.id} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="px-4 py-3 font-mono font-semibold text-amber-600">{f.numero}</td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 py-2.5 font-mono font-semibold text-amber-600">{f.numero}</td>
+                          <td className="px-2 py-2.5">
                             <p className="font-medium text-slate-800">{f.nombreCliente}</p>
                             <p className="text-xs text-slate-400">{f.nitCliente !== 'Sin NIT' ? `NIT: ${f.nitCliente}` : 'Sin NIT'}</p>
                           </td>
-                          <td className="px-4 py-3 text-slate-500 text-xs">{fmtFecha(f.fechaEmision)}</td>
-                          <td className="px-4 py-3 text-right font-semibold text-slate-800">{fmt(f.total)}</td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-2 py-2.5 text-slate-500 text-xs">{fmtFecha(f.fechaEmision)}</td>
+                          <td className="px-2 py-2.5 text-right font-semibold text-slate-800">{fmt(f.total)}</td>
+                          <td className="px-2 py-2.5 text-center">
                             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${TIPO_COLOR[f.tipo] ?? 'bg-slate-100 text-slate-600'}`}>
                               {f.tipo === 'ELECTRONICA' ? '⚡ Electrónica' : '📄 Manual'}
                             </span>
                           </td>
-                          <td className="px-4 py-3 text-center">
+                          <td className="px-2 py-2.5 text-center">
                             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${ESTADO_COLOR[f.estado] ?? 'bg-slate-100 text-slate-600'}`}>
                               {f.estado === 'EMITIDA' ? 'Emitida' : f.estado === 'ENVIADA_DIAN' ? 'Enviada DIAN' : 'Anulada'}
                             </span>
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 py-2.5">
                             <button
                               onClick={() => handleDescargar(f)}
                               disabled={descargando === f.id}

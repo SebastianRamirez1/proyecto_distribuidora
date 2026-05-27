@@ -188,7 +188,7 @@ export default function Ventas() {
       <Alert type="error"   message={error}   onClose={() => setError('')} />
       <Alert type="success" message={success} onClose={() => setSuccess('')} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:flex-1 lg:min-h-0">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:flex-1 lg:min-h-0">
         {/* Formulario */}
         <div className="lg:col-span-1 lg:overflow-y-auto">
           {/* Tabs */}
@@ -331,7 +331,7 @@ export default function Ventas() {
         </div>
 
         {/* Lista de ventas */}
-        <div className="lg:col-span-2 lg:flex lg:flex-col lg:min-h-0">
+        <div className="lg:col-span-3 lg:flex lg:flex-col lg:min-h-0">
           <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
             <div className="flex items-center gap-3">
               <h3 className="font-semibold text-slate-700">
@@ -367,15 +367,15 @@ export default function Ventas() {
               <table className="w-full text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="table-head">
-                    <th className="px-4 py-3 text-left">Cliente</th>
-                    <th className="px-4 py-3 text-left">Tipo</th>
-                    <th className="px-4 py-3 text-right">Cant.</th>
-                    <th className="px-4 py-3 text-right">P/U</th>
-                    <th className="px-4 py-3 text-right">Total</th>
-                    <th className="px-4 py-3 text-right">Ganancia</th>
-                    <th className="px-4 py-3 text-left">Pago</th>
-                    <th className="px-4 py-3 text-left">Hora</th>
-                    <th className="px-4 py-3"></th>
+                    <th className="px-2 py-2.5 text-left">Cliente</th>
+                    <th className="px-2 py-2.5 text-left">Tipo</th>
+                    <th className="px-2 py-2.5 text-right">Cant.</th>
+                    <th className="px-2 py-2.5 text-right">P/U</th>
+                    <th className="px-2 py-2.5 text-right">Total</th>
+                    <th className="px-2 py-2.5 text-right">Ganancia</th>
+                    <th className="px-2 py-2.5 text-left">Pago</th>
+                    <th className="px-2 py-2.5 text-left">Hora</th>
+                    <th className="px-2 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
