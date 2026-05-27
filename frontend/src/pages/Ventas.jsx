@@ -179,8 +179,8 @@ export default function Ventas() {
   const esHoy = fechaSeleccionada === hoy
 
   return (
-    <div>
-      <div className="mb-6">
+    <div className="lg:h-full lg:flex lg:flex-col">
+      <div className="mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
         <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
       </div>
@@ -188,9 +188,9 @@ export default function Ventas() {
       <Alert type="error"   message={error}   onClose={() => setError('')} />
       <Alert type="success" message={success} onClose={() => setSuccess('')} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:flex-1 lg:min-h-0">
         {/* Formulario */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 lg:overflow-y-auto">
           {/* Tabs */}
           <div className="flex mb-4 bg-slate-100 rounded-lg p-1">
             <button
@@ -331,8 +331,8 @@ export default function Ventas() {
         </div>
 
         {/* Lista de ventas */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        <div className="lg:col-span-2 lg:flex lg:flex-col lg:min-h-0">
+          <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
             <div className="flex items-center gap-3">
               <h3 className="font-semibold text-slate-700">
                 {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
@@ -359,11 +359,13 @@ export default function Ventas() {
               </span>
             </div>
           </div>
-          {loading ? <Spinner /> : (
-            <Card className="p-0 overflow-hidden">
-              <div className="overflow-x-auto">
+          {loading ? (
+            <div className="lg:flex-1 flex items-center justify-center"><Spinner /></div>
+          ) : (
+            <Card className="p-0 overflow-hidden lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
+              <div className="overflow-x-auto lg:overflow-y-auto lg:flex-1">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="sticky top-0 z-10">
                   <tr className="table-head">
                     <th className="px-4 py-3 text-left">Cliente</th>
                     <th className="px-4 py-3 text-left">Tipo</th>
