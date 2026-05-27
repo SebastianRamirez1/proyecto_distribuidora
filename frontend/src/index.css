@@ -50,6 +50,6 @@
     @apply bg-slate-50 text-slate-600 text-xs font-semibold uppercase tracking-wider;
   }
   .table-cell {
-    @apply px-4 py-3 text-sm text-slate-700;
+    @apply px-2 py-2.5 text-sm text-slate-700;
   }
 }
