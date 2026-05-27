@@ -47,9 +47,10 @@ public class ActualizarClienteService {
                     Precio.de(command.getPrecioEspecialB()));
         }
 
-        // Preserva el descuento por volumen existente; nombre y tipo se reemplazan
+        // Preserva el descuento por volumen existente; nombre, tipo y notas se actualizan
         Cliente actualizado = new Cliente(existente.getId(), command.getNombre(),
-                command.getTipo(), precioEspecial, existente.getDescuentoVolumen());
+                command.getTipo(), precioEspecial, existente.getDescuentoVolumen(),
+                command.getNotas());
 
         return clienteMapper.toResponse(clienteRepository.save(actualizado));
     }

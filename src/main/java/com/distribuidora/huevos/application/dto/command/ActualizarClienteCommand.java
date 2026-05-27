@@ -39,4 +39,9 @@ public class ActualizarClienteCommand {
 
     public BigDecimal getPrecioEspecialB() { return precioEspecialB; }
     public void setPrecioEspecialB(BigDecimal v) { this.precioEspecialB = v; }
+
+    /** Notas internas opcionales sobre el cliente. */
+    private String notas;
+    public String getNotas()             { return notas; }
+    public void setNotas(String notas)   { this.notas = notas; }
 }

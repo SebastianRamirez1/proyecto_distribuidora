@@ -28,6 +28,8 @@ public class ClienteMapper {
             response.setDescuentoPrecioB(cliente.getDescuentoVolumen().getPrecioB().getValor());
         }
 
+        response.setNotas(cliente.getNotas());
+
         return response;
     }
 }

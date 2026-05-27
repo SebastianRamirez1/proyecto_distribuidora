@@ -14,10 +14,13 @@ public class Cliente {
     private final TipoCliente tipo;
     private final PrecioEspecial precioEspecial;
     private final DescuentoPorVolumen descuentoVolumen;
+    /** Notas internas sobre el cliente (acuerdos verbales, condiciones, etc.). Nullable. */
+    private final String notas;
 
     public Cliente(Long id, String nombre, TipoCliente tipo,
                    PrecioEspecial precioEspecial,
-                   DescuentoPorVolumen descuentoVolumen) {
+                   DescuentoPorVolumen descuentoVolumen,
+                   String notas) {
         Objects.requireNonNull(nombre, "El nombre del cliente no puede ser null");
         Objects.requireNonNull(tipo, "El tipo de cliente no puede ser null");
         if (nombre.isBlank()) {
@@ -27,11 +30,19 @@ public class Cliente {
             throw new ClienteIncompletoException(
                     "Un cliente ESPECIAL debe tener precio especial definido. Cliente: " + nombre);
         }
-        this.id = id;
-        this.nombre = nombre;
-        this.tipo = tipo;
-        this.precioEspecial = precioEspecial;
+        this.id               = id;
+        this.nombre           = nombre;
+        this.tipo             = tipo;
+        this.precioEspecial   = precioEspecial;
         this.descuentoVolumen = descuentoVolumen;
+        this.notas            = notas;
+    }
+
+    /** Constructor de compatibilidad (sin notas). */
+    public Cliente(Long id, String nombre, TipoCliente tipo,
+                   PrecioEspecial precioEspecial,
+                   DescuentoPorVolumen descuentoVolumen) {
+        this(id, nombre, tipo, precioEspecial, descuentoVolumen, null);
     }
 
     public Precio calcularPrecio(TipoProducto tipoProducto, Cantidad cantidad,
@@ -46,11 +57,11 @@ public class Cliente {
     }
 
     public Cliente conPrecioEspecial(PrecioEspecial nuevoPrecio) {
-        return new Cliente(this.id, this.nombre, this.tipo, nuevoPrecio, this.descuentoVolumen);
+        return new Cliente(this.id, this.nombre, this.tipo, nuevoPrecio, this.descuentoVolumen, this.notas);
     }
 
     public Cliente conDescuentoVolumen(DescuentoPorVolumen nuevoDescuento) {
-        return new Cliente(this.id, this.nombre, this.tipo, this.precioEspecial, nuevoDescuento);
+        return new Cliente(this.id, this.nombre, this.tipo, this.precioEspecial, nuevoDescuento, this.notas);
     }
 
     public Long getId() {
@@ -71,6 +82,10 @@ public class Cliente {
 
     public DescuentoPorVolumen getDescuentoVolumen() {
         return descuentoVolumen;
+    }
+
+    public String getNotas() {
+        return notas;
     }
 
     public boolean esEspecial() {
