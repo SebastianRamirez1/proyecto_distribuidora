@@ -19,5 +19,8 @@ public interface VentaRepository {
 
     boolean existsByClienteId(Long clienteId);
 
+    /** Ventas al fiado (no anuladas) de un cliente, ordenadas por fecha ascendente. */
+    List<Venta> findFiadasByClienteId(Long clienteId);
+
     void deleteByClienteId(Long clienteId);
 }

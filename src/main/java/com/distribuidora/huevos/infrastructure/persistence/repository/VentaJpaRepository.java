@@ -38,6 +38,11 @@ public interface VentaJpaRepository extends JpaRepository<VentaJpaEntity, Long> 
 
     boolean existsByClienteId(Long clienteId);
 
+    @Query("SELECT v FROM VentaJpaEntity v WHERE v.cliente.id = :clienteId " +
+           "AND v.tipoPago = com.distribuidora.huevos.domain.enums.TipoPago.FIADO " +
+           "AND v.anulada = false ORDER BY v.fecha ASC")
+    List<VentaJpaEntity> findFiadasByClienteId(@Param("clienteId") Long clienteId);
+
     @Modifying
     @Transactional
     @Query("DELETE FROM VentaJpaEntity v WHERE v.cliente.id = :clienteId")

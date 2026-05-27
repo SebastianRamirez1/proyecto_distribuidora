@@ -54,4 +54,7 @@ public class ClienteJpaEntity {
 
     @Column(name = "descuento_precio_b", precision = 12, scale = 2)
     private BigDecimal descuentoPrecioB;
+
+    @Column(columnDefinition = "TEXT")
+    private String notas;
 }

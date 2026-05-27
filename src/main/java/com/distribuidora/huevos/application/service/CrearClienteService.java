@@ -28,7 +28,7 @@ public class CrearClienteService {
         DescuentoPorVolumen descuentoVolumen = construirDescuentoVolumen(command);
 
         Cliente cliente = new Cliente(null, command.getNombre(), command.getTipo(),
-                precioEspecial, descuentoVolumen);
+                precioEspecial, descuentoVolumen, command.getNotas());
 
         Cliente guardado = clienteRepository.save(cliente);
         return clienteMapper.toResponse(guardado);

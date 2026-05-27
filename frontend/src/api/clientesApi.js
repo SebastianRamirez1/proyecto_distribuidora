@@ -12,3 +12,11 @@ export const actualizarPrecioEspecial = (id, data) =>
 
 export const eliminarCliente = (id) =>
   api.delete(`/clientes/${id}`).then(r => r.data)
+
+/** Carga un saldo deudor anterior sin crear una venta (migración de cuaderno). */
+export const cargarSaldoAnterior = (id, data) =>
+  api.post(`/clientes/${id}/saldo-anterior`, data).then(r => r.data)
+
+/** Devuelve el estado de cuenta completo del cliente (cargas + ventas fiado + abonos). */
+export const obtenerEstadoCuenta = (id) =>
+  api.get(`/clientes/${id}/estado-cuenta`).then(r => r.data)

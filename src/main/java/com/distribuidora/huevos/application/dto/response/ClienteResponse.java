@@ -60,4 +60,8 @@ public class ClienteResponse {
 
     public BigDecimal getDescuentoPrecioB() { return descuentoPrecioB; }
     public void setDescuentoPrecioB(BigDecimal v) { this.descuentoPrecioB = v; }
+
+    private String notas;
+    public String getNotas()             { return notas; }
+    public void setNotas(String notas)   { this.notas = notas; }
 }

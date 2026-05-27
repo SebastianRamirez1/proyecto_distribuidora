@@ -36,7 +36,7 @@ public class ClienteJpaMapper {
         }
 
         return new Cliente(entity.getId(), entity.getNombre(), entity.getTipo(),
-                precioEspecial, descuentoVolumen);
+                precioEspecial, descuentoVolumen, entity.getNotas());
     }
 
     public ClienteJpaEntity toJpa(Cliente cliente) {
@@ -59,6 +59,8 @@ public class ClienteJpaMapper {
             entity.setDescuentoPrecioA(cliente.getDescuentoVolumen().getPrecioA().getValor());
             entity.setDescuentoPrecioB(cliente.getDescuentoVolumen().getPrecioB().getValor());
         }
+
+        entity.setNotas(cliente.getNotas());
 
         return entity;
     }

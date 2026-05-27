@@ -61,4 +61,9 @@ public class CrearClienteCommand {
 
     public BigDecimal getDescuentoPrecioB() { return descuentoPrecioB; }
     public void setDescuentoPrecioB(BigDecimal v) { this.descuentoPrecioB = v; }
+
+    /** Notas internas opcionales sobre el cliente. */
+    private String notas;
+    public String getNotas()             { return notas; }
+    public void setNotas(String notas)   { this.notas = notas; }
 }
