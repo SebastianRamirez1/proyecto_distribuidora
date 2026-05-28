@@ -34,6 +34,10 @@ public final class Precio {
         return new Precio(this.valor.multiply(BigDecimal.valueOf(cantidad)));
     }
 
+    public Precio dividir(int divisor) {
+        return new Precio(this.valor.divide(BigDecimal.valueOf(divisor), 2, RoundingMode.HALF_UP));
+    }
+
     public BigDecimal getValor() {
         return valor;
     }

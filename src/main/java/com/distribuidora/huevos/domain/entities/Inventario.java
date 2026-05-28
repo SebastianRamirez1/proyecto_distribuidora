@@ -22,38 +22,52 @@ public class Inventario {
 
     public int obtenerStock(TipoProducto tipo) {
         return switch (tipo) {
-            case EXTRA -> stockExtra;
-            case AA    -> stockAA;
-            case A     -> stockA;
-            case B     -> stockB;
+            case EXTRA, EXTRA_MEDIA -> stockExtra;
+            case AA,    AA_MEDIA    -> stockAA;
+            case A                  -> stockA;
+            case B                  -> stockB;
+        };
+    }
+
+    /**
+     * Cuántas canastas ENTERAS se necesitan para atender una venta del tipo dado.
+     * Para medias canastas: ceil(n/2) — p.ej. 1 media = 1 entera abierta; 2 medias = 1 entera.
+     */
+    private int canastasEnteras(TipoProducto tipo, Cantidad cantidad) {
+        return switch (tipo) {
+            case EXTRA_MEDIA, AA_MEDIA -> (cantidad.getValor() + 1) / 2;
+            default                    -> cantidad.getValor();
         };
     }
 
     public void validarStock(TipoProducto tipo, Cantidad cantidad) {
-        int disponible = obtenerStock(tipo);
-        if (disponible < cantidad.getValor()) {
+        int disponible  = obtenerStock(tipo);
+        int necesarias  = canastasEnteras(tipo, cantidad);
+        if (disponible < necesarias) {
             throw new StockInsuficienteException(
-                    String.format("Stock insuficiente para canastas %s. Disponible: %d, solicitado: %d",
-                            tipo.name(), disponible, cantidad.getValor()));
+                    String.format("Stock insuficiente para %s. Disponible: %d canastas, solicitado: %d",
+                            tipo.name(), disponible, necesarias));
         }
     }
 
     public void descontar(TipoProducto tipo, Cantidad cantidad) {
         validarStock(tipo, cantidad);
+        int canastas = canastasEnteras(tipo, cantidad);
         switch (tipo) {
-            case EXTRA -> stockExtra -= cantidad.getValor();
-            case AA    -> stockAA    -= cantidad.getValor();
-            case A     -> stockA     -= cantidad.getValor();
-            case B     -> stockB     -= cantidad.getValor();
+            case EXTRA, EXTRA_MEDIA -> stockExtra -= canastas;
+            case AA,    AA_MEDIA    -> stockAA    -= canastas;
+            case A                  -> stockA     -= canastas;
+            case B                  -> stockB     -= canastas;
         }
     }
 
     public void agregar(TipoProducto tipo, Cantidad cantidad) {
+        int canastas = canastasEnteras(tipo, cantidad);
         switch (tipo) {
-            case EXTRA -> stockExtra += cantidad.getValor();
-            case AA    -> stockAA    += cantidad.getValor();
-            case A     -> stockA     += cantidad.getValor();
-            case B     -> stockB     += cantidad.getValor();
+            case EXTRA, EXTRA_MEDIA -> stockExtra += canastas;
+            case AA,    AA_MEDIA    -> stockAA    += canastas;
+            case A                  -> stockA     += canastas;
+            case B                  -> stockB     += canastas;
         }
     }
 
