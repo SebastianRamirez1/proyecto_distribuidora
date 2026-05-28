@@ -22,6 +22,7 @@ function CajaRow({ icon, label, value, highlight = false }) {
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
 const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate', EXTRA_MEDIA: 'orange', AA_MEDIA: 'lime' }
+const tipoLabel = { EXTRA: 'EXTRA', AA: 'AA', A: 'A', B: 'B', EXTRA_MEDIA: '½ EXTRA', AA_MEDIA: '½ AA' }
 
 // Formato YYYY-MM-DD para el input type="date"
 const toInputDate = (d) => d.toISOString().slice(0, 10)
@@ -243,7 +244,7 @@ export default function Reportes() {
                       <td className="table-cell text-slate-400">{i + 1}</td>
                       <td className="table-cell font-medium">{v.nombreCliente}</td>
                       <td className="table-cell">
-                        <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
+                        <Badge color={tipoColor[v.tipoProducto]}>{tipoLabel[v.tipoProducto] ?? v.tipoProducto}</Badge>
                       </td>
                       <td className="table-cell text-right">{v.cantidad}</td>
                       <td className="table-cell text-right">{fmt(v.precioUnitario)}</td>
