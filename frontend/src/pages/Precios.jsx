@@ -147,8 +147,23 @@ export default function Precios() {
                     </Card>
                   )
                 })}
+                {/* Precios derivados de media canasta (solo informativo, se calculan automáticamente) */}
+                {[
+                  { label: '½ EXTRA', precio: Number(precios?.precioExtra ?? 0) / 2, bg: 'bg-orange-100', text: 'text-orange-500' },
+                  { label: '½ AA',    precio: Number(precios?.precioAA    ?? 0) / 2, bg: 'bg-lime-100',   text: 'text-lime-600'  },
+                ].map(({ label, precio, bg, text }) => precio > 0 && (
+                  <Card key={label} className="flex items-center gap-4 border border-dashed border-slate-200">
+                    <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-xl font-bold flex-shrink-0 ${text}`}>½</div>
+                    <div>
+                      <p className="text-slate-500 text-sm">Media canasta {label}</p>
+                      <p className={`text-3xl font-bold ${text}`}>{fmt(precio)}</p>
+                      <p className="text-xs text-slate-400 mt-1">derivado automático (÷ 2)</p>
+                    </div>
+                  </Card>
+                ))}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
                   ℹ️ Aplica a clientes <strong>NORMAL</strong>. Los clientes <strong>ESPECIAL</strong> tienen precios personalizados en su perfil.
+                  Las medias canastas usan siempre la mitad del precio de su tipo padre.
                 </div>
               </div>
 
@@ -202,8 +217,22 @@ export default function Precios() {
                     </Card>
                   )
                 })}
+                {[
+                  { label: '½ EXTRA', costo: Number(costos?.costoExtra ?? 0) / 2, bg: 'bg-orange-100', text: 'text-orange-500' },
+                  { label: '½ AA',    costo: Number(costos?.costoAA    ?? 0) / 2, bg: 'bg-lime-100',   text: 'text-lime-600'  },
+                ].map(({ label, costo, bg, text }) => costo > 0 && (
+                  <Card key={label} className="flex items-center gap-4 border border-dashed border-slate-200">
+                    <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-xl font-bold flex-shrink-0 ${text}`}>½</div>
+                    <div>
+                      <p className="text-slate-500 text-sm">Media canasta {label}</p>
+                      <p className={`text-3xl font-bold ${text}`}>{fmt(costo)}</p>
+                      <p className="text-xs text-slate-400 mt-1">costo derivado (÷ 2)</p>
+                    </div>
+                  </Card>
+                ))}
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-700">
                   ℹ️ El costo se guarda en cada venta al momento de registrarla. Cambiar este valor no afecta ventas pasadas.
+                  El costo de medias canastas se calcula automáticamente como la mitad del tipo padre.
                 </div>
               </div>
 
