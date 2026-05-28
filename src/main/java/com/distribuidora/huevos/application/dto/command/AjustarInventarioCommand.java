@@ -1,18 +1,19 @@
 package com.distribuidora.huevos.application.dto.command;
 
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
 
 /**
  * Establece el stock exacto de cada tipo.
- * Usado para correcciones manuales: mermas, tomas sin registro, conteo físico, etc.
+ * stockExtra y stockAA aceptan 0.5 para representar media canasta abierta.
  */
 public class AjustarInventarioCommand {
 
-    @Min(value = 0, message = "El stock EXTRA no puede ser negativo")
-    private int stockExtra;
+    @DecimalMin(value = "0.0", message = "El stock EXTRA no puede ser negativo")
+    private double stockExtra;
 
-    @Min(value = 0, message = "El stock AA no puede ser negativo")
-    private int stockAA;
+    @DecimalMin(value = "0.0", message = "El stock AA no puede ser negativo")
+    private double stockAA;
 
     @Min(value = 0, message = "El stock A no puede ser negativo")
     private int stockA;
@@ -22,15 +23,15 @@ public class AjustarInventarioCommand {
 
     public AjustarInventarioCommand() {}
 
-    public int getStockExtra() { return stockExtra; }
-    public void setStockExtra(int stockExtra) { this.stockExtra = stockExtra; }
+    public double getStockExtra() { return stockExtra; }
+    public void   setStockExtra(double stockExtra) { this.stockExtra = stockExtra; }
 
-    public int getStockAA() { return stockAA; }
-    public void setStockAA(int stockAA) { this.stockAA = stockAA; }
+    public double getStockAA() { return stockAA; }
+    public void   setStockAA(double stockAA) { this.stockAA = stockAA; }
 
-    public int getStockA() { return stockA; }
+    public int  getStockA() { return stockA; }
     public void setStockA(int stockA) { this.stockA = stockA; }
 
-    public int getStockB() { return stockB; }
+    public int  getStockB() { return stockB; }
     public void setStockB(int stockB) { this.stockB = stockB; }
 }

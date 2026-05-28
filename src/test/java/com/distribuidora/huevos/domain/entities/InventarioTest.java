@@ -13,7 +13,7 @@ class InventarioTest {
     void descontarReduceElStockCorrectamente() {
         Inventario inventario = new Inventario(1L, 10, 0, 0, 0);
         inventario.descontar(TipoProducto.EXTRA, new Cantidad(3));
-        assertThat(inventario.getStockExtra()).isEqualTo(7);
+        assertThat(inventario.getStockExtra()).isEqualTo(7.0);
     }
 
     @Test
@@ -21,7 +21,7 @@ class InventarioTest {
         Inventario inventario = new Inventario(1L, 10, 0, 20, 0);
         inventario.descontar(TipoProducto.A, new Cantidad(5));
         assertThat(inventario.getStockA()).isEqualTo(15);
-        assertThat(inventario.getStockExtra()).isEqualTo(10);
+        assertThat(inventario.getStockExtra()).isEqualTo(10.0);
     }
 
     @Test
@@ -38,22 +38,22 @@ class InventarioTest {
         Inventario inventario = new Inventario(1L, 5, 0, 0, 0);
         assertThatNoException().isThrownBy(() ->
                 inventario.descontar(TipoProducto.EXTRA, new Cantidad(5)));
-        assertThat(inventario.getStockExtra()).isEqualTo(0);
+        assertThat(inventario.getStockExtra()).isEqualTo(0.0);
     }
 
     @Test
     void agregarAumentaElStockCorrectamente() {
         Inventario inventario = new Inventario(1L, 10, 0, 0, 0);
         inventario.agregar(TipoProducto.EXTRA, new Cantidad(5));
-        assertThat(inventario.getStockExtra()).isEqualTo(15);
+        assertThat(inventario.getStockExtra()).isEqualTo(15.0);
     }
 
     @Test
     void agregarStockAANoAfectaStockExtra() {
         Inventario inventario = new Inventario(1L, 10, 20, 0, 0);
         inventario.agregar(TipoProducto.AA, new Cantidad(10));
-        assertThat(inventario.getStockAA()).isEqualTo(30);
-        assertThat(inventario.getStockExtra()).isEqualTo(10);
+        assertThat(inventario.getStockAA()).isEqualTo(30.0);
+        assertThat(inventario.getStockExtra()).isEqualTo(10.0);
     }
 
     @Test

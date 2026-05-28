@@ -6,11 +6,14 @@ import Alert from '../components/ui/Alert'
 import Spinner from '../components/ui/Spinner'
 
 const TIPOS = [
-  { key: 'stockExtra', tipo: 'EXTRA', label: 'EXTRA',  color: 'amber',   emoji: '🥚' },
-  { key: 'stockAA',    tipo: 'AA',    label: 'AA',     color: 'yellow',  emoji: '🥚' },
-  { key: 'stockA',     tipo: 'A',     label: 'A',      color: 'blue',    emoji: '🥚' },
-  { key: 'stockB',     tipo: 'B',     label: 'B',      color: 'slate',   emoji: '🥚' },
+  { key: 'stockExtra', tipo: 'EXTRA', label: 'EXTRA',  color: 'amber',  emoji: '🥚', tieneMedia: true  },
+  { key: 'stockAA',    tipo: 'AA',    label: 'AA',     color: 'yellow', emoji: '🥚', tieneMedia: true  },
+  { key: 'stockA',     tipo: 'A',     label: 'A',      color: 'blue',   emoji: '🥚', tieneMedia: false },
+  { key: 'stockB',     tipo: 'B',     label: 'B',      color: 'slate',  emoji: '🥚', tieneMedia: false },
 ]
+
+// Formatea el stock: 80.0 → "80", 79.5 → "79.5"
+const fmtStock = (v) => (v == null ? 0 : Number.isInteger(Number(v)) ? Number(v) : Number(v).toFixed(1))
 
 const colorMap = {
   amber:  { bg: 'bg-amber-100',  text: 'text-amber-600'  },
@@ -126,10 +129,11 @@ export default function Inventario() {
           <div className="space-y-4">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Stock actual</h2>
 
-            {TIPOS.map(({ key, label, color }) => {
+            {TIPOS.map(({ key, label, color, tieneMedia }) => {
               const stock = inventario?.[key] ?? 0
               const { bg, text } = colorMap[color]
               const dot = stock > 10 ? 'bg-emerald-400' : stock > 0 ? 'bg-amber-400' : 'bg-red-400'
+              const tieneMediaAbierta = tieneMedia && !Number.isInteger(Number(stock))
               return (
                 <Card key={key} className="flex items-center gap-4">
                   <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-3xl flex-shrink-0`}>
@@ -137,8 +141,10 @@ export default function Inventario() {
                   </div>
                   <div className="flex-1">
                     <p className="text-slate-500 text-sm">Canastas {label}</p>
-                    <p className={`text-4xl font-bold ${text}`}>{stock}</p>
-                    <p className="text-xs text-slate-400 mt-1">unidades disponibles</p>
+                    <p className={`text-4xl font-bold ${text}`}>{fmtStock(stock)}</p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      {tieneMediaAbierta ? '½ canasta abierta incluida' : 'unidades disponibles'}
+                    </p>
                   </div>
                   <div className={`w-3 h-3 rounded-full ${dot}`} />
                 </Card>
@@ -215,10 +221,10 @@ export default function Inventario() {
                   Corrige el stock a un valor exacto. Úsalo cuando alguien tomó canastas sin registrar una venta, hubo una merma, o el conteo físico no coincide.
                 </p>
                 <form onSubmit={handleAjustar}>
-                  {TIPOS.map(({ key, label }) => {
+                  {TIPOS.map(({ key, label, tieneMedia }) => {
                     const actual   = inventario?.[key] ?? 0
                     const nuevo    = formAjustar[key] !== '' ? Number(formAjustar[key]) : actual
-                    const diff     = nuevo - actual
+                    const diff     = Number((nuevo - actual).toFixed(1))
                     const diffLabel = diff === 0 ? null
                       : diff > 0 ? `+${diff} vs actual`
                       : `${diff} vs actual`
@@ -227,18 +233,19 @@ export default function Inventario() {
                       <div key={key} className="mb-3">
                         <label className="label">
                           Canastas {label}
-                          <span className="ml-2 text-xs font-normal text-slate-400">(actual: {actual})</span>
+                          <span className="ml-2 text-xs font-normal text-slate-400">(actual: {fmtStock(actual)})</span>
                         </label>
                         <input
                           className="input"
                           type="number" min="0"
-                          placeholder={String(actual)}
+                          step={tieneMedia ? '0.5' : '1'}
+                          placeholder={String(fmtStock(actual))}
                           value={formAjustar[key]}
                           onChange={e => setFormAjustar(p => ({ ...p, [key]: e.target.value }))}
                         />
                         {diffLabel && (
                           <p className={`text-xs mt-1 font-medium ${diffColor}`}>
-                            Quedará en <strong>{nuevo}</strong> canastas ({diffLabel})
+                            Quedará en <strong>{fmtStock(nuevo)}</strong> canastas ({diffLabel})
                           </p>
                         )}
                       </div>
