@@ -21,7 +21,7 @@ function CajaRow({ icon, label, value, highlight = false }) {
 }
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate', EXTRA_MEDIA: 'orange', AA_MEDIA: 'lime' }
 
 // Formato YYYY-MM-DD para el input type="date"
 const toInputDate = (d) => d.toISOString().slice(0, 10)
@@ -74,23 +74,28 @@ export default function Reportes() {
   }
 
   // Stats
-  const ventasExtra = ventas.filter(v => v.tipoProducto === 'EXTRA')
-  const ventasAA    = ventas.filter(v => v.tipoProducto === 'AA')
-  const ventasA     = ventas.filter(v => v.tipoProducto === 'A')
-  const ventasB     = ventas.filter(v => v.tipoProducto === 'B')
-  const totalCanastas = ventas.reduce((a, v) => a + v.cantidad, 0)
+  // Media canasta = 0.5 canastas equivalentes para totales
+  const canastasEquiv = (v) =>
+    (v.tipoProducto === 'EXTRA_MEDIA' || v.tipoProducto === 'AA_MEDIA') ? v.cantidad * 0.5 : v.cantidad
+
+  const totalCanastas = ventas.reduce((a, v) => a + canastasEquiv(v), 0)
+  const fmtCanastas   = (n) => Number.isInteger(n) ? String(n) : n.toFixed(1)
 
   // Ganancia por tipo: null si ninguna venta de ese tipo tiene costo configurado
   const gananciaArr = (arr) => {
     const c = arr.filter(v => !v.anulada && v.ganancia != null)
     return c.length > 0 ? c.reduce((a, v) => a + Number(v.ganancia), 0) : null
   }
-  const gananciasPorTipo = {
-    EXTRA: gananciaArr(ventasExtra),
-    AA:    gananciaArr(ventasAA),
-    A:     gananciaArr(ventasA),
-    B:     gananciaArr(ventasB),
-  }
+
+  // Tipos de producto en orden canónico — solo se muestran los que tienen ventas
+  const TIPOS_REPORTE = [
+    { key: 'EXTRA',       label: 'EXTRA',   unidad: 'Can.',   bg: 'bg-amber-50',   text: 'text-amber-600'  },
+    { key: 'EXTRA_MEDIA', label: '½ EXTRA', unidad: 'Medias', bg: 'bg-orange-50',  text: 'text-orange-500' },
+    { key: 'AA',          label: 'AA',      unidad: 'Can.',   bg: 'bg-yellow-50',  text: 'text-yellow-600' },
+    { key: 'AA_MEDIA',    label: '½ AA',    unidad: 'Medias', bg: 'bg-lime-50',    text: 'text-lime-600'   },
+    { key: 'A',           label: 'A',       unidad: 'Can.',   bg: 'bg-blue-50',    text: 'text-blue-600'   },
+    { key: 'B',           label: 'B',       unidad: 'Can.',   bg: 'bg-slate-100',  text: 'text-slate-600'  },
+  ]
 
   const fechaLabel = fecha === today
     ? new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
@@ -156,7 +161,7 @@ export default function Reportes() {
                       <p className="text-xs text-slate-400 mt-1">Ventas</p>
                     </div>
                     <div className="text-center bg-slate-50 rounded-lg p-3">
-                      <p className="text-2xl font-bold text-slate-700">{totalCanastas}</p>
+                      <p className="text-2xl font-bold text-slate-700">{fmtCanastas(totalCanastas)}</p>
                       <p className="text-xs text-slate-400 mt-1">Total canastas</p>
                     </div>
                     <div className="text-center bg-slate-50 rounded-lg p-3">
@@ -167,17 +172,15 @@ export default function Reportes() {
                     </div>
                   </div>
                   <div className="grid grid-cols-4 gap-2 mb-4">
-                    {[
-                      { label: 'EXTRA', data: ventasExtra, bg: 'bg-amber-50',  text: 'text-amber-600'  },
-                      { label: 'AA',    data: ventasAA,    bg: 'bg-yellow-50', text: 'text-yellow-600' },
-                      { label: 'A',     data: ventasA,     bg: 'bg-blue-50',   text: 'text-blue-600'   },
-                      { label: 'B',     data: ventasB,     bg: 'bg-slate-100', text: 'text-slate-600'  },
-                    ].map(({ label, data, bg, text }) => {
-                      const gan = gananciasPorTipo[label]
+                    {TIPOS_REPORTE.map(({ key, label, unidad, bg, text }) => {
+                      const data = ventas.filter(v => v.tipoProducto === key && !v.anulada)
+                      if (data.length === 0) return null
+                      const total = data.reduce((a, v) => a + v.cantidad, 0)
+                      const gan   = gananciaArr(data)
                       return (
-                        <div key={label} className={`text-center ${bg} rounded-lg p-2`}>
-                          <p className={`text-xl font-bold ${text}`}>{data.reduce((a, v) => a + v.cantidad, 0)}</p>
-                          <p className="text-xs text-slate-400 mt-1">Can. {label}</p>
+                        <div key={key} className={`text-center ${bg} rounded-lg p-2`}>
+                          <p className={`text-xl font-bold ${text}`}>{total}</p>
+                          <p className="text-xs text-slate-400 mt-1">{unidad} {label}</p>
                           {gan != null && (
                             <>
                               <div className="border-t border-white/60 my-1.5" />
@@ -260,8 +263,8 @@ export default function Reportes() {
                 {ventas.length > 0 && (
                   <tfoot>
                     <tr className="bg-slate-50 font-semibold">
-                      <td colSpan={3} className="px-4 py-3 text-slate-600 text-sm">Total ({totalCanastas} canastas)</td>
-                      <td className="px-4 py-3 text-right text-sm">{totalCanastas}</td>
+                      <td colSpan={3} className="px-4 py-3 text-slate-600 text-sm">Total ({fmtCanastas(totalCanastas)} canastas equiv.)</td>
+                      <td className="px-4 py-3 text-right text-sm">{fmtCanastas(totalCanastas)}</td>
                       <td></td>
                       <td className="px-4 py-3 text-right text-amber-600">
                         {fmt(ventas.reduce((a, v) => a + Number(v.total || 0), 0))}
