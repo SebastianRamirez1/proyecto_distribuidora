@@ -26,10 +26,12 @@ public final class PrecioCosto {
 
     public Precio obtenerCosto(TipoProducto tipo) {
         return switch (tipo) {
-            case EXTRA -> costoExtra;
-            case AA    -> costoAA;
-            case A     -> costoA;
-            case B     -> costoB;
+            case EXTRA       -> costoExtra;
+            case AA          -> costoAA;
+            case A           -> costoA;
+            case B           -> costoB;
+            case EXTRA_MEDIA -> costoExtra.dividir(2);
+            case AA_MEDIA    -> costoAA.dividir(2);
         };
     }
 

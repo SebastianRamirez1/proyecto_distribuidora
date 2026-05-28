@@ -12,7 +12,7 @@ import Spinner from '../components/ui/Spinner'
 import { fmt, parsePrecio } from '../utils/fmt'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate', EXTRA_MEDIA: 'orange', AA_MEDIA: 'lime' }
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
 const initAbono = { clienteId: '', monto: '', medioPago: 'EFECTIVO' }
@@ -218,7 +218,7 @@ export default function Ventas() {
                   ))}
                 </Select>
                 <Select
-                  label="Tipo de canasta"
+                  label="Tipo de producto"
                   value={formVenta.tipoProducto}
                   onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
                 >
@@ -226,9 +226,12 @@ export default function Ventas() {
                   <option value="AA">🥚 AA</option>
                   <option value="A">🥚 A</option>
                   <option value="B">🥚 B</option>
+                  <option disabled>──────────────</option>
+                  <option value="EXTRA_MEDIA">🥚 ½ EXTRA (media canasta)</option>
+                  <option value="AA_MEDIA">🥚 ½ AA (media canasta)</option>
                 </Select>
                 <Input
-                  label="Cantidad (canastas)"
+                  label={`Cantidad (${formVenta.tipoProducto.endsWith('_MEDIA') ? 'medias canastas' : 'canastas'})`}
                   type="number" min="1"
                   placeholder="Ej: 5"
                   value={formVenta.cantidad}
