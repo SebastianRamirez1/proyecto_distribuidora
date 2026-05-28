@@ -1,8 +1,10 @@
 package com.distribuidora.huevos.infrastructure.controller;
 
+import com.distribuidora.huevos.application.dto.command.AjustarInventarioCommand;
 import com.distribuidora.huevos.application.dto.command.CargarInventarioCommand;
 import com.distribuidora.huevos.application.dto.command.CargarInventarioBulkCommand;
 import com.distribuidora.huevos.application.dto.response.InventarioResponse;
+import com.distribuidora.huevos.application.service.AjustarInventarioService;
 import com.distribuidora.huevos.application.service.CargarInventarioService;
 import com.distribuidora.huevos.application.service.CargarInventarioBulkService;
 import com.distribuidora.huevos.application.service.ConsultarInventarioService;
@@ -17,13 +19,16 @@ public class InventarioController {
     private final ConsultarInventarioService consultarInventarioService;
     private final CargarInventarioService cargarInventarioService;
     private final CargarInventarioBulkService cargarInventarioBulkService;
+    private final AjustarInventarioService ajustarInventarioService;
 
     public InventarioController(ConsultarInventarioService consultarInventarioService,
                                 CargarInventarioService cargarInventarioService,
-                                CargarInventarioBulkService cargarInventarioBulkService) {
+                                CargarInventarioBulkService cargarInventarioBulkService,
+                                AjustarInventarioService ajustarInventarioService) {
         this.consultarInventarioService = consultarInventarioService;
         this.cargarInventarioService = cargarInventarioService;
         this.cargarInventarioBulkService = cargarInventarioBulkService;
+        this.ajustarInventarioService = ajustarInventarioService;
     }
 
     @GetMapping
@@ -42,5 +47,15 @@ public class InventarioController {
     public ResponseEntity<InventarioResponse> cargarBulk(
             @RequestBody CargarInventarioBulkCommand command) {
         return ResponseEntity.ok(cargarInventarioBulkService.ejecutar(command));
+    }
+
+    /**
+     * Corrige el stock directamente a los valores indicados.
+     * Úsese para mermas, tomas sin registro de venta o conteo físico.
+     */
+    @PutMapping("/ajustar")
+    public ResponseEntity<InventarioResponse> ajustar(
+            @Valid @RequestBody AjustarInventarioCommand command) {
+        return ResponseEntity.ok(ajustarInventarioService.ejecutar(command));
     }
 }

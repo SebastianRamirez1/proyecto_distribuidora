@@ -61,6 +61,21 @@ public class Inventario {
         }
     }
 
+    /**
+     * Establece el stock exacto para cada tipo de canasta entera.
+     * Úsese para correcciones manuales (mermas, tomas sin venta registrada, conteo físico).
+     */
+    public void ajustar(int stockExtra, int stockAA, int stockA, int stockB) {
+        if (stockExtra < 0 || stockAA < 0 || stockA < 0 || stockB < 0) {
+            throw new com.distribuidora.huevos.domain.exceptions.OperacionNoPermitidaException(
+                "El stock no puede ser negativo");
+        }
+        this.stockExtra = stockExtra;
+        this.stockAA    = stockAA;
+        this.stockA     = stockA;
+        this.stockB     = stockB;
+    }
+
     public void agregar(TipoProducto tipo, Cantidad cantidad) {
         int canastas = canastasEnteras(tipo, cantidad);
         switch (tipo) {
