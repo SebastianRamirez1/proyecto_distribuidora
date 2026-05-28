@@ -211,19 +211,9 @@ DELETE FROM configuracion_factura WHERE id NOT IN (SELECT MIN(id) FROM configura
 
 -- ============================================================
 -- Precisión de media canasta: stock_extra y stock_aa pasan a
--- NUMERIC(10,1) para poder representar 0.5 (media canasta abierta).
--- La conversión es idempotente: si ya son NUMERIC no hace nada.
+-- NUMERIC(10,1) para representar 0.5 (media canasta abierta).
+-- USING permite convertir desde INTEGER o desde NUMERIC sin error.
 -- ============================================================
-DO $$
-BEGIN
-  IF EXISTS (
-    SELECT 1 FROM information_schema.columns
-     WHERE table_name  = 'inventario'
-       AND column_name = 'stock_extra'
-       AND data_type   = 'integer'
-  ) THEN
-    ALTER TABLE inventario
-      ALTER COLUMN stock_extra TYPE NUMERIC(10,1),
-      ALTER COLUMN stock_aa    TYPE NUMERIC(10,1);
-  END IF;
-END$$;
+ALTER TABLE inventario
+  ALTER COLUMN stock_extra TYPE NUMERIC(10,1) USING stock_extra::NUMERIC(10,1),
+  ALTER COLUMN stock_aa    TYPE NUMERIC(10,1) USING stock_aa::NUMERIC(10,1);
