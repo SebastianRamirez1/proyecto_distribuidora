@@ -258,6 +258,120 @@ class RegistrarVentaServiceTest {
                 .hasMessageContaining("EXTRA");
     }
 
+    // ── media canasta ─────────────────────────────────────────────────────────
+
+    @Test
+    void ventaMediaExtraDescuenta0punto5PorUnidadDelStock() {
+        // 2 unidades de EXTRA_MEDIA → descuenta 1.0 del stockExtra (no 2)
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.EXTRA_MEDIA, 2, TipoPago.EFECTIVO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario); // stockExtra = 100
+
+        org.mockito.ArgumentCaptor<Inventario> invCaptor =
+                org.mockito.ArgumentCaptor.forClass(Inventario.class);
+        when(inventarioRepository.save(invCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        Venta ventaSaved = new Venta(20L, null, TipoProducto.EXTRA_MEDIA,
+                new Cantidad(2), Precio.de("2.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+        when(ventaRepository.save(any())).thenReturn(ventaSaved);
+        when(ventaMapper.toResponse(any())).thenReturn(new VentaResponse());
+
+        service.ejecutar(command);
+
+        // 100 - (2 × 0.5) = 99.0  — si fuera 1 entera por unidad sería 98.0 (bug)
+        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(99.0);
+    }
+
+    @Test
+    void ventaMediaExtraUsaPrecioMitadDelPrecioExtra() {
+        // precioPublico EXTRA = 4.00 → EXTRA_MEDIA debe quedar registrada con 2.00
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.EXTRA_MEDIA, 1, TipoPago.EFECTIVO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario);
+        when(inventarioRepository.save(any())).thenReturn(inventario);
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        org.mockito.ArgumentCaptor<Venta> ventaCaptor =
+                org.mockito.ArgumentCaptor.forClass(Venta.class);
+        when(ventaRepository.save(ventaCaptor.capture())).thenAnswer(inv -> {
+            Venta v = inv.getArgument(0);
+            return new Venta(21L, null, v.getTipoProducto(),
+                    v.getCantidad(), v.getPrecioUnitario(), v.getCostoUnitario(),
+                    v.getTipoPago(), v.getFecha());
+        });
+        when(ventaMapper.toResponse(any())).thenReturn(new VentaResponse());
+
+        service.ejecutar(command);
+
+        assertThat(ventaCaptor.getValue().getPrecioUnitario().getValor())
+                .isEqualByComparingTo("2.00");
+    }
+
+    @Test
+    void ventaMediaAADescuenta0punto5PorUnidadDelStock() {
+        // 4 unidades AA_MEDIA → descuenta 2.0 del stockAA
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.AA_MEDIA, 4, TipoPago.EFECTIVO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario); // stockAA = 100
+
+        org.mockito.ArgumentCaptor<Inventario> invCaptor =
+                org.mockito.ArgumentCaptor.forClass(Inventario.class);
+        when(inventarioRepository.save(invCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        Venta ventaSaved = new Venta(22L, null, TipoProducto.AA_MEDIA,
+                new Cantidad(4), Precio.de("1.80"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+        when(ventaRepository.save(any())).thenReturn(ventaSaved);
+        when(ventaMapper.toResponse(any())).thenReturn(new VentaResponse());
+
+        service.ejecutar(command);
+
+        // 100 - (4 × 0.5) = 98.0
+        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(98.0);
+    }
+
+    @Test
+    void ventaMediaAAUsaPrecioMitadDelPrecioAA() {
+        // precioPublico AA = 3.60 → AA_MEDIA debe quedar registrada con 1.80
+        RegistrarVentaCommand command = crearCommand(null, TipoProducto.AA_MEDIA, 1, TipoPago.EFECTIVO);
+
+        when(precioPublicoRepository.findCurrent()).thenReturn(precioPublico);
+        when(precioCostoRepository.findCurrent()).thenReturn(precioCosto);
+        when(inventarioRepository.findUnico()).thenReturn(inventario);
+        when(inventarioRepository.save(any())).thenReturn(inventario);
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenReturn(Caja.nueva(java.time.LocalDate.now()));
+
+        org.mockito.ArgumentCaptor<Venta> ventaCaptor =
+                org.mockito.ArgumentCaptor.forClass(Venta.class);
+        when(ventaRepository.save(ventaCaptor.capture())).thenAnswer(inv -> {
+            Venta v = inv.getArgument(0);
+            return new Venta(23L, null, v.getTipoProducto(),
+                    v.getCantidad(), v.getPrecioUnitario(), v.getCostoUnitario(),
+                    v.getTipoPago(), v.getFecha());
+        });
+        when(ventaMapper.toResponse(any())).thenReturn(new VentaResponse());
+
+        service.ejecutar(command);
+
+        assertThat(ventaCaptor.getValue().getPrecioUnitario().getValor())
+                .isEqualByComparingTo("1.80");
+    }
+
     private RegistrarVentaCommand crearCommand(Long clienteId, TipoProducto tipo,
                                                int cantidad, TipoPago tipoPago) {
         RegistrarVentaCommand command = new RegistrarVentaCommand();
