@@ -6,3 +6,6 @@ export const cargarInventario = (data) => api.post('/inventario/cargar', data).t
 
 /** Carga los 4 tipos en una sola llamada atómica: { extra, aa, a, b } */
 export const cargarInventarioBulk = (data) => api.post('/inventario/cargar-bulk', data).then(r => r.data)
+
+/** Corrige el stock a valores exactos: { stockExtra, stockAA, stockA, stockB } */
+export const ajustarInventario = (data) => api.put('/inventario/ajustar', data).then(r => r.data)

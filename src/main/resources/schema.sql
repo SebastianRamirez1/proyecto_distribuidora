@@ -208,3 +208,12 @@ SELECT '', '', '', '', '', 'No responsable de IVA', '', 'FAC', 1, 9999, 1
 WHERE NOT EXISTS (SELECT 1 FROM configuracion_factura);
 
 DELETE FROM configuracion_factura WHERE id NOT IN (SELECT MIN(id) FROM configuracion_factura);
+
+-- ============================================================
+-- Precisión de media canasta: stock_extra y stock_aa pasan a
+-- NUMERIC(10,1) para representar 0.5 (media canasta abierta).
+-- USING permite convertir desde INTEGER o desde NUMERIC sin error.
+-- ============================================================
+ALTER TABLE inventario
+  ALTER COLUMN stock_extra TYPE DOUBLE PRECISION USING stock_extra::DOUBLE PRECISION,
+  ALTER COLUMN stock_aa    TYPE DOUBLE PRECISION USING stock_aa::DOUBLE PRECISION;

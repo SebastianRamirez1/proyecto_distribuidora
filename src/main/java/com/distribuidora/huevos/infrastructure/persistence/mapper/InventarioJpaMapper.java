@@ -9,10 +9,10 @@ public class InventarioJpaMapper {
 
     public Inventario toDomain(InventarioJpaEntity entity) {
         return new Inventario(entity.getId(),
-                entity.getStockExtra(),
-                entity.getStockAA(),
-                entity.getStockA(),
-                entity.getStockB());
+                entity.getStockExtra() != null ? entity.getStockExtra() : 0.0,
+                entity.getStockAA()    != null ? entity.getStockAA()    : 0.0,
+                entity.getStockA()     != null ? entity.getStockA()     : 0,
+                entity.getStockB()     != null ? entity.getStockB()     : 0);
     }
 
     public InventarioJpaEntity toJpa(Inventario inventario) {

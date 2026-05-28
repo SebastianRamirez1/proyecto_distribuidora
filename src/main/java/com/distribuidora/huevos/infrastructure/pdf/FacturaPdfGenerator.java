@@ -62,10 +62,12 @@ public class FacturaPdfGenerator {
                 : "Resolucion DIAN: pendiente de tramite";
 
         String tipoLabel = switch (f.getTipoProducto()) {
-            case EXTRA -> "Canastas de huevo tipo EXTRA";
-            case AA    -> "Canastas de huevo tipo AA";
-            case A     -> "Canastas de huevo tipo A";
-            case B     -> "Canastas de huevo tipo B";
+            case EXTRA       -> "Canastas de huevo tipo EXTRA";
+            case AA          -> "Canastas de huevo tipo AA";
+            case A           -> "Canastas de huevo tipo A";
+            case B           -> "Canastas de huevo tipo B";
+            case EXTRA_MEDIA -> "Medias canastas de huevo tipo EXTRA";
+            case AA_MEDIA    -> "Medias canastas de huevo tipo AA";
         };
 
         String pagoLabel = switch (f.getTipoPago()) {

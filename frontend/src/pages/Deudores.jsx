@@ -157,11 +157,11 @@ export default function Deudores() {
                 <table className="w-full text-sm">
                   <thead className="bg-slate-50 border-b border-slate-200">
                     <tr>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
-                      <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Deuda total</th>
-                      <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Ya pagó</th>
-                      <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo pendiente</th>
-                      <th className="px-4 py-3"></th>
+                      <th className="text-left px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Cliente</th>
+                      <th className="text-right px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Deuda total</th>
+                      <th className="text-right px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Ya pagó</th>
+                      <th className="text-right px-2 py-2.5 text-xs font-semibold text-slate-500 uppercase tracking-wider">Saldo pendiente</th>
+                      <th className="px-2 py-2.5"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100">
@@ -171,13 +171,13 @@ export default function Deudores() {
                         : 0
                       return (
                         <tr key={d.clienteId} className={i % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}>
-                          <td className="px-4 py-3 font-medium text-slate-800">
+                          <td className="px-2 py-2.5 font-medium text-slate-800">
                             {d.nombreCliente}
                           </td>
-                          <td className="px-4 py-3 text-right text-slate-600">
+                          <td className="px-2 py-2.5 text-right text-slate-600">
                             {fmt(d.montoTotal)}
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-2 py-2.5 text-right">
                             <span className="text-emerald-600 font-medium">{fmt(d.montoPagado)}</span>
                             <div className="mt-1 h-1.5 w-20 ml-auto bg-slate-200 rounded-full overflow-hidden">
                               <div
@@ -186,10 +186,10 @@ export default function Deudores() {
                               />
                             </div>
                           </td>
-                          <td className="px-4 py-3 text-right font-bold text-rose-600">
+                          <td className="px-2 py-2.5 text-right font-bold text-rose-600">
                             {fmt(d.saldoPendiente)}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-2 py-2.5">
                             <div className="flex items-center justify-end gap-2">
                               <button
                                 onClick={() => abrirHistorial(d)}
@@ -212,16 +212,16 @@ export default function Deudores() {
                   </tbody>
                   <tfoot className="bg-slate-50 border-t-2 border-slate-200">
                     <tr>
-                      <td className="px-4 py-3 font-semibold text-slate-600">
+                      <td className="px-2 py-2.5 font-semibold text-slate-600">
                         Total ({filtrados.length} clientes)
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-slate-600">
+                      <td className="px-2 py-2.5 text-right font-semibold text-slate-600">
                         {fmt(filtrados.reduce((s, d) => s + Number(d.montoTotal), 0))}
                       </td>
-                      <td className="px-4 py-3 text-right font-semibold text-emerald-600">
+                      <td className="px-2 py-2.5 text-right font-semibold text-emerald-600">
                         {fmt(filtrados.reduce((s, d) => s + Number(d.montoPagado), 0))}
                       </td>
-                      <td className="px-4 py-3 text-right font-bold text-rose-600">
+                      <td className="px-2 py-2.5 text-right font-bold text-rose-600">
                         {fmt(totalDeuda)}
                       </td>
                       <td />

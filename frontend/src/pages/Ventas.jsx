@@ -12,7 +12,8 @@ import Spinner from '../components/ui/Spinner'
 import { fmt, parsePrecio } from '../utils/fmt'
 
 const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
+const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate', EXTRA_MEDIA: 'orange', AA_MEDIA: 'lime' }
+const tipoLabel = { EXTRA: 'EXTRA', AA: 'AA', A: 'A', B: 'B', EXTRA_MEDIA: '½ EXTRA', AA_MEDIA: '½ AA' }
 
 const initVenta = { clienteId: '', tipoProducto: 'EXTRA', cantidad: '', tipoPago: 'EFECTIVO', precioManual: '' }
 const initAbono = { clienteId: '', monto: '', medioPago: 'EFECTIVO' }
@@ -179,8 +180,8 @@ export default function Ventas() {
   const esHoy = fechaSeleccionada === hoy
 
   return (
-    <div>
-      <div className="mb-6">
+    <div className="lg:h-full lg:flex lg:flex-col">
+      <div className="mb-4 flex-shrink-0">
         <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
         <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
       </div>
@@ -188,9 +189,9 @@ export default function Ventas() {
       <Alert type="error"   message={error}   onClose={() => setError('')} />
       <Alert type="success" message={success} onClose={() => setSuccess('')} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:flex-1 lg:min-h-0">
         {/* Formulario */}
-        <div className="lg:col-span-1">
+        <div className="lg:col-span-1 lg:overflow-y-auto">
           {/* Tabs */}
           <div className="flex mb-4 bg-slate-100 rounded-lg p-1">
             <button
@@ -218,7 +219,7 @@ export default function Ventas() {
                   ))}
                 </Select>
                 <Select
-                  label="Tipo de canasta"
+                  label="Tipo de producto"
                   value={formVenta.tipoProducto}
                   onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
                 >
@@ -226,9 +227,12 @@ export default function Ventas() {
                   <option value="AA">🥚 AA</option>
                   <option value="A">🥚 A</option>
                   <option value="B">🥚 B</option>
+                  <option disabled>──────────────</option>
+                  <option value="EXTRA_MEDIA">🥚 ½ EXTRA (media canasta)</option>
+                  <option value="AA_MEDIA">🥚 ½ AA (media canasta)</option>
                 </Select>
                 <Input
-                  label="Cantidad (canastas)"
+                  label={`Cantidad (${formVenta.tipoProducto.endsWith('_MEDIA') ? 'medias canastas' : 'canastas'})`}
                   type="number" min="1"
                   placeholder="Ej: 5"
                   value={formVenta.cantidad}
@@ -331,8 +335,8 @@ export default function Ventas() {
         </div>
 
         {/* Lista de ventas */}
-        <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        <div className="lg:col-span-3 lg:flex lg:flex-col lg:min-h-0">
+          <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
             <div className="flex items-center gap-3">
               <h3 className="font-semibold text-slate-700">
                 {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
@@ -359,21 +363,23 @@ export default function Ventas() {
               </span>
             </div>
           </div>
-          {loading ? <Spinner /> : (
-            <Card className="p-0 overflow-hidden">
-              <div className="overflow-x-auto">
+          {loading ? (
+            <div className="lg:flex-1 flex items-center justify-center"><Spinner /></div>
+          ) : (
+            <Card className="p-0 overflow-hidden lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
+              <div className="overflow-x-auto lg:overflow-y-auto lg:flex-1">
               <table className="w-full text-sm">
-                <thead>
+                <thead className="sticky top-0 z-10">
                   <tr className="table-head">
-                    <th className="px-4 py-3 text-left">Cliente</th>
-                    <th className="px-4 py-3 text-left">Tipo</th>
-                    <th className="px-4 py-3 text-right">Cant.</th>
-                    <th className="px-4 py-3 text-right">P/U</th>
-                    <th className="px-4 py-3 text-right">Total</th>
-                    <th className="px-4 py-3 text-right">Ganancia</th>
-                    <th className="px-4 py-3 text-left">Pago</th>
-                    <th className="px-4 py-3 text-left">Hora</th>
-                    <th className="px-4 py-3"></th>
+                    <th className="px-2 py-2.5 text-left">Cliente</th>
+                    <th className="px-2 py-2.5 text-left">Tipo</th>
+                    <th className="px-2 py-2.5 text-right">Cant.</th>
+                    <th className="px-2 py-2.5 text-right">P/U</th>
+                    <th className="px-2 py-2.5 text-right">Total</th>
+                    <th className="px-2 py-2.5 text-right">Ganancia</th>
+                    <th className="px-2 py-2.5 text-left">Pago</th>
+                    <th className="px-2 py-2.5 text-left">Hora</th>
+                    <th className="px-2 py-2.5"></th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
@@ -383,7 +389,7 @@ export default function Ventas() {
                     <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
                       <td className="table-cell font-medium">{v.nombreCliente}</td>
                       <td className="table-cell">
-                        <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
+                        <Badge color={tipoColor[v.tipoProducto]}>{tipoLabel[v.tipoProducto] ?? v.tipoProducto}</Badge>
                       </td>
                       <td className="table-cell text-right">{v.cantidad}</td>
                       <td className="table-cell text-right text-slate-500">{fmt(v.precioUnitario)}</td>

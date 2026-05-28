@@ -3,6 +3,8 @@ package com.distribuidora.huevos.application.service;
 import com.distribuidora.huevos.application.dto.command.CargarInventarioCommand;
 import com.distribuidora.huevos.application.dto.response.InventarioResponse;
 import com.distribuidora.huevos.domain.entities.Inventario;
+import com.distribuidora.huevos.domain.enums.TipoProducto;
+import com.distribuidora.huevos.domain.exceptions.OperacionNoPermitidaException;
 import com.distribuidora.huevos.domain.repositories.InventarioRepository;
 import com.distribuidora.huevos.domain.valueobjects.Cantidad;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,11 @@ public class CargarInventarioService {
     }
 
     public InventarioResponse ejecutar(CargarInventarioCommand command) {
+        if (command.getTipoProducto() == TipoProducto.EXTRA_MEDIA ||
+            command.getTipoProducto() == TipoProducto.AA_MEDIA) {
+            throw new OperacionNoPermitidaException(
+                "Las medias canastas no se cargan al inventario. Carga canastas EXTRA o AA completas.");
+        }
         Inventario inventario = inventarioRepository.findUnico();
         inventario.agregar(command.getTipoProducto(), new Cantidad(command.getCantidad()));
         inventarioRepository.save(inventario);

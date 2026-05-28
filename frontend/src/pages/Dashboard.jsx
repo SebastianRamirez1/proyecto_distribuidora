@@ -70,7 +70,8 @@ export default function Dashboard() {
   if (loading) return <Spinner />
 
   const tipoPagoColor = { EFECTIVO: 'emerald', TRANSFERENCIA: 'blue', FIADO: 'rose', ABONO: 'purple' }
-  const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate' }
+  const tipoColor = { EXTRA: 'amber', AA: 'yellow', A: 'blue', B: 'slate', EXTRA_MEDIA: 'orange', AA_MEDIA: 'lime' }
+  const tipoLabel = { EXTRA: 'EXTRA', AA: 'AA', A: 'A', B: 'B', EXTRA_MEDIA: '½ EXTRA', AA_MEDIA: '½ AA' }
 
   return (
     <div>
@@ -125,7 +126,7 @@ export default function Dashboard() {
                 <tr key={v.id} className="hover:bg-slate-50">
                   <td className="table-cell font-medium">{v.nombreCliente}</td>
                   <td className="table-cell">
-                    <Badge color={tipoColor[v.tipoProducto]}>{v.tipoProducto}</Badge>
+                    <Badge color={tipoColor[v.tipoProducto]}>{tipoLabel[v.tipoProducto] ?? v.tipoProducto}</Badge>
                   </td>
                   <td className="table-cell text-right">{v.cantidad}</td>
                   <td className="table-cell text-right">{fmt(v.precioUnitario)}</td>

@@ -7,7 +7,7 @@ export default function Layout() {
   const [mobileOpen, setMobileOpen] = useState(false)
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="h-screen overflow-hidden bg-slate-50">
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed(c => !c)}
@@ -37,7 +37,8 @@ export default function Layout() {
       <main
         className={`
           transition-all duration-300 ease-in-out
-          min-h-screen p-4 md:p-6
+          h-full overflow-y-auto
+          p-4 md:p-6
           pt-20 lg:pt-6
           ${collapsed ? 'lg:ml-16' : 'lg:ml-60'}
         `}

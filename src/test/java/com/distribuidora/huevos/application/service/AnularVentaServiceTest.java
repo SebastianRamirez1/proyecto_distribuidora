@@ -80,7 +80,7 @@ class AnularVentaServiceTest {
         service.ejecutar(1L);
 
         // inventario tenía 10 EXTRA; al revertir la venta de 3 debe quedar 13
-        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(13);
+        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(13.0);
     }
 
     @Test
@@ -177,7 +177,7 @@ class AnularVentaServiceTest {
         service.ejecutar(6L);
 
         // 10 AA + 4 revertidas = 14
-        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(14);
+        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(14.0);
     }
 
     // ── error paths ───────────────────────────────────────────────────────────
@@ -201,6 +201,48 @@ class AnularVentaServiceTest {
         assertThatThrownBy(() -> service.ejecutar(4L))
                 .isInstanceOf(VentaOperacionException.class)
                 .hasMessageContaining("ya fue anulada");
+    }
+
+    // ── media canasta ─────────────────────────────────────────────────────────
+
+    @Test
+    void anularVentaMediaExtraRestaura0punto5PorUnidad() {
+        // Venta de 2 EXTRA_MEDIA → al anular, stock recupera 1.0 (no 2.0)
+        Venta venta = new Venta(10L, cliente, TipoProducto.EXTRA_MEDIA,
+                new Cantidad(2), Precio.de("2.00"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+
+        when(ventaRepository.findById(10L)).thenReturn(Optional.of(venta));
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+
+        ArgumentCaptor<Inventario> invCaptor = ArgumentCaptor.forClass(Inventario.class);
+        when(inventarioRepository.findUnico()).thenReturn(inventario); // stockExtra = 10
+        when(inventarioRepository.save(invCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.ejecutar(10L);
+
+        // 10.0 + (2 × 0.5) = 11.0  — si contara 1 entera por media sería 12.0 (bug)
+        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(11.0);
+    }
+
+    @Test
+    void anularVentaMediaAARestaura0punto5PorUnidad() {
+        // Venta de 1 AA_MEDIA → al anular, stock AA recupera 0.5
+        Venta venta = new Venta(11L, cliente, TipoProducto.AA_MEDIA,
+                new Cantidad(1), Precio.de("1.80"), Precio.cero(),
+                TipoPago.EFECTIVO, LocalDateTime.now());
+
+        when(ventaRepository.findById(11L)).thenReturn(Optional.of(venta));
+        when(cajaRepository.findByFecha(any())).thenReturn(Optional.empty());
+
+        ArgumentCaptor<Inventario> invCaptor = ArgumentCaptor.forClass(Inventario.class);
+        when(inventarioRepository.findUnico()).thenReturn(inventario); // stockAA = 10
+        when(inventarioRepository.save(invCaptor.capture())).thenAnswer(inv -> inv.getArgument(0));
+
+        service.ejecutar(11L);
+
+        // 10.0 + 0.5 = 10.5
+        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(10.5);
     }
 
     // ── helpers ───────────────────────────────────────────────────────────────

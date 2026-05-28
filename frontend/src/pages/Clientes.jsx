@@ -252,14 +252,14 @@ export default function Clientes() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="table-head">
-                  <th className="px-4 py-3 text-left">ID</th>
-                  <th className="px-4 py-3 text-left">Nombre</th>
-                  <th className="px-4 py-3 text-left">Tipo</th>
-                  <th className="px-4 py-3 text-right">P. Extra</th>
-                  <th className="px-4 py-3 text-right">P. AA</th>
-                  <th className="px-4 py-3 text-right">P. A</th>
-                  <th className="px-4 py-3 text-right">P. B</th>
-                  <th className="px-4 py-3 text-center">Acciones</th>
+                  <th className="px-2 py-2.5 text-left">ID</th>
+                  <th className="px-2 py-2.5 text-left">Nombre</th>
+                  <th className="px-2 py-2.5 text-left">Tipo</th>
+                  <th className="px-2 py-2.5 text-right">P. Extra</th>
+                  <th className="px-2 py-2.5 text-right">P. AA</th>
+                  <th className="px-2 py-2.5 text-right">P. A</th>
+                  <th className="px-2 py-2.5 text-right">P. B</th>
+                  <th className="px-2 py-2.5 text-center">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
