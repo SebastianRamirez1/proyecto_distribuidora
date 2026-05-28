@@ -80,7 +80,7 @@ class AnularVentaServiceTest {
         service.ejecutar(1L);
 
         // inventario tenía 10 EXTRA; al revertir la venta de 3 debe quedar 13
-        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(13);
+        assertThat(invCaptor.getValue().getStockExtra()).isEqualTo(13.0);
     }
 
     @Test
@@ -177,7 +177,7 @@ class AnularVentaServiceTest {
         service.ejecutar(6L);
 
         // 10 AA + 4 revertidas = 14
-        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(14);
+        assertThat(invCaptor.getValue().getStockAA()).isEqualTo(14.0);
     }
 
     // ── error paths ───────────────────────────────────────────────────────────

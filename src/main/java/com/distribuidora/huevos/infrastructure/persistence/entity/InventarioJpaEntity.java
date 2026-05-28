@@ -16,11 +16,13 @@ public class InventarioJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /** NUMERIC(10,1) — soporta 0.5 para representar media canasta abierta */
     @Column(name = "stock_extra", nullable = false)
-    private Integer stockExtra;
+    private Double stockExtra;
 
+    /** NUMERIC(10,1) — soporta 0.5 para representar media canasta abierta */
     @Column(name = "stock_aa", nullable = false)
-    private Integer stockAA;
+    private Double stockAA;
 
     @Column(name = "stock_a", nullable = false)
     private Integer stockA;

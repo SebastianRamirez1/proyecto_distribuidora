@@ -20,8 +20,8 @@ public class AjustarInventarioService {
     public InventarioResponse ejecutar(AjustarInventarioCommand command) {
         Inventario inventario = inventarioRepository.findUnico();
         inventario.ajustar(
-            command.getStockExtra(),
-            command.getStockAA(),
+            command.getStockExtra(),  // double
+            command.getStockAA(),     // double
             command.getStockA(),
             command.getStockB()
         );

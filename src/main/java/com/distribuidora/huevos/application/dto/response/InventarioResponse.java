@@ -2,29 +2,30 @@ package com.distribuidora.huevos.application.dto.response;
 
 public class InventarioResponse {
 
-    private int stockExtra;
-    private int stockAA;
-    private int stockA;
-    private int stockB;
+    /** En canastas. Puede ser .5 cuando hay una canasta abierta (media vendida). */
+    private double stockExtra;
+    private double stockAA;
+    private int    stockA;
+    private int    stockB;
 
     public InventarioResponse() {}
 
-    public InventarioResponse(int stockExtra, int stockAA, int stockA, int stockB) {
+    public InventarioResponse(double stockExtra, double stockAA, int stockA, int stockB) {
         this.stockExtra = stockExtra;
-        this.stockAA = stockAA;
-        this.stockA  = stockA;
-        this.stockB  = stockB;
+        this.stockAA    = stockAA;
+        this.stockA     = stockA;
+        this.stockB     = stockB;
     }
 
-    public int getStockExtra() { return stockExtra; }
-    public void setStockExtra(int stockExtra) { this.stockExtra = stockExtra; }
+    public double getStockExtra() { return stockExtra; }
+    public void   setStockExtra(double stockExtra) { this.stockExtra = stockExtra; }
 
-    public int getStockAA() { return stockAA; }
-    public void setStockAA(int stockAA) { this.stockAA = stockAA; }
+    public double getStockAA() { return stockAA; }
+    public void   setStockAA(double stockAA) { this.stockAA = stockAA; }
 
-    public int getStockA() { return stockA; }
+    public int  getStockA() { return stockA; }
     public void setStockA(int stockA) { this.stockA = stockA; }
 
-    public int getStockB() { return stockB; }
+    public int  getStockB() { return stockB; }
     public void setStockB(int stockB) { this.stockB = stockB; }
 }
