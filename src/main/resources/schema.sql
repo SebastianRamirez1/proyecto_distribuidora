@@ -215,5 +215,5 @@ DELETE FROM configuracion_factura WHERE id NOT IN (SELECT MIN(id) FROM configura
 -- USING permite convertir desde INTEGER o desde NUMERIC sin error.
 -- ============================================================
 ALTER TABLE inventario
-  ALTER COLUMN stock_extra TYPE NUMERIC(10,1) USING stock_extra::NUMERIC(10,1),
-  ALTER COLUMN stock_aa    TYPE NUMERIC(10,1) USING stock_aa::NUMERIC(10,1);
+  ALTER COLUMN stock_extra TYPE DOUBLE PRECISION USING stock_extra::DOUBLE PRECISION,
+  ALTER COLUMN stock_aa    TYPE DOUBLE PRECISION USING stock_aa::DOUBLE PRECISION;
