@@ -16,7 +16,7 @@ export default function Layout() {
       />
 
       {/* Top bar móvil */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-slate-900 flex items-center gap-3 px-4 h-14 shadow-lg">
+      <div className="lg:hidden fixed top-0 left-0 right-0 z-30 bg-slate-900 flex items-center gap-3 px-4 h-14 border-b border-slate-800">
         <button
           onClick={() => setMobileOpen(true)}
           className="text-slate-300 hover:text-white p-1"
@@ -26,10 +26,9 @@ export default function Layout() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
           </svg>
         </button>
-        <span className="text-2xl">🥚</span>
         <div>
           <p className="text-white font-bold text-sm leading-tight">La Golondrina</p>
-          <p className="text-amber-400 font-semibold text-xs">Dist. de Huevos</p>
+          <p className="text-amber-400 text-xs">Distribuidora de Huevos</p>
         </div>
       </div>
 

@@ -77,7 +77,7 @@ export default function Deudores() {
     setError('')
     try {
       await registrarAbono({ clienteId: modal.clienteId, monto: valor, medioPago })
-      setSuccess(`Abono de ${fmt(valor)} registrado para ${modal.nombre} ✅`)
+      setSuccess(`Abono de ${fmt(valor)} registrado para ${modal.nombre}`)
       setModal(null)
       await cargar()
     } catch (e) {
@@ -138,7 +138,7 @@ export default function Deudores() {
             <input
               type="text"
               className="input max-w-sm"
-              placeholder="🔍 Buscar cliente..."
+              placeholder="Buscar cliente..."
               value={busqueda}
               onChange={e => setBusqueda(e.target.value)}
             />
@@ -149,7 +149,7 @@ export default function Deudores() {
             <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
               {busqueda
                 ? 'No se encontraron deudores con ese nombre.'
-                : '🎉 ¡No hay deudores pendientes!'}
+                : 'No hay deudores pendientes.'}
             </div>
           ) : (
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -196,13 +196,13 @@ export default function Deudores() {
                                 className="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
                                 title="Ver historial de abonos"
                               >
-                                📋 Historial
+                                Historial
                               </button>
                               <button
                                 onClick={() => abrirModal(d)}
                                 className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium px-3 py-1.5 rounded-lg transition-colors min-h-[36px]"
                               >
-                                💵 Abonar
+                                Abonar
                               </button>
                             </div>
                           </td>
@@ -237,7 +237,7 @@ export default function Deudores() {
       {/* ── Modal: registrar abono ─────────────────────────────────────────── */}
       {modal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-sm p-6">
             <h2 className="text-lg font-bold text-slate-800 mb-1">Registrar abono</h2>
             <p className="text-sm text-slate-500 mb-4">{modal.nombre}</p>
 
@@ -259,7 +259,7 @@ export default function Deudores() {
                       : 'border-slate-300 text-slate-600 hover:bg-slate-50'
                   }`}
                 >
-                  {op === 'EFECTIVO' ? '💵 Efectivo' : '🏦 Transferencia'}
+                  {op === 'EFECTIVO' ? 'Efectivo' : 'Transferencia'}
                 </button>
               ))}
             </div>
@@ -295,7 +295,7 @@ export default function Deudores() {
       {/* ── Modal: historial de abonos ────────────────────────────────────── */}
       {historialModal && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[85vh] flex flex-col">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-lg p-6 max-h-[85vh] flex flex-col">
             {/* Header */}
             <div className="flex items-start justify-between mb-4">
               <div>
@@ -321,7 +321,6 @@ export default function Deudores() {
                 </div>
               ) : historial.length === 0 ? (
                 <div className="text-center text-slate-400 py-10">
-                  <p className="text-3xl mb-2">📭</p>
                   <p className="text-sm">Este cliente no tiene abonos registrados.</p>
                 </div>
               ) : (
@@ -338,8 +337,8 @@ export default function Deudores() {
                           <p className="text-xs text-slate-400">{fmtFecha(a.fecha)}</p>
                         </div>
                       </div>
-                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${MEDIO_COLOR[a.medioPago] ?? 'bg-slate-100 text-slate-600'}`}>
-                        {a.medioPago === 'EFECTIVO' ? '💵 Efectivo' : '🏦 Transferencia'}
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded ${MEDIO_COLOR[a.medioPago] ?? 'bg-slate-100 text-slate-600'}`}>
+                        {a.medioPago === 'EFECTIVO' ? 'Efectivo' : 'Transferencia'}
                       </span>
                     </div>
                   ))}

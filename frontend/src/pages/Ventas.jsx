@@ -196,12 +196,12 @@ export default function Ventas() {
           <div className="flex mb-4 bg-slate-100 rounded-lg p-1">
             <button
               onClick={() => setTab('venta')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'venta' ? 'bg-white shadow text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
-            >🛒 Venta</button>
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'venta' ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >Venta</button>
             <button
               onClick={() => setTab('abono')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'abono' ? 'bg-white shadow text-purple-600' : 'text-slate-500 hover:text-slate-700'}`}
-            >💳 Abono</button>
+              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'abono' ? 'bg-white shadow-sm text-purple-600' : 'text-slate-500 hover:text-slate-700'}`}
+            >Abono</button>
           </div>
 
           {tab === 'venta' ? (
@@ -223,13 +223,13 @@ export default function Ventas() {
                   value={formVenta.tipoProducto}
                   onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
                 >
-                  <option value="EXTRA">🥚 EXTRA</option>
-                  <option value="AA">🥚 AA</option>
-                  <option value="A">🥚 A</option>
-                  <option value="B">🥚 B</option>
+                  <option value="EXTRA">EXTRA</option>
+                  <option value="AA">AA</option>
+                  <option value="A">A</option>
+                  <option value="B">B</option>
                   <option disabled>──────────────</option>
-                  <option value="EXTRA_MEDIA">🥚 ½ EXTRA (media canasta)</option>
-                  <option value="AA_MEDIA">🥚 ½ AA (media canasta)</option>
+                  <option value="EXTRA_MEDIA">½ EXTRA (media canasta)</option>
+                  <option value="AA_MEDIA">½ AA (media canasta)</option>
                 </Select>
                 <Input
                   label={`Cantidad (${formVenta.tipoProducto.endsWith('_MEDIA') ? 'medias canastas' : 'canastas'})`}
@@ -244,9 +244,9 @@ export default function Ventas() {
                   value={formVenta.tipoPago}
                   onChange={e => setFormVenta(p => ({ ...p, tipoPago: e.target.value }))}
                 >
-                  <option value="EFECTIVO">💵 Efectivo</option>
-                  <option value="TRANSFERENCIA">📲 Transferencia</option>
-                  <option value="FIADO">📋 Fiado</option>
+                  <option value="EFECTIVO">Efectivo</option>
+                  <option value="TRANSFERENCIA">Transferencia</option>
+                  <option value="FIADO">Fiado</option>
                 </Select>
 
                 {/* Precio manual — rebaja puntual */}
@@ -254,13 +254,12 @@ export default function Ventas() {
                   <button
                     type="button"
                     onClick={togglePrecioManual}
-                    className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                    className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-md border transition-colors ${
                       mostrarPrecioManual
                         ? 'bg-orange-100 border-orange-300 text-orange-700'
                         : 'bg-slate-100 border-slate-300 text-slate-500 hover:text-slate-700'
                     }`}
                   >
-                    <span>{mostrarPrecioManual ? '✕' : '🏷️'}</span>
                     {mostrarPrecioManual ? 'Quitar rebaja' : 'Aplicar rebaja puntual'}
                   </button>
                 </div>
@@ -268,7 +267,7 @@ export default function Ventas() {
                 {mostrarPrecioManual && (
                   <div className="border border-orange-200 bg-orange-50 rounded-lg p-3 mt-2">
                     <p className="text-xs text-orange-700 mb-2 font-medium">
-                      🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
+                      Este precio reemplaza el precio normal del cliente, solo para esta venta.
                     </p>
                     <Input
                       label="Precio por canasta ($)"
@@ -314,8 +313,8 @@ export default function Ventas() {
                   value={formAbono.medioPago}
                   onChange={e => setFormAbono(p => ({ ...p, medioPago: e.target.value }))}
                 >
-                  <option value="EFECTIVO">💵 Efectivo</option>
-                  <option value="TRANSFERENCIA">📲 Transferencia</option>
+                  <option value="EFECTIVO">Efectivo</option>
+                  <option value="TRANSFERENCIA">Transferencia</option>
                 </Select>
                 <div className={`text-xs rounded-lg px-3 py-2 mb-3 ${
                   formAbono.medioPago === 'EFECTIVO'
@@ -323,8 +322,8 @@ export default function Ventas() {
                     : 'bg-blue-50 text-blue-700 border border-blue-200'
                 }`}>
                   {formAbono.medioPago === 'EFECTIVO'
-                    ? '💵 Este abono sumará al efectivo del día'
-                    : '📲 Este abono sumará a las transferencias del día'}
+                    ? 'Este abono sumará al efectivo del día'
+                    : 'Este abono sumará a las transferencias del día'}
                 </div>
                 <Button type="submit" loading={savingA} variant="success" className="w-full">
                   Registrar abono
@@ -441,10 +440,9 @@ export default function Ventas() {
       {/* Modal generar factura */}
       {ventaAFacturar && !facturaGenerada && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl">🧾</span>
-              <h3 className="text-lg font-bold text-slate-800">Generar factura</h3>
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 w-full max-w-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Generar factura</h3>
             </div>
             <p className="text-sm text-slate-600 mb-1">
               Cliente: <span className="font-semibold">{ventaAFacturar.nombreCliente}</span>
@@ -487,12 +485,12 @@ export default function Ventas() {
                   onChange={e => setFacturaForm(p => ({ ...p, tipo: e.target.value }))}
                   className="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
                 >
-                  <option value="MANUAL">📄 Factura de venta (manual)</option>
-                  <option value="ELECTRONICA">💻 Factura electrónica (DIAN)</option>
+                  <option value="MANUAL">Factura de venta (manual)</option>
+                  <option value="ELECTRONICA">Factura electrónica (DIAN)</option>
                 </select>
                 {facturaForm.tipo === 'ELECTRONICA' && (
                   <p className="text-xs text-blue-600 mt-1">
-                    ℹ️ Se genera el PDF. La transmisión a la DIAN requiere un PTH habilitado.
+                    Se genera el PDF. La transmisión a la DIAN requiere un PTH habilitado.
                   </p>
                 )}
               </div>
@@ -522,8 +520,7 @@ export default function Ventas() {
       {facturaGenerada && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
-            <div className="text-4xl mb-3">✅</div>
-            <h3 className="text-lg font-bold text-slate-800 mb-1">¡Factura generada!</h3>
+            <h3 className="text-lg font-semibold text-slate-800 mb-1">Factura generada</h3>
             <p className="text-sm text-slate-500 mb-1">Número de factura:</p>
             <p className="text-xl font-bold text-amber-600 mb-5">{facturaGenerada.numero}</p>
             <div className="flex gap-3">
@@ -543,7 +540,7 @@ export default function Ventas() {
                 }}
                 className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
               >
-                📥 Descargar PDF
+                Descargar PDF
               </button>
             </div>
           </div>
@@ -553,10 +550,9 @@ export default function Ventas() {
       {/* Modal confirmación de anulación */}
       {ventaAAnular && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-2xl">⚠️</span>
-              <h3 className="text-lg font-bold text-slate-800">Anular venta</h3>
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 w-full max-w-sm">
+            <div className="mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Anular venta</h3>
             </div>
             <p className="text-sm text-slate-600 mb-1">
               ¿Estás seguro de anular la venta <span className="font-semibold">#{ventaAAnular.id}</span>?
