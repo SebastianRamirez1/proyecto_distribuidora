@@ -25,13 +25,11 @@ export default function Ventas() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
+  const [tab, setTab] = useState('venta')  // 'venta' | 'abono'
   const [formVenta, setFormVenta] = useState(initVenta)
   const [formAbono, setFormAbono] = useState(initAbono)
   const [savingV, setSavingV] = useState(false)
   const [savingA, setSavingA] = useState(false)
-
-  // Modal formulario (venta / abono)
-  const [modalForm, setModalForm] = useState(null)  // null | 'venta' | 'abono'
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
 
   const [anulando, setAnulando] = useState(false)
@@ -98,7 +96,6 @@ export default function Ventas() {
       await registrarVenta(payload)
       setFormVenta(initVenta)
       setMostrarPrecioManual(false)
-      setModalForm(null)
       await loadVentas(new Date().toISOString().split('T')[0])
       setFechaSeleccionada(new Date().toISOString().split('T')[0])
       setSuccess('Venta registrada correctamente ✅')
@@ -120,7 +117,6 @@ export default function Ventas() {
         medioPago: formAbono.medioPago,
       })
       setFormAbono(initAbono)
-      setModalForm(null)
       await loadVentas()
       setSuccess('Abono registrado correctamente ✅')
     } catch (e) {
@@ -185,159 +181,46 @@ export default function Ventas() {
   const esHoy = fechaSeleccionada === hoy
 
   return (
-    <div className="lg:h-full lg:flex lg:flex-col">
-
-      {/* Header */}
-      <div className="mb-4 flex-shrink-0 flex items-center justify-between gap-3 flex-wrap">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
-          <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
-        </div>
-        <div className="flex gap-2">
-          <Button onClick={() => setModalForm('venta')}>
-            🛒 Registrar venta
-          </Button>
-          <Button variant="secondary" onClick={() => setModalForm('abono')}>
-            💳 Registrar abono
-          </Button>
-        </div>
+    <div>
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
+        <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
       </div>
 
       <Alert type="error"   message={error}   onClose={() => setError('')} />
       <Alert type="success" message={success} onClose={() => setSuccess('')} />
 
-      {/* Tabla — ancho completo */}
-      <div className="lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
-        <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
-          <div className="flex items-center gap-3">
-            <h3 className="font-semibold text-slate-700">
-              {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
-            </h3>
-            {!esHoy && (
-              <button
-                onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
-                className="text-xs text-amber-600 hover:text-amber-700 font-medium"
-              >
-                ← Volver a hoy
-              </button>
-            )}
-          </div>
-          <div className="flex items-center gap-3">
-            <input
-              type="date"
-              value={fechaSeleccionada}
-              max={hoy}
-              onChange={handleFechaChange}
-              className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
-            />
-            <span className="text-sm text-slate-500 whitespace-nowrap">
-              Total: <span className="font-bold text-slate-800">{fmt(totalDia)}</span>
-            </span>
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        {loading ? (
-          <div className="lg:flex-1 flex items-center justify-center"><Spinner /></div>
-        ) : (
-          <Card className="p-0 overflow-hidden lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
-            <div className="overflow-x-auto lg:overflow-y-auto lg:flex-1">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10">
-                  <tr className="table-head">
-                    <th className="px-2 py-2.5 text-left">Cliente</th>
-                    <th className="px-2 py-2.5 text-left">Tipo</th>
-                    <th className="px-2 py-2.5 text-right">Cant.</th>
-                    <th className="px-2 py-2.5 text-right">P/U</th>
-                    <th className="px-2 py-2.5 text-right">Total</th>
-                    <th className="px-2 py-2.5 text-right">Ganancia</th>
-                    <th className="px-2 py-2.5 text-left">Pago</th>
-                    <th className="px-2 py-2.5 text-left">Hora</th>
-                    <th className="px-2 py-2.5"></th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {ventas.length === 0 ? (
-                    <tr><td colSpan={9} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
-                  ) : ventas.map((v) => (
-                    <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
-                      <td className="table-cell font-medium">{v.nombreCliente}</td>
-                      <td className="table-cell">
-                        <Badge color={tipoColor[v.tipoProducto]}>{tipoLabel[v.tipoProducto] ?? v.tipoProducto}</Badge>
-                      </td>
-                      <td className="table-cell text-right">{v.cantidad}</td>
-                      <td className="table-cell text-right text-slate-500">{fmt(v.precioUnitario)}</td>
-                      <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
-                      <td className="table-cell text-right text-emerald-600 text-xs">
-                        {v.ganancia != null ? fmt(v.ganancia) : <span className="text-slate-300">—</span>}
-                      </td>
-                      <td className="table-cell">
-                        <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
-                      </td>
-                      <td className="table-cell text-slate-400 text-xs">
-                        {v.fecha ? new Date(v.fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : '-'}
-                      </td>
-                      <td className="table-cell">
-                        {!v.anulada && (
-                          <div className="flex items-center gap-1">
-                            <button
-                              onClick={() => {
-                                setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })
-                                const esPublico = !v.clienteId
-                                setFacturaForm(f => ({ ...f, nombreCliente: esPublico ? '' : (v.nombreCliente || '') }))
-                              }}
-                              title="Generar factura"
-                              className="text-slate-300 hover:text-amber-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
-                            >
-                              🧾
-                            </button>
-                            <button
-                              onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
-                              title="Anular venta"
-                              className="text-slate-300 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
-                            >
-                              🗑️
-                            </button>
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </Card>
-        )}
-      </div>
-
-      {/* ── Modal formulario (venta / abono) ── */}
-      {modalForm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm max-h-[90vh] overflow-y-auto">
-            {/* Header del modal */}
-            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-100">
-              <h3 className="font-bold text-slate-800 text-lg">
-                {modalForm === 'venta' ? '🛒 Registrar venta' : '💳 Registrar abono'}
-              </h3>
-              <button
-                onClick={() => setModalForm(null)}
-                className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
-              >×</button>
-            </div>
-
+        {/* ── Panel izquierdo: formularios ── */}
+        <div className="lg:col-span-1">
+          <Card className="p-0 overflow-hidden">
             {/* Tabs */}
-            <div className="flex px-6 pt-4 pb-1 gap-2">
+            <div className="flex border-b border-slate-100">
               <button
-                onClick={() => setModalForm('venta')}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${modalForm === 'venta' ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-              >🛒 Venta</button>
+                onClick={() => setTab('venta')}
+                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                  tab === 'venta'
+                    ? 'bg-amber-50 text-amber-600 border-b-2 border-amber-400'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                🛒 Venta
+              </button>
               <button
-                onClick={() => setModalForm('abono')}
-                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${modalForm === 'abono' ? 'bg-purple-50 text-purple-600 ring-1 ring-purple-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
-              >💳 Abono</button>
+                onClick={() => setTab('abono')}
+                className={`flex-1 py-3 text-sm font-medium transition-colors ${
+                  tab === 'abono'
+                    ? 'bg-purple-50 text-purple-600 border-b-2 border-purple-400'
+                    : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                💳 Abono
+              </button>
             </div>
 
-            <div className="px-6 pb-6 pt-3">
-              {modalForm === 'venta' ? (
+            <div className="p-4">
+              {tab === 'venta' ? (
                 <form onSubmit={handleVenta}>
                   <Select
                     label="Cliente"
@@ -369,7 +252,6 @@ export default function Ventas() {
                     value={formVenta.cantidad}
                     onChange={e => setFormVenta(p => ({ ...p, cantidad: e.target.value }))}
                     required
-                    autoFocus
                   />
                   <Select
                     label="Tipo de pago"
@@ -414,7 +296,7 @@ export default function Ventas() {
                   )}
 
                   <Button type="submit" loading={savingV} className="w-full mt-4">
-                    Registrar venta
+                    🛒 Registrar venta
                   </Button>
                 </form>
               ) : (
@@ -437,7 +319,6 @@ export default function Ventas() {
                     value={formAbono.monto}
                     onChange={e => setFormAbono(p => ({ ...p, monto: e.target.value }))}
                     required
-                    autoFocus
                   />
                   <Select
                     label="¿Cómo pagó?"
@@ -457,16 +338,119 @@ export default function Ventas() {
                       : '📲 Este abono sumará a las transferencias del día'}
                   </div>
                   <Button type="submit" loading={savingA} variant="success" className="w-full">
-                    Registrar abono
+                    💳 Registrar abono
                   </Button>
                 </form>
               )}
             </div>
-          </div>
+          </Card>
         </div>
-      )}
 
-      {/* Modal generar factura */}
+        {/* ── Panel derecho: tabla de ventas ── */}
+        <div className="lg:col-span-3">
+          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+            <h3 className="font-semibold text-slate-700">
+              {esHoy
+                ? 'Ventas de hoy'
+                : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+              {!esHoy && (
+                <button
+                  onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
+                  className="ml-3 text-xs text-amber-600 hover:text-amber-700 font-medium"
+                >
+                  ← Volver a hoy
+                </button>
+              )}
+            </h3>
+            <div className="flex items-center gap-3">
+              <input
+                type="date"
+                value={fechaSeleccionada}
+                max={hoy}
+                onChange={handleFechaChange}
+                className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+              />
+              <span className="text-sm text-slate-500 whitespace-nowrap">
+                Total: <span className="font-bold text-slate-800">{fmt(totalDia)}</span>
+              </span>
+            </div>
+          </div>
+
+          {loading ? (
+            <div className="flex items-center justify-center py-16"><Spinner /></div>
+          ) : (
+            <Card className="p-0 overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="table-head">
+                      <th className="px-3 py-2.5 text-left">Cliente</th>
+                      <th className="px-3 py-2.5 text-left">Tipo</th>
+                      <th className="px-3 py-2.5 text-right">Cant.</th>
+                      <th className="px-3 py-2.5 text-right">P/U</th>
+                      <th className="px-3 py-2.5 text-right">Total</th>
+                      <th className="px-3 py-2.5 text-right">Ganancia</th>
+                      <th className="px-3 py-2.5 text-left">Pago</th>
+                      <th className="px-3 py-2.5 text-left">Hora</th>
+                      <th className="px-3 py-2.5"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {ventas.length === 0 ? (
+                      <tr><td colSpan={9} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
+                    ) : ventas.map((v) => (
+                      <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
+                        <td className="table-cell font-medium">{v.nombreCliente}</td>
+                        <td className="table-cell">
+                          <Badge color={tipoColor[v.tipoProducto]}>{tipoLabel[v.tipoProducto] ?? v.tipoProducto}</Badge>
+                        </td>
+                        <td className="table-cell text-right">{v.cantidad}</td>
+                        <td className="table-cell text-right text-slate-500">{fmt(v.precioUnitario)}</td>
+                        <td className="table-cell text-right font-semibold">{fmt(v.total)}</td>
+                        <td className="table-cell text-right text-emerald-600 text-xs">
+                          {v.ganancia != null ? fmt(v.ganancia) : <span className="text-slate-300">—</span>}
+                        </td>
+                        <td className="table-cell">
+                          <Badge color={tipoPagoColor[v.tipoPago]}>{v.tipoPago}</Badge>
+                        </td>
+                        <td className="table-cell text-slate-400 text-xs">
+                          {v.fecha ? new Date(v.fecha).toLocaleTimeString('es-PE', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </td>
+                        <td className="table-cell">
+                          {!v.anulada && (
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => {
+                                  setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })
+                                  const esPublico = !v.clienteId
+                                  setFacturaForm(f => ({ ...f, nombreCliente: esPublico ? '' : (v.nombreCliente || '') }))
+                                }}
+                                title="Generar factura"
+                                className="text-slate-300 hover:text-amber-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
+                              >
+                                🧾
+                              </button>
+                              <button
+                                onClick={() => setVentaAAnular({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })}
+                                title="Anular venta"
+                                className="text-slate-300 hover:text-rose-500 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center rounded"
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Card>
+          )}
+        </div>
+      </div>
+
+      {/* ── Modal generar factura ── */}
       {ventaAFacturar && !facturaGenerada && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
@@ -546,7 +530,7 @@ export default function Ventas() {
         </div>
       )}
 
-      {/* Modal factura generada */}
+      {/* ── Modal factura generada ── */}
       {facturaGenerada && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
@@ -578,7 +562,7 @@ export default function Ventas() {
         </div>
       )}
 
-      {/* Modal confirmación de anulación */}
+      {/* ── Modal confirmación de anulación ── */}
       {ventaAAnular && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
