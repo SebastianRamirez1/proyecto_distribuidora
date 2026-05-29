@@ -29,16 +29,19 @@ export default function Ventas() {
   const [formAbono, setFormAbono] = useState(initAbono)
   const [savingV, setSavingV] = useState(false)
   const [savingA, setSavingA] = useState(false)
-  const [tab, setTab] = useState('venta') // 'venta' | 'abono'
+
+  // Modal formulario (venta / abono)
+  const [modalForm, setModalForm] = useState(null)  // null | 'venta' | 'abono'
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
+
   const [anulando, setAnulando] = useState(false)
-  const [ventaAAnular, setVentaAAnular]   = useState(null)  // { id, nombreCliente, total }
-  const [ventaAFacturar, setVentaAFacturar] = useState(null) // { id, nombreCliente, total }
-  const [facturaForm, setFacturaForm]     = useState({ nombreCliente: '', nitCliente: '', tipo: 'MANUAL' })
+  const [ventaAAnular, setVentaAAnular]     = useState(null)
+  const [ventaAFacturar, setVentaAFacturar] = useState(null)
+  const [facturaForm, setFacturaForm]       = useState({ nombreCliente: '', nitCliente: '', tipo: 'MANUAL' })
   const [generandoFactura, setGenerandoFactura] = useState(false)
-  const [facturaGenerada, setFacturaGenerada]   = useState(null) // { id, numero }
+  const [facturaGenerada, setFacturaGenerada]   = useState(null)
   const [fechaSeleccionada, setFechaSeleccionada] = useState(
-    new Date().toISOString().split('T')[0]  // hoy en formato YYYY-MM-DD
+    new Date().toISOString().split('T')[0]
   )
 
   const loadVentas = async (fecha = fechaSeleccionada) => {
@@ -95,6 +98,7 @@ export default function Ventas() {
       await registrarVenta(payload)
       setFormVenta(initVenta)
       setMostrarPrecioManual(false)
+      setModalForm(null)
       await loadVentas(new Date().toISOString().split('T')[0])
       setFechaSeleccionada(new Date().toISOString().split('T')[0])
       setSuccess('Venta registrada correctamente ✅')
@@ -116,6 +120,7 @@ export default function Ventas() {
         medioPago: formAbono.medioPago,
       })
       setFormAbono(initAbono)
+      setModalForm(null)
       await loadVentas()
       setSuccess('Abono registrado correctamente ✅')
     } catch (e) {
@@ -154,10 +159,10 @@ export default function Ventas() {
     setError('')
     try {
       const result = await generarFactura({
-        ventaId:        ventaAFacturar.id,
-        nombreCliente:  facturaForm.nombreCliente || null,
-        nitCliente:     facturaForm.nitCliente || null,
-        tipo:           facturaForm.tipo,
+        ventaId:       ventaAFacturar.id,
+        nombreCliente: facturaForm.nombreCliente || null,
+        nitCliente:    facturaForm.nitCliente || null,
+        tipo:          facturaForm.tipo,
       })
       setFacturaGenerada({ id: result.id, numero: result.numero })
     } catch (e) {
@@ -181,193 +186,61 @@ export default function Ventas() {
 
   return (
     <div className="lg:h-full lg:flex lg:flex-col">
-      <div className="mb-4 flex-shrink-0">
-        <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
-        <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
+
+      {/* Header */}
+      <div className="mb-4 flex-shrink-0 flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
+          <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
+        </div>
+        <div className="flex gap-2">
+          <Button onClick={() => setModalForm('venta')}>
+            🛒 Registrar venta
+          </Button>
+          <Button variant="secondary" onClick={() => setModalForm('abono')}>
+            💳 Registrar abono
+          </Button>
+        </div>
       </div>
 
       <Alert type="error"   message={error}   onClose={() => setError('')} />
       <Alert type="success" message={success} onClose={() => setSuccess('')} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:flex-1 lg:min-h-0">
-        {/* Formulario */}
-        <div className="lg:col-span-1 lg:overflow-y-auto">
-          {/* Tabs */}
-          <div className="flex mb-4 bg-slate-100 rounded-lg p-1">
-            <button
-              onClick={() => setTab('venta')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'venta' ? 'bg-white shadow text-amber-600' : 'text-slate-500 hover:text-slate-700'}`}
-            >🛒 Venta</button>
-            <button
-              onClick={() => setTab('abono')}
-              className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'abono' ? 'bg-white shadow text-purple-600' : 'text-slate-500 hover:text-slate-700'}`}
-            >💳 Abono</button>
+      {/* Tabla — ancho completo */}
+      <div className="lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
+        <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
+          <div className="flex items-center gap-3">
+            <h3 className="font-semibold text-slate-700">
+              {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+            </h3>
+            {!esHoy && (
+              <button
+                onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
+                className="text-xs text-amber-600 hover:text-amber-700 font-medium"
+              >
+                ← Volver a hoy
+              </button>
+            )}
           </div>
-
-          {tab === 'venta' ? (
-            <Card>
-              <h3 className="font-semibold text-slate-700 mb-4">Registrar venta</h3>
-              <form onSubmit={handleVenta}>
-                <Select
-                  label="Cliente"
-                  value={formVenta.clienteId}
-                  onChange={e => setFormVenta(p => ({ ...p, clienteId: e.target.value }))}
-                >
-                  <option value="">Público General (precio público)</option>
-                  {clientes.map(c => (
-                    <option key={c.id} value={c.id}>{c.nombre} ({c.tipo})</option>
-                  ))}
-                </Select>
-                <Select
-                  label="Tipo de producto"
-                  value={formVenta.tipoProducto}
-                  onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
-                >
-                  <option value="EXTRA">🥚 EXTRA</option>
-                  <option value="AA">🥚 AA</option>
-                  <option value="A">🥚 A</option>
-                  <option value="B">🥚 B</option>
-                  <option disabled>──────────────</option>
-                  <option value="EXTRA_MEDIA">🥚 ½ EXTRA (media canasta)</option>
-                  <option value="AA_MEDIA">🥚 ½ AA (media canasta)</option>
-                </Select>
-                <Input
-                  label={`Cantidad (${formVenta.tipoProducto.endsWith('_MEDIA') ? 'medias canastas' : 'canastas'})`}
-                  type="number" min="1"
-                  placeholder="Ej: 5"
-                  value={formVenta.cantidad}
-                  onChange={e => setFormVenta(p => ({ ...p, cantidad: e.target.value }))}
-                  required
-                />
-                <Select
-                  label="Tipo de pago"
-                  value={formVenta.tipoPago}
-                  onChange={e => setFormVenta(p => ({ ...p, tipoPago: e.target.value }))}
-                >
-                  <option value="EFECTIVO">💵 Efectivo</option>
-                  <option value="TRANSFERENCIA">📲 Transferencia</option>
-                  <option value="FIADO">📋 Fiado</option>
-                </Select>
-
-                {/* Precio manual — rebaja puntual */}
-                <div className="mt-3 mb-1">
-                  <button
-                    type="button"
-                    onClick={togglePrecioManual}
-                    className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
-                      mostrarPrecioManual
-                        ? 'bg-orange-100 border-orange-300 text-orange-700'
-                        : 'bg-slate-100 border-slate-300 text-slate-500 hover:text-slate-700'
-                    }`}
-                  >
-                    <span>{mostrarPrecioManual ? '✕' : '🏷️'}</span>
-                    {mostrarPrecioManual ? 'Quitar rebaja' : 'Aplicar rebaja puntual'}
-                  </button>
-                </div>
-
-                {mostrarPrecioManual && (
-                  <div className="border border-orange-200 bg-orange-50 rounded-lg p-3 mt-2">
-                    <p className="text-xs text-orange-700 mb-2 font-medium">
-                      🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
-                    </p>
-                    <Input
-                      label="Precio por canasta ($)"
-                      type="number" step="0.01" min="0.01"
-                      placeholder="0.00"
-                      value={formVenta.precioManual}
-                      onChange={e => setFormVenta(p => ({ ...p, precioManual: e.target.value }))}
-                      required
-                    />
-                  </div>
-                )}
-
-                <Button type="submit" loading={savingV} className="w-full mt-3">
-                  Registrar venta
-                </Button>
-              </form>
-            </Card>
-          ) : (
-            <Card>
-              <h3 className="font-semibold text-slate-700 mb-4">Registrar abono</h3>
-              <form onSubmit={handleAbono}>
-                <Select
-                  label="Cliente"
-                  value={formAbono.clienteId}
-                  onChange={e => setFormAbono(p => ({ ...p, clienteId: e.target.value }))}
-                  required
-                >
-                  <option value="">— Seleccionar cliente —</option>
-                  {clientes.map(c => (
-                    <option key={c.id} value={c.id}>{c.nombre}</option>
-                  ))}
-                </Select>
-                <Input
-                  label="Monto del abono ($)"
-                  type="number" step="0.01" min="0.01"
-                  placeholder="0.00"
-                  value={formAbono.monto}
-                  onChange={e => setFormAbono(p => ({ ...p, monto: e.target.value }))}
-                  required
-                />
-                <Select
-                  label="¿Cómo pagó?"
-                  value={formAbono.medioPago}
-                  onChange={e => setFormAbono(p => ({ ...p, medioPago: e.target.value }))}
-                >
-                  <option value="EFECTIVO">💵 Efectivo</option>
-                  <option value="TRANSFERENCIA">📲 Transferencia</option>
-                </Select>
-                <div className={`text-xs rounded-lg px-3 py-2 mb-3 ${
-                  formAbono.medioPago === 'EFECTIVO'
-                    ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                    : 'bg-blue-50 text-blue-700 border border-blue-200'
-                }`}>
-                  {formAbono.medioPago === 'EFECTIVO'
-                    ? '💵 Este abono sumará al efectivo del día'
-                    : '📲 Este abono sumará a las transferencias del día'}
-                </div>
-                <Button type="submit" loading={savingA} variant="success" className="w-full">
-                  Registrar abono
-                </Button>
-              </form>
-            </Card>
-          )}
+          <div className="flex items-center gap-3">
+            <input
+              type="date"
+              value={fechaSeleccionada}
+              max={hoy}
+              onChange={handleFechaChange}
+              className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
+            />
+            <span className="text-sm text-slate-500 whitespace-nowrap">
+              Total: <span className="font-bold text-slate-800">{fmt(totalDia)}</span>
+            </span>
+          </div>
         </div>
 
-        {/* Lista de ventas */}
-        <div className="lg:col-span-3 lg:flex lg:flex-col lg:min-h-0">
-          <div className="flex items-center justify-between mb-2 gap-3 flex-wrap flex-shrink-0">
-            <div className="flex items-center gap-3">
-              <h3 className="font-semibold text-slate-700">
-                {esHoy ? 'Ventas de hoy' : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
-              </h3>
-              {!esHoy && (
-                <button
-                  onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
-                  className="text-xs text-amber-600 hover:text-amber-700 font-medium"
-                >
-                  ← Volver a hoy
-                </button>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <input
-                type="date"
-                value={fechaSeleccionada}
-                max={hoy}
-                onChange={handleFechaChange}
-                className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
-              <span className="text-sm text-slate-500 whitespace-nowrap">
-                Total: <span className="font-bold text-slate-800">{fmt(totalDia)}</span>
-              </span>
-            </div>
-          </div>
-          {loading ? (
-            <div className="lg:flex-1 flex items-center justify-center"><Spinner /></div>
-          ) : (
-            <Card className="p-0 overflow-hidden lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
-              <div className="overflow-x-auto lg:overflow-y-auto lg:flex-1">
+        {loading ? (
+          <div className="lg:flex-1 flex items-center justify-center"><Spinner /></div>
+        ) : (
+          <Card className="p-0 overflow-hidden lg:flex-1 lg:flex lg:flex-col lg:min-h-0">
+            <div className="overflow-x-auto lg:overflow-y-auto lg:flex-1">
               <table className="w-full text-sm">
                 <thead className="sticky top-0 z-10">
                   <tr className="table-head">
@@ -409,7 +282,6 @@ export default function Ventas() {
                             <button
                               onClick={() => {
                                 setVentaAFacturar({ id: v.id, nombreCliente: v.nombreCliente, total: v.total })
-                                // Pre-llenar con el nombre del cliente registrado si no es público general
                                 const esPublico = !v.clienteId
                                 setFacturaForm(f => ({ ...f, nombreCliente: esPublico ? '' : (v.nombreCliente || '') }))
                               }}
@@ -432,11 +304,167 @@ export default function Ventas() {
                   ))}
                 </tbody>
               </table>
-              </div>
-            </Card>
-          )}
-        </div>
+            </div>
+          </Card>
+        )}
       </div>
+
+      {/* ── Modal formulario (venta / abono) ── */}
+      {modalForm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm max-h-[90vh] overflow-y-auto">
+            {/* Header del modal */}
+            <div className="flex items-center justify-between px-6 pt-5 pb-3 border-b border-slate-100">
+              <h3 className="font-bold text-slate-800 text-lg">
+                {modalForm === 'venta' ? '🛒 Registrar venta' : '💳 Registrar abono'}
+              </h3>
+              <button
+                onClick={() => setModalForm(null)}
+                className="text-slate-400 hover:text-slate-600 text-2xl leading-none"
+              >×</button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex px-6 pt-4 pb-1 gap-2">
+              <button
+                onClick={() => setModalForm('venta')}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${modalForm === 'venta' ? 'bg-amber-50 text-amber-600 ring-1 ring-amber-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+              >🛒 Venta</button>
+              <button
+                onClick={() => setModalForm('abono')}
+                className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${modalForm === 'abono' ? 'bg-purple-50 text-purple-600 ring-1 ring-purple-200' : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'}`}
+              >💳 Abono</button>
+            </div>
+
+            <div className="px-6 pb-6 pt-3">
+              {modalForm === 'venta' ? (
+                <form onSubmit={handleVenta}>
+                  <Select
+                    label="Cliente"
+                    value={formVenta.clienteId}
+                    onChange={e => setFormVenta(p => ({ ...p, clienteId: e.target.value }))}
+                  >
+                    <option value="">Público General (precio público)</option>
+                    {clientes.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre} ({c.tipo})</option>
+                    ))}
+                  </Select>
+                  <Select
+                    label="Tipo de producto"
+                    value={formVenta.tipoProducto}
+                    onChange={e => setFormVenta(p => ({ ...p, tipoProducto: e.target.value }))}
+                  >
+                    <option value="EXTRA">🥚 EXTRA</option>
+                    <option value="AA">🥚 AA</option>
+                    <option value="A">🥚 A</option>
+                    <option value="B">🥚 B</option>
+                    <option disabled>──────────────</option>
+                    <option value="EXTRA_MEDIA">🥚 ½ EXTRA (media canasta)</option>
+                    <option value="AA_MEDIA">🥚 ½ AA (media canasta)</option>
+                  </Select>
+                  <Input
+                    label={`Cantidad (${formVenta.tipoProducto.endsWith('_MEDIA') ? 'medias canastas' : 'canastas'})`}
+                    type="number" min="1"
+                    placeholder="Ej: 5"
+                    value={formVenta.cantidad}
+                    onChange={e => setFormVenta(p => ({ ...p, cantidad: e.target.value }))}
+                    required
+                    autoFocus
+                  />
+                  <Select
+                    label="Tipo de pago"
+                    value={formVenta.tipoPago}
+                    onChange={e => setFormVenta(p => ({ ...p, tipoPago: e.target.value }))}
+                  >
+                    <option value="EFECTIVO">💵 Efectivo</option>
+                    <option value="TRANSFERENCIA">📲 Transferencia</option>
+                    <option value="FIADO">📋 Fiado</option>
+                  </Select>
+
+                  {/* Precio manual */}
+                  <div className="mt-3 mb-1">
+                    <button
+                      type="button"
+                      onClick={togglePrecioManual}
+                      className={`flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-full border transition-colors ${
+                        mostrarPrecioManual
+                          ? 'bg-orange-100 border-orange-300 text-orange-700'
+                          : 'bg-slate-100 border-slate-300 text-slate-500 hover:text-slate-700'
+                      }`}
+                    >
+                      <span>{mostrarPrecioManual ? '✕' : '🏷️'}</span>
+                      {mostrarPrecioManual ? 'Quitar rebaja' : 'Aplicar rebaja puntual'}
+                    </button>
+                  </div>
+
+                  {mostrarPrecioManual && (
+                    <div className="border border-orange-200 bg-orange-50 rounded-lg p-3 mt-2">
+                      <p className="text-xs text-orange-700 mb-2 font-medium">
+                        🏷️ Este precio reemplaza el precio normal del cliente, solo para esta venta.
+                      </p>
+                      <Input
+                        label="Precio por canasta ($)"
+                        type="number" step="0.01" min="0.01"
+                        placeholder="0.00"
+                        value={formVenta.precioManual}
+                        onChange={e => setFormVenta(p => ({ ...p, precioManual: e.target.value }))}
+                        required
+                      />
+                    </div>
+                  )}
+
+                  <Button type="submit" loading={savingV} className="w-full mt-4">
+                    Registrar venta
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handleAbono}>
+                  <Select
+                    label="Cliente"
+                    value={formAbono.clienteId}
+                    onChange={e => setFormAbono(p => ({ ...p, clienteId: e.target.value }))}
+                    required
+                  >
+                    <option value="">— Seleccionar cliente —</option>
+                    {clientes.map(c => (
+                      <option key={c.id} value={c.id}>{c.nombre}</option>
+                    ))}
+                  </Select>
+                  <Input
+                    label="Monto del abono ($)"
+                    type="number" step="0.01" min="0.01"
+                    placeholder="0.00"
+                    value={formAbono.monto}
+                    onChange={e => setFormAbono(p => ({ ...p, monto: e.target.value }))}
+                    required
+                    autoFocus
+                  />
+                  <Select
+                    label="¿Cómo pagó?"
+                    value={formAbono.medioPago}
+                    onChange={e => setFormAbono(p => ({ ...p, medioPago: e.target.value }))}
+                  >
+                    <option value="EFECTIVO">💵 Efectivo</option>
+                    <option value="TRANSFERENCIA">📲 Transferencia</option>
+                  </Select>
+                  <div className={`text-xs rounded-lg px-3 py-2 mb-3 ${
+                    formAbono.medioPago === 'EFECTIVO'
+                      ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
+                      : 'bg-blue-50 text-blue-700 border border-blue-200'
+                  }`}>
+                    {formAbono.medioPago === 'EFECTIVO'
+                      ? '💵 Este abono sumará al efectivo del día'
+                      : '📲 Este abono sumará a las transferencias del día'}
+                  </div>
+                  <Button type="submit" loading={savingA} variant="success" className="w-full">
+                    Registrar abono
+                  </Button>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal generar factura */}
       {ventaAFacturar && !facturaGenerada && (
@@ -518,7 +546,7 @@ export default function Ventas() {
         </div>
       )}
 
-      {/* Modal factura generada — descargar PDF */}
+      {/* Modal factura generada */}
       {facturaGenerada && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
           <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
