@@ -8,7 +8,10 @@ import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
 import { fmt } from '../utils/fmt'
 
-function StatCard({ label, value, sub, color = 'amber' }) {
+// StatCard limpia: fondo blanco + borde izquierdo coloreado.
+// Elimina gradientes decorativos que generan carga cognitiva exógena [CLT 1.2].
+// Consistente con .card del sistema de diseño [P8.3].
+function StatCard({ icon, label, value, sub, color = 'amber' }) {
   const borders = {
     amber:   'border-l-amber-500',
     emerald: 'border-l-emerald-500',
@@ -25,9 +28,14 @@ function StatCard({ label, value, sub, color = 'amber' }) {
   }
   return (
     <div className={`card border-l-4 ${borders[color]}`}>
-      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${texts[color]}`}>{value}</p>
-      {sub && <p className="text-slate-400 text-xs mt-1">{sub}</p>}
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-slate-500 text-xs font-medium uppercase tracking-wide mb-1">{label}</p>
+          <p className={`text-2xl font-bold ${texts[color]}`}>{value}</p>
+          {sub && <p className="text-slate-400 text-xs mt-1">{sub}</p>}
+        </div>
+        <span className="text-2xl">{icon}</span>
+      </div>
     </div>
   )
 }
@@ -75,28 +83,28 @@ export default function Dashboard() {
       <Alert type="error" message={error} onClose={() => setError('')} />
 
       {/* Inventario */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Stock actual</h2>
+      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">📦 Stock actual</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Canastas EXTRA" value={inventario?.stockExtra ?? 0} color="amber" />
-        <StatCard label="Canastas AA"    value={inventario?.stockAA    ?? 0} color="amber" />
-        <StatCard label="Canastas A"     value={inventario?.stockA     ?? 0} color="blue"  />
-        <StatCard label="Canastas B"     value={inventario?.stockB     ?? 0} color="purple" />
+        <StatCard icon="🥚" label="Canastas EXTRA" value={inventario?.stockExtra ?? 0} color="amber" />
+        <StatCard icon="🥚" label="Canastas AA"    value={inventario?.stockAA    ?? 0} color="amber" />
+        <StatCard icon="🥚" label="Canastas A"     value={inventario?.stockA     ?? 0} color="blue"  />
+        <StatCard icon="🥚" label="Canastas B"     value={inventario?.stockB     ?? 0} color="purple" />
       </div>
 
       {/* Caja */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Caja de hoy</h2>
+      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">💰 Caja de hoy</h2>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard label="Efectivo"      value={fmt(caja?.totalEfectivo)}      color="emerald" />
-        <StatCard label="Transferencia" value={fmt(caja?.totalTransferencia)} color="blue" />
-        <StatCard label="Fiado"         value={fmt(caja?.totalFiado)}         color="rose" />
-        <StatCard label="Abonos"        value={fmt(caja?.totalAbonos)}        color="purple" />
+        <StatCard icon="💵" label="Efectivo" value={fmt(caja?.totalEfectivo)} color="emerald" />
+        <StatCard icon="📲" label="Transferencia" value={fmt(caja?.totalTransferencia)} color="blue" />
+        <StatCard icon="📋" label="Fiado" value={fmt(caja?.totalFiado)} color="rose" />
+        <StatCard icon="💳" label="Abonos" value={fmt(caja?.totalAbonos)} color="purple" />
       </div>
       <div className="grid grid-cols-1 gap-4 mb-8">
-        <StatCard label="Total cobrado hoy" value={fmt(caja?.totalCobrado)} sub="Efectivo + Transferencia" color="amber" />
+        <StatCard icon="🏦" label="Total cobrado hoy" value={fmt(caja?.totalCobrado)} sub="Efectivo + Transferencia" color="amber" />
       </div>
 
       {/* Últimas ventas */}
-      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Ventas de hoy ({ventas.length})</h2>
+      <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">🛒 Ventas de hoy ({ventas.length})</h2>
       <Card className="p-0 overflow-hidden">
         {ventas.length === 0 ? (
           <p className="text-slate-400 text-sm text-center py-8">No hay ventas registradas hoy</p>

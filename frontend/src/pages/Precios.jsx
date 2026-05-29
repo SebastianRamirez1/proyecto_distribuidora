@@ -11,17 +11,17 @@ import Spinner from '../components/ui/Spinner'
 import { fmt, parsePrecio } from '../utils/fmt'
 
 const TIPOS_PUBLICO = [
-  { key: 'precioExtra', field: 'precioExtra', label: 'EXTRA', color: 'amber'  },
-  { key: 'precioAA',    field: 'precioAA',    label: 'AA',    color: 'yellow' },
-  { key: 'precioA',     field: 'precioA',     label: 'A',     color: 'blue'   },
-  { key: 'precioB',     field: 'precioB',     label: 'B',     color: 'slate'  },
+  { key: 'precioExtra', field: 'precioExtra', label: 'EXTRA', color: 'amber',  emoji: '💛' },
+  { key: 'precioAA',    field: 'precioAA',    label: 'AA',    color: 'yellow', emoji: '🌟' },
+  { key: 'precioA',     field: 'precioA',     label: 'A',     color: 'blue',   emoji: '🤍' },
+  { key: 'precioB',     field: 'precioB',     label: 'B',     color: 'slate',  emoji: '⚪' },
 ]
 
 const TIPOS_COSTO = [
-  { key: 'costoExtra', field: 'costoExtra', label: 'EXTRA', color: 'amber'  },
-  { key: 'costoAA',    field: 'costoAA',    label: 'AA',    color: 'yellow' },
-  { key: 'costoA',     field: 'costoA',     label: 'A',     color: 'blue'   },
-  { key: 'costoB',     field: 'costoB',     label: 'B',     color: 'slate'  },
+  { key: 'costoExtra', field: 'costoExtra', label: 'EXTRA', color: 'amber',  emoji: '💛' },
+  { key: 'costoAA',    field: 'costoAA',    label: 'AA',    color: 'yellow', emoji: '🌟' },
+  { key: 'costoA',     field: 'costoA',     label: 'A',     color: 'blue',   emoji: '🤍' },
+  { key: 'costoB',     field: 'costoB',     label: 'B',     color: 'slate',  emoji: '⚪' },
 ]
 
 const colorMap = {
@@ -83,7 +83,7 @@ export default function Precios() {
         precioB:     parsePrecio(form.precioB),
       })
       setPrecios(guardados)
-      setSuccess('Precios públicos actualizados correctamente')
+      setSuccess('Precios públicos actualizados correctamente ✅')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -103,7 +103,7 @@ export default function Precios() {
         costoB:     parsePrecio(formC.costoB),
       })
       setCostos(guardados)
-      setSuccess('Precios de liquidación actualizados correctamente')
+      setSuccess('Precios de liquidación actualizados correctamente ✅')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -126,16 +126,16 @@ export default function Precios() {
 
           {/* ── Precios públicos ── */}
           <section>
-            <h2 className="text-base font-bold text-slate-700 mb-4">Precios de venta al público</h2>
+            <h2 className="text-base font-bold text-slate-700 mb-4">💰 Precios de venta al público</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Vigentes</h3>
-                {TIPOS_PUBLICO.map(({ key, label, color }) => {
+                {TIPOS_PUBLICO.map(({ key, label, color, emoji }) => {
                   const { bg, text } = colorMap[color]
                   return (
                     <Card key={key} className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
-                        <span className={`text-sm font-bold ${text}`}>{label}</span>
+                      <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-2xl flex-shrink-0`}>
+                        {emoji}
                       </div>
                       <div>
                         <p className="text-slate-500 text-sm">Canasta {label}</p>
@@ -162,7 +162,7 @@ export default function Precios() {
                   </Card>
                 ))}
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs text-blue-700">
-                  Aplica a clientes <strong>NORMAL</strong>. Los clientes <strong>ESPECIAL</strong> tienen precios personalizados en su perfil.
+                  ℹ️ Aplica a clientes <strong>NORMAL</strong>. Los clientes <strong>ESPECIAL</strong> tienen precios personalizados en su perfil.
                   Las medias canastas usan siempre la mitad del precio de su tipo padre.
                 </div>
               </div>
@@ -183,10 +183,10 @@ export default function Precios() {
                       />
                     ))}
                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700 mb-4">
-                      Cambiar los precios afectará todas las nuevas ventas a partir de este momento.
+                      ⚠️ Cambiar los precios afectará todas las nuevas ventas a partir de este momento.
                     </div>
                     <Button type="submit" loading={saving} className="w-full">
-                      Actualizar precios públicos
+                      💰 Actualizar precios públicos
                     </Button>
                   </form>
                 </Card>
@@ -196,16 +196,16 @@ export default function Precios() {
 
           {/* ── Precio de liquidación / costo ── */}
           <section>
-            <h2 className="text-base font-bold text-slate-700 mb-4">Precio de liquidación (costo)</h2>
+            <h2 className="text-base font-bold text-slate-700 mb-4">📦 Precio de liquidación (costo)</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <h3 className="text-sm font-semibold text-slate-500 uppercase tracking-wider">Vigentes</h3>
-                {TIPOS_COSTO.map(({ key, label, color }) => {
+                {TIPOS_COSTO.map(({ key, label, color, emoji }) => {
                   const { bg, text } = colorMap[color]
                   return (
                     <Card key={key} className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg ${bg} flex items-center justify-center flex-shrink-0`}>
-                        <span className={`text-sm font-bold ${text}`}>{label}</span>
+                      <div className={`w-14 h-14 rounded-full ${bg} flex items-center justify-center text-2xl flex-shrink-0`}>
+                        {emoji}
                       </div>
                       <div>
                         <p className="text-slate-500 text-sm">Canasta {label}</p>
@@ -231,7 +231,7 @@ export default function Precios() {
                   </Card>
                 ))}
                 <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-700">
-                  El costo se guarda en cada venta al momento de registrarla. Cambiar este valor no afecta ventas pasadas.
+                  ℹ️ El costo se guarda en cada venta al momento de registrarla. Cambiar este valor no afecta ventas pasadas.
                   El costo de medias canastas se calcula automáticamente como la mitad del tipo padre.
                 </div>
               </div>
@@ -252,10 +252,10 @@ export default function Precios() {
                       />
                     ))}
                     <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-3 text-xs text-emerald-700 mb-4">
-                      Este precio se usa para calcular la ganancia neta por venta.
+                      ℹ️ Este precio se usa para calcular la ganancia neta por venta.
                     </div>
                     <Button type="submit" loading={savingC} className="w-full">
-                      Actualizar precio de costo
+                      📦 Actualizar precio de costo
                     </Button>
                   </form>
                 </Card>

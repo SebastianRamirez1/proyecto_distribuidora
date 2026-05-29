@@ -84,7 +84,7 @@ export default function Facturas() {
         nitCliente: nitCliente.trim() || null,
         tipo:       tipoFactura,
       })
-      setSuccess(`Factura ${nueva.numero} generada correctamente`)
+      setSuccess(`Factura ${nueva.numero} generada correctamente ✅`)
       setModalGenerar(null)
       setNitCliente('')
       setTipoFactura('MANUAL')
@@ -118,7 +118,7 @@ export default function Facturas() {
       })
       setConfig(saved)
       setFormConfig(saved)
-      setSuccess('Configuración guardada correctamente')
+      setSuccess('Configuración guardada correctamente ✅')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -137,8 +137,8 @@ export default function Facturas() {
           <p className="text-slate-500 text-sm mt-1">Facturas de venta — Normatividad colombiana</p>
         </div>
         {!config?.configurada && (
-          <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-md">
-            Configura los datos del negocio primero
+          <span className="bg-amber-100 text-amber-700 text-xs font-semibold px-3 py-1.5 rounded-full">
+            ⚠️ Configura los datos del negocio primero
           </span>
         )}
       </div>
@@ -150,12 +150,12 @@ export default function Facturas() {
       <div className="flex mb-6 bg-slate-100 rounded-lg p-1 max-w-sm">
         <button
           onClick={() => setTab('facturas')}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'facturas' ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500'}`}
-        >Facturas</button>
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'facturas' ? 'bg-white shadow text-amber-600' : 'text-slate-500'}`}
+        >🧾 Facturas</button>
         <button
           onClick={() => setTab('config')}
-          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'config' ? 'bg-white shadow-sm text-amber-600' : 'text-slate-500'}`}
-        >Configuración</button>
+          className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${tab === 'config' ? 'bg-white shadow text-amber-600' : 'text-slate-500'}`}
+        >⚙️ Configuración</button>
       </div>
 
       {/* ── Tab: Facturas ─────────────────────────────────────────────────────── */}
@@ -167,7 +167,7 @@ export default function Facturas() {
               <input
                 type="text"
                 className="input max-w-sm"
-                placeholder="Buscar por número o cliente..."
+                placeholder="🔍 Buscar por número o cliente..."
                 value={busqueda}
                 onChange={e => setBusqueda(e.target.value)}
               />
@@ -177,7 +177,7 @@ export default function Facturas() {
               <div className="bg-white rounded-xl border border-slate-200 p-12 text-center text-slate-400">
                 {busqueda
                   ? 'No se encontraron facturas con ese criterio.'
-                  : 'No hay facturas emitidas aún. Genera facturas desde la página de Ventas.'}
+                  : '🧾 No hay facturas emitidas aún. Genera facturas desde la página de Ventas.'}
               </div>
             ) : (
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -206,7 +206,7 @@ export default function Facturas() {
                           <td className="px-2 py-2.5 text-right font-semibold text-slate-800">{fmt(f.total)}</td>
                           <td className="px-2 py-2.5 text-center">
                             <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${TIPO_COLOR[f.tipo] ?? 'bg-slate-100 text-slate-600'}`}>
-                              {f.tipo === 'ELECTRONICA' ? 'Electrónica' : 'Manual'}
+                              {f.tipo === 'ELECTRONICA' ? '⚡ Electrónica' : '📄 Manual'}
                             </span>
                           </td>
                           <td className="px-2 py-2.5 text-center">
@@ -220,7 +220,7 @@ export default function Facturas() {
                               disabled={descargando === f.id}
                               className="text-xs bg-amber-100 text-amber-700 hover:bg-amber-200 font-medium px-3 py-1.5 rounded-lg transition-colors disabled:opacity-50"
                             >
-                              {descargando === f.id ? 'Descargando…' : 'PDF'}
+                              {descargando === f.id ? '⏳' : '📥 PDF'}
                             </button>
                           </td>
                         </tr>
@@ -238,7 +238,7 @@ export default function Facturas() {
       {tab === 'config' && (
         <div className="max-w-2xl">
           <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6 text-sm text-blue-800">
-            <p className="font-semibold mb-1">Datos requeridos por la DIAN</p>
+            <p className="font-semibold mb-1">📋 Datos requeridos por la DIAN</p>
             <p>Estos datos aparecerán en todas las facturas. La razón social y el NIT son obligatorios según la normatividad tributaria colombiana (Res. 042/2020).</p>
           </div>
 
@@ -246,7 +246,7 @@ export default function Facturas() {
             <form onSubmit={handleGuardarConfig} className="space-y-6">
               {/* Datos del negocio */}
               <div className="bg-white border border-slate-200 rounded-xl p-5">
-                <h3 className="font-semibold text-slate-700 mb-4">Datos del emisor</h3>
+                <h3 className="font-semibold text-slate-700 mb-4">🏢 Datos del emisor</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="label">Razón social *</label>
@@ -279,7 +279,7 @@ export default function Facturas() {
 
               {/* Resolución DIAN */}
               <div className="bg-white border border-slate-200 rounded-xl p-5">
-                <h3 className="font-semibold text-slate-700 mb-1">Resolución DIAN</h3>
+                <h3 className="font-semibold text-slate-700 mb-1">📜 Resolución DIAN</h3>
                 <p className="text-xs text-slate-500 mb-4">Si aún no tienes resolución, déjalo en blanco. Puedes completarlo cuando la obtengas.</p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
@@ -308,11 +308,11 @@ export default function Facturas() {
               </div>
 
               <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
-                Los huevos están <strong>excluidos de IVA</strong> según el Art. 424 del E.T. (canasta familiar). Las facturas se generan sin IVA automáticamente.
+                ℹ️ Los huevos están <strong>excluidos de IVA</strong> según el Art. 424 del E.T. (canasta familiar). Las facturas se generan sin IVA automáticamente.
               </div>
 
               <Button type="submit" loading={guardando} className="w-full md:w-auto px-8">
-                Guardar configuración
+                💾 Guardar configuración
               </Button>
             </form>
           )}
@@ -322,7 +322,7 @@ export default function Facturas() {
       {/* ── Modal: Generar factura ─────────────────────────────────────────────── */}
       {modalGenerar && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 w-full max-w-sm p-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
             <h2 className="text-lg font-bold text-slate-800 mb-1">Generar factura</h2>
             <p className="text-sm text-slate-500 mb-4">{modalGenerar.nombreCliente}</p>
 
@@ -343,8 +343,8 @@ export default function Facturas() {
             <label className="label">Tipo de factura</label>
             <div className="flex gap-2 mb-5">
               {[
-                { val: 'MANUAL',      label: 'Manual',      desc: 'PDF local, sin DIAN' },
-                { val: 'ELECTRONICA', label: 'Electrónica', desc: 'PDF + registro DIAN' },
+                { val: 'MANUAL',     label: '📄 Manual',     desc: 'PDF local, sin DIAN' },
+                { val: 'ELECTRONICA', label: '⚡ Electrónica', desc: 'PDF + registro DIAN' },
               ].map(op => (
                 <button
                   key={op.val}
@@ -364,7 +364,7 @@ export default function Facturas() {
 
             {tipoFactura === 'ELECTRONICA' && (
               <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 text-xs text-blue-700 mb-4">
-                La integración con DIAN vía PTH está en desarrollo. Por ahora se genera el PDF y se registra como factura electrónica pendiente de envío.
+                ℹ️ La integración con DIAN vía PTH está en desarrollo. Por ahora se genera el PDF y se registra como factura electrónica pendiente de envío.
               </div>
             )}
 
