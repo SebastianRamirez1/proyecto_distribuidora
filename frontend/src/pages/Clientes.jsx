@@ -272,7 +272,7 @@ export default function Clientes() {
                       <div className="font-medium">{c.nombre}</div>
                       {c.notas && (
                         <div className="text-xs text-slate-400 mt-0.5 truncate max-w-[180px]" title={c.notas}>
-                          {c.notas}
+                          📝 {c.notas}
                         </div>
                       )}
                     </td>
@@ -286,23 +286,23 @@ export default function Clientes() {
                     <td className="table-cell text-center">
                       <div className="flex gap-1.5 justify-center flex-wrap">
                         <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openEditar(c)}>
-                          Editar
+                          ✏️ Editar
                         </Button>
                         <Button variant="secondary" className="text-xs py-1 px-2 text-orange-600 hover:bg-orange-50" onClick={() => openSaldo(c)}>
-                          Saldo ant.
+                          📒 Saldo ant.
                         </Button>
                         <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCuenta(c)}>
-                          Cuenta
+                          📊 Cuenta
                         </Button>
                         <Button variant="secondary" className="text-xs py-1 px-2" onClick={() => openCredito(c)}>
-                          Crédito
+                          💳 Crédito
                         </Button>
                         <Button
                           variant="secondary"
                           className="text-xs py-1 px-2 text-red-600 hover:bg-red-50"
                           onClick={() => { setSelectedCliente(c); setModalEliminar(true) }}
                         >
-                          Eliminar
+                          🗑️
                         </Button>
                       </div>
                     </td>
@@ -335,7 +335,7 @@ export default function Clientes() {
 
           {formEditar.tipo === 'ESPECIAL' && (
             <div className="mt-3 border border-amber-200 bg-amber-50 rounded-lg p-3">
-              <p className="text-xs font-semibold text-amber-700 mb-3">Precios personalizados por canasta</p>
+              <p className="text-xs font-semibold text-amber-700 mb-3">💲 Precios personalizados por canasta</p>
               {[
                 { field: 'precioEspecialExtra', label: 'EXTRA' },
                 { field: 'precioEspecialAA',    label: 'AA'    },
@@ -396,7 +396,7 @@ export default function Clientes() {
 
           {formCrear.tipo === 'ESPECIAL' && (
             <div className="mt-3 border border-amber-200 bg-amber-50 rounded-lg p-3">
-              <p className="text-xs font-semibold text-amber-700 mb-3">Precios personalizados por canasta</p>
+              <p className="text-xs font-semibold text-amber-700 mb-3">💲 Precios personalizados por canasta</p>
               {[
                 { field: 'precioEspecialExtra', label: 'EXTRA' },
                 { field: 'precioEspecialAA',    label: 'AA'    },

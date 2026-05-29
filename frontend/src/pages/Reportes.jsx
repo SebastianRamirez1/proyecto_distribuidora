@@ -8,10 +8,13 @@ import Spinner from '../components/ui/Spinner'
 import Button from '../components/ui/Button'
 import { fmt } from '../utils/fmt'
 
-function CajaRow({ label, value, highlight = false }) {
+function CajaRow({ icon, label, value, highlight = false }) {
   return (
     <div className={`flex items-center justify-between py-3 ${highlight ? 'border-t-2 border-slate-200 mt-2 pt-4' : 'border-b border-slate-100'}`}>
-      <span className={`text-sm ${highlight ? 'font-semibold text-slate-800' : 'text-slate-600'}`}>{label}</span>
+      <div className="flex items-center gap-2 text-slate-600">
+        <span className="text-lg">{icon}</span>
+        <span className={`text-sm ${highlight ? 'font-semibold text-slate-800' : ''}`}>{label}</span>
+      </div>
       <span className={`font-bold ${highlight ? 'text-xl text-amber-600' : 'text-slate-800'}`}>{fmt(value)}</span>
     </div>
   )
@@ -108,7 +111,7 @@ export default function Reportes() {
 
       {/* Selector de fecha */}
       <form onSubmit={handleBuscar} className="flex items-center gap-3 mb-6 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm">
-        <span className="text-slate-500 text-sm font-medium whitespace-nowrap">Ver fecha:</span>
+        <span className="text-slate-500 text-sm font-medium whitespace-nowrap">📅 Ver fecha:</span>
         <input
           type="date"
           max={today}
@@ -132,22 +135,22 @@ export default function Reportes() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Caja */}
           <div>
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Cierre de caja</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">💰 Cierre de caja</h2>
             <Card>
-              <CajaRow label="Efectivo"          value={caja?.totalEfectivo} />
-              <CajaRow label="Transferencia"     value={caja?.totalTransferencia} />
-              <CajaRow label="Abonos recibidos"  value={caja?.totalAbonos} />
-              <CajaRow label="Fiado (pendiente)" value={caja?.totalFiado} />
-              <CajaRow label="Total cobrado"     value={caja?.totalCobrado} highlight />
+              <CajaRow icon="💵" label="Efectivo"          value={caja?.totalEfectivo} />
+              <CajaRow icon="📲" label="Transferencia"     value={caja?.totalTransferencia} />
+              <CajaRow icon="💳" label="Abonos recibidos"  value={caja?.totalAbonos} />
+              <CajaRow icon="📋" label="Fiado (pendiente)" value={caja?.totalFiado} />
+              <CajaRow icon="🏦" label="Total cobrado"     value={caja?.totalCobrado} highlight />
               {caja?.totalGanancia != null && Number(caja.totalGanancia) > 0 && (
-                <CajaRow label="Ganancia neta"   value={caja.totalGanancia} />
+                <CajaRow icon="📈" label="Ganancia neta"   value={caja.totalGanancia} />
               )}
             </Card>
           </div>
 
           {/* Resumen ventas */}
           <div>
-            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">Resumen de ventas</h2>
+            <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">📦 Resumen de ventas</h2>
             <Card>
               {ventas.length === 0 ? (
                 <p className="text-slate-400 text-sm text-center py-6">No hay ventas registradas este día</p>
@@ -216,7 +219,7 @@ export default function Reportes() {
           {/* Detalle ventas */}
           <div className="lg:col-span-2">
             <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              Detalle de ventas ({ventas.length})
+              📋 Detalle de ventas ({ventas.length})
             </h2>
             <Card className="p-0 overflow-hidden">
               <table className="w-full text-sm">
