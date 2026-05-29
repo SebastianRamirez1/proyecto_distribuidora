@@ -35,15 +35,15 @@ export default function Login() {
       <div className="w-full max-w-sm">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-2xl shadow-lg mb-4">
-            <span className="text-4xl">🥚</span>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-amber-500 rounded-xl mb-4">
+            <span className="text-3xl select-none">🥚</span>
           </div>
           <h1 className="text-2xl font-bold text-white">La Golondrina</h1>
           <p className="text-amber-400 font-semibold text-sm">Distribuidora de Huevos</p>
         </div>
 
         {/* Card */}
-        <div className="bg-white rounded-2xl shadow-2xl p-8">
+        <div className="bg-white rounded-xl shadow-md border border-slate-200 p-8">
           <h2 className="text-lg font-bold text-slate-800 mb-1">Iniciar sesión</h2>
           <p className="text-sm text-slate-500 mb-6">Ingresa tus credenciales para continuar</p>
 
