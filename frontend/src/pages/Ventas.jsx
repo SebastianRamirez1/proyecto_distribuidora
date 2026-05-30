@@ -494,19 +494,49 @@ export default function Ventas() {
         {/* ── Panel derecho: tabla de ventas ── */}
         <div className="lg:col-span-3">
           <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
-            <h3 className="font-semibold text-slate-700">
-              {esHoy
-                ? 'Ventas de hoy'
-                : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
-              {!esHoy && (
-                <button
-                  onClick={() => { setFechaSeleccionada(hoy); loadVentas(hoy) }}
-                  className="ml-3 text-xs text-amber-600 hover:text-amber-700 font-medium"
-                >
-                  ← Volver a hoy
-                </button>
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Switch rápido de hojas — aparece solo cuando hay dos jornadas activas */}
+              {jornadaEnCierre ? (
+                <>
+                  <button
+                    onClick={() => { setFechaSeleccionada(jornada.fecha); loadVentas(jornada.fecha) }}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                      fechaSeleccionada === jornada?.fecha
+                        ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                        : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    📋 Hoja actual
+                    <span className="ml-1.5 text-xs opacity-70 capitalize">{fmtFechaJornada(jornada.fecha)}</span>
+                  </button>
+                  <button
+                    onClick={() => { setFechaSeleccionada(jornadaEnCierre.fecha); loadVentas(jornadaEnCierre.fecha) }}
+                    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+                      fechaSeleccionada === jornadaEnCierre?.fecha
+                        ? 'bg-amber-50 border-amber-300 text-amber-700'
+                        : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+                    }`}
+                  >
+                    📋 Hoja anterior
+                    <span className="ml-1.5 text-xs opacity-70 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</span>
+                  </button>
+                </>
+              ) : (
+                <h3 className="font-semibold text-slate-700">
+                  {fechaSeleccionada === jornada?.fecha
+                    ? 'Ventas de hoy'
+                    : `Ventas del ${new Date(fechaSeleccionada + 'T12:00:00').toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}`}
+                  {fechaSeleccionada !== jornada?.fecha && (
+                    <button
+                      onClick={() => { const f = jornada?.fecha ?? hoy; setFechaSeleccionada(f); loadVentas(f) }}
+                      className="ml-3 text-xs text-amber-600 hover:text-amber-700 font-medium"
+                    >
+                      ← Volver a hoy
+                    </button>
+                  )}
+                </h3>
               )}
-            </h3>
+            </div>
             <div className="flex items-center gap-3">
               <input
                 type="date"
