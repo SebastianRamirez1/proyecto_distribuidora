@@ -11,6 +11,7 @@ import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
 import com.distribuidora.huevos.domain.repositories.AbonoRepository;
 import com.distribuidora.huevos.domain.repositories.CajaRepository;
 import com.distribuidora.huevos.domain.repositories.CreditoRepository;
+import com.distribuidora.huevos.domain.repositories.JornadaRepository;
 import com.distribuidora.huevos.domain.valueobjects.Dinero;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,6 +35,7 @@ class RegistrarAbonoServiceTest {
     @Mock private CreditoRepository creditoRepository;
     @Mock private CajaRepository cajaRepository;
     @Mock private AbonoRepository abonoRepository;
+    @Mock private JornadaRepository jornadaRepository;
 
     @InjectMocks
     private RegistrarAbonoService service;

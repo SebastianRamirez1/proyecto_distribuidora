@@ -1,4 +1,4 @@
-import api from './axiosConfig'
+import api from './axios'
 
 export const obtenerJornadaActiva = () =>
   api.get('/jornadas/activa').then(r => r.data)
