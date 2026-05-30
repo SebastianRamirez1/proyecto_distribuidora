@@ -42,6 +42,8 @@ export default function Ventas() {
   const [modalCerrar, setModalCerrar]       = useState(false)
   // jornadaIdVenta: null = usar jornada ABIERTA, o ID de la jornada EN_CIERRE
   const [jornadaIdVenta, setJornadaIdVenta] = useState(null)
+  // jornadaIdAbono: igual que jornadaIdVenta pero para abonos
+  const [jornadaIdAbono, setJornadaIdAbono] = useState(null)
 
   const [anulando, setAnulando] = useState(false)
   const [ventaAAnular, setVentaAAnular]     = useState(null)
@@ -133,13 +135,22 @@ export default function Ventas() {
     setSavingA(true)
     setError('')
     try {
-      await registrarAbono({
+      const payload = {
         clienteId: Number(formAbono.clienteId),
         monto:     Number(formAbono.monto),
         medioPago: formAbono.medioPago,
-      })
+      }
+      if (jornadaIdAbono !== null) {
+        payload.jornadaId = jornadaIdAbono
+      }
+      await registrarAbono(payload)
       setFormAbono(initAbono)
-      await loadVentas()
+      // Recargar la fecha de la jornada donde se registró el abono
+      const fechaRecarga = jornadaIdAbono !== null && jornadaEnCierre
+        ? jornadaEnCierre.fecha
+        : (jornada?.fecha ?? new Date().toISOString().split('T')[0])
+      await loadVentas(fechaRecarga)
+      setFechaSeleccionada(fechaRecarga)
       setSuccess('Abono registrado correctamente ✅')
     } catch (e) {
       setError(e.message)
@@ -224,6 +235,7 @@ export default function Ventas() {
       await cerrarJornada()
       setJornadaEnCierre(null)
       setJornadaIdVenta(null)
+      setJornadaIdAbono(null)
       setModalCerrar(false)
       setSuccess('✅ Hoja anterior cerrada definitivamente')
     } catch (e) {
@@ -295,8 +307,8 @@ export default function Ventas() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
 
-        {/* ── Panel izquierdo: formularios ── */}
-        <div className="lg:col-span-1">
+        {/* ── Panel izquierdo: formularios (sticky en desktop) ── */}
+        <div className="lg:col-span-1 lg:sticky lg:top-0 lg:self-start">
           <Card className="p-0 overflow-hidden">
             {/* Tabs */}
             <div className="flex border-b border-slate-100">
@@ -446,6 +458,48 @@ export default function Ventas() {
                 </form>
               ) : (
                 <form onSubmit={handleAbono}>
+                  {/* Selector de hoja — solo visible cuando hay una jornada EN_CIERRE */}
+                  {jornadaEnCierre && (
+                    <div className="mb-3">
+                      <p className="label mb-1.5">¿En qué hoja va este abono?</p>
+                      <div className="flex flex-col gap-1.5">
+                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                          jornadaIdAbono === null
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="jornadaAbono"
+                            checked={jornadaIdAbono === null}
+                            onChange={() => setJornadaIdAbono(null)}
+                            className="accent-emerald-600"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold">Hoja actual</p>
+                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornada?.fecha ?? '')}</p>
+                          </div>
+                        </label>
+                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                          jornadaIdAbono === jornadaEnCierre.id
+                            ? 'bg-amber-50 border-amber-300 text-amber-800'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="jornadaAbono"
+                            checked={jornadaIdAbono === jornadaEnCierre.id}
+                            onChange={() => setJornadaIdAbono(jornadaEnCierre.id)}
+                            className="accent-amber-500"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold">Hoja anterior <span className="text-amber-600">(en cierre)</span></p>
+                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                   <Select
                     label="Cliente"
                     value={formAbono.clienteId}
@@ -478,9 +532,12 @@ export default function Ventas() {
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                       : 'bg-blue-50 text-blue-700 border border-blue-200'
                   }`}>
-                    {formAbono.medioPago === 'EFECTIVO'
-                      ? '💵 Este abono sumará al efectivo del día'
-                      : '📲 Este abono sumará a las transferencias del día'}
+                    {formAbono.medioPago === 'EFECTIVO' ? '💵 ' : '📲 '}
+                    {jornadaEnCierre
+                      ? `Sumará a la caja de la hoja ${jornadaIdAbono === null ? 'actual' : 'anterior'}`
+                      : (formAbono.medioPago === 'EFECTIVO'
+                          ? 'Este abono sumará al efectivo del día'
+                          : 'Este abono sumará a las transferencias del día')}
                   </div>
                   <Button type="submit" loading={savingA} variant="success" className="w-full">
                     💳 Registrar abono
