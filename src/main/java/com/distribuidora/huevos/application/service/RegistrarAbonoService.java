@@ -43,10 +43,17 @@ public class RegistrarAbonoService {
         credito.abonar(monto);
         creditoRepository.save(credito);
 
-        // Usar la fecha de la jornada activa para la caja (igual que en ventas).
-        LocalDate fechaJornada = jornadaRepository.findActiva()
-                .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
-                .orElse(LocalDate.now());
+        // Igual que ventas: si viene jornadaId usar esa fecha, si no usar la ABIERTA.
+        LocalDate fechaJornada;
+        if (command.getJornadaId() != null) {
+            fechaJornada = jornadaRepository.findById(command.getJornadaId())
+                    .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
+                    .orElse(LocalDate.now());
+        } else {
+            fechaJornada = jornadaRepository.findActiva()
+                    .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
+                    .orElse(LocalDate.now());
+        }
         Caja caja = cajaRepository.findByFecha(fechaJornada).orElse(Caja.nueva(fechaJornada));
         caja.registrarAbono(command.getMedioPago(), monto);
         cajaRepository.save(caja);

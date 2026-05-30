@@ -18,15 +18,22 @@ public class LiquidarJornadaService {
     }
 
     /**
-     * Cierra la jornada activa y abre automáticamente la del día siguiente.
-     * Retorna la nueva jornada abierta.
+     * Liquida la jornada activa: la pasa a EN_CIERRE (puede seguir recibiendo
+     * ventas rezagadas) y abre automáticamente la del día siguiente.
+     * Retorna la nueva jornada ABIERTA.
      */
     public JornadaResponse ejecutar() {
+        // No puede haber dos jornadas en cierre a la vez
+        if (jornadaRepository.findEnCierre().isPresent()) {
+            throw new OperacionNoPermitidaException(
+                    "Ya hay una jornada en cierre. Ciérrala definitivamente antes de liquidar la actual.");
+        }
+
         Jornada actual = jornadaRepository.findActiva()
                 .orElseThrow(() -> new OperacionNoPermitidaException(
                         "No hay ninguna jornada abierta para liquidar."));
 
-        actual.cerrar();
+        actual.pasarAEnCierre();
         jornadaRepository.save(actual);
 
         Jornada siguiente = Jornada.nueva(actual.getFecha().plusDays(1));

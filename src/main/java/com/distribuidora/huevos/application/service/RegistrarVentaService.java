@@ -92,11 +92,19 @@ public class RegistrarVentaService {
         inventario.descontar(command.getTipoProducto(), cantidad);
         inventarioRepository.save(inventario);
 
-        // Usar la fecha de la jornada activa (no la fecha calendario).
-        // Así las ventas registradas después de liquidar quedan en el día siguiente.
-        LocalDate fechaJornada = jornadaRepository.findActiva()
-                .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
-                .orElse(LocalDate.now());
+        // Determinar la fecha de jornada:
+        // - Si viene jornadaId explícito → usar esa jornada (venta rezagada de hoja anterior)
+        // - Si no → usar la jornada ABIERTA actualmente
+        LocalDate fechaJornada;
+        if (command.getJornadaId() != null) {
+            fechaJornada = jornadaRepository.findById(command.getJornadaId())
+                    .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
+                    .orElse(LocalDate.now());
+        } else {
+            fechaJornada = jornadaRepository.findActiva()
+                    .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
+                    .orElse(LocalDate.now());
+        }
         LocalDateTime fechaVenta = LocalDateTime.of(fechaJornada, LocalTime.now());
 
         Venta venta = new Venta(null, cliente, command.getTipoProducto(), cantidad,
