@@ -511,7 +511,7 @@ export default function Ventas() {
               <input
                 type="date"
                 value={fechaSeleccionada}
-                max={hoy}
+                max={jornada?.fecha ?? hoy}
                 onChange={handleFechaChange}
                 className="text-sm border border-slate-300 rounded-lg px-3 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-amber-400"
               />

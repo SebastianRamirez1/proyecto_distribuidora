@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { reporteCajaHoy, reporteCajaPorFecha } from '../api/reportesApi'
 import { ventasHoy, ventasPorFecha } from '../api/ventasApi'
+import { obtenerEstadoJornadas } from '../api/jornadasApi'
 import Card from '../components/ui/Card'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
@@ -35,6 +36,7 @@ export default function Reportes() {
   const [error, setError]   = useState('')
   const [fecha, setFecha]   = useState(today)       // fecha seleccionada (YYYY-MM-DD)
   const [buscando, setBuscando] = useState(false)
+  const [maxFecha, setMaxFecha] = useState(today)   // hasta la fecha de la jornada activa
 
   const cargar = async (f) => {
     setError('')
@@ -51,13 +53,18 @@ export default function Reportes() {
     }
   }
 
-  // Carga inicial (hoy)
+  // Carga inicial (hoy) + fecha máxima desde la jornada activa
   useEffect(() => {
     const init = async () => {
       await cargar(today)
       setLoading(false)
     }
     init()
+    // La jornada activa puede ser de un día futuro (después de liquidar).
+    // Actualizamos maxFecha para que el picker permita seleccionarla.
+    obtenerEstadoJornadas()
+      .then(e => { if (e?.abierta?.fecha) setMaxFecha(e.abierta.fecha) })
+      .catch(() => {})
   }, [])
 
   const handleBuscar = async (e) => {
@@ -68,9 +75,9 @@ export default function Reportes() {
   }
 
   const handleHoy = async () => {
-    setFecha(today)
+    setFecha(maxFecha)
     setBuscando(true)
-    await cargar(today)
+    await cargar(maxFecha)
     setBuscando(false)
   }
 
@@ -114,7 +121,7 @@ export default function Reportes() {
         <span className="text-slate-500 text-sm font-medium whitespace-nowrap">📅 Ver fecha:</span>
         <input
           type="date"
-          max={today}
+          max={maxFecha}
           value={fecha}
           onChange={e => setFecha(e.target.value)}
           className="input flex-1 max-w-xs"
@@ -122,7 +129,7 @@ export default function Reportes() {
         <Button type="submit" loading={buscando} className="whitespace-nowrap">
           Buscar
         </Button>
-        {fecha !== today && (
+        {fecha !== maxFecha && (
           <Button type="button" variant="secondary" onClick={handleHoy} className="whitespace-nowrap">
             Hoy
           </Button>
