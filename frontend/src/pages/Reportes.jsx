@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { reporteCajaHoy, reporteCajaPorFecha } from '../api/reportesApi'
 import { ventasHoy, ventasPorFecha } from '../api/ventasApi'
-import { obtenerJornadaActiva } from '../api/jornadasApi'
+import { obtenerEstadoJornadas } from '../api/jornadasApi'
 import Card from '../components/ui/Card'
 import Alert from '../components/ui/Alert'
 import Badge from '../components/ui/Badge'
@@ -62,8 +62,8 @@ export default function Reportes() {
     init()
     // La jornada activa puede ser de un día futuro (después de liquidar).
     // Actualizamos maxFecha para que el picker permita seleccionarla.
-    obtenerJornadaActiva()
-      .then(j => { if (j?.fecha) setMaxFecha(j.fecha) })
+    obtenerEstadoJornadas()
+      .then(e => { if (e?.abierta?.fecha) setMaxFecha(e.abierta.fecha) })
       .catch(() => {})
   }, [])
 
