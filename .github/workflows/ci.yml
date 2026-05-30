@@ -110,7 +110,12 @@ jobs:
   # JOB 3: SCA — OWASP Dependency Check
   # Escanea dependencias Maven contra CVEs.
   # Falla si hay vulnerabilidad CVSS ≥ 7 (High).
-  # Corre en paralelo con backend-tests.
+  #
+  # Requiere el secret NVD_API_KEY para funcionar
+  # de forma fiable (sin él la API de NVD aplica
+  # rate limiting y el job puede fallar por timeout).
+  # Obtener gratis en: https://nvd.nist.gov/developers/request-an-api-key
+  # Agregar en: GitHub → Settings → Secrets → NVD_API_KEY
   # ─────────────────────────────────────────
   dependency-check:
     name: SCA — OWASP Dependency Check
@@ -121,27 +126,34 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Configurar Java 21
-        uses: actions/setup-java@v4
+      # Cachear la BD de NVD entre runs para evitar re-descargas y rate limits
+      - name: Caché base de datos NVD
+        uses: actions/cache@v4
         with:
-          java-version: '21'
-          distribution: 'temurin'
-          cache: maven
+          path: ~/.dependency-check/data
+          key: dependency-check-nvd-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            dependency-check-nvd-${{ runner.os }}-
 
       - name: Ejecutar OWASP Dependency Check
-        run: |
-          mvn org.owasp:dependency-check-maven:check \
-            -DfailBuildOnCVSS=7 \
-            -DskipTestScope=false \
-            -Dformat=HTML \
-            -B
-        # failBuildOnCVSS=7 → bloquea si hay CVE High o Critical sin suprimir
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'distribuidora-huevos'
+          path: '.'
+          format: 'HTML'
+          args: >
+            --failOnCVSS 7
+            --enableRetired
+            --nvdApiKey ${{ secrets.NVD_API_KEY }}
+        # failOnCVSS 7 → bloquea si hay CVE High o Critical
+        # Si NVD_API_KEY no está configurado, el step falla con rate limit;
+        # Dependabot (dependabot.yml) cubre el escaneo semanal como alternativa.
 
       - name: Subir reporte de dependencias
-        if: always()   # subir aunque falle, para diagnóstico
+        if: always()
         continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: dependency-check-report
-          path: target/dependency-check-report.html
+          path: ${{ github.workspace }}/reports
           retention-days: 14
