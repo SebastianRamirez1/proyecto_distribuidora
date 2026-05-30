@@ -19,6 +19,9 @@ public class RegistrarAbonoCommand {
     @NotNull(message = "El medio de pago del abono es obligatorio")
     private TipoPago medioPago;
 
+    /** Opcional. ID de la jornada a la que pertenece este abono (igual que en ventas). */
+    private Long jornadaId;
+
     public RegistrarAbonoCommand() {}
 
     public Long getClienteId() { return clienteId; }
@@ -29,4 +32,7 @@ public class RegistrarAbonoCommand {
 
     public TipoPago getMedioPago() { return medioPago; }
     public void setMedioPago(TipoPago medioPago) { this.medioPago = medioPago; }
+
+    public Long getJornadaId() { return jornadaId; }
+    public void setJornadaId(Long jornadaId) { this.jornadaId = jornadaId; }
 }

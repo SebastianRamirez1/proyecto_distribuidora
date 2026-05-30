@@ -24,6 +24,16 @@ public class JornadaRepositoryImpl implements JornadaRepository {
     }
 
     @Override
+    public Optional<Jornada> findEnCierre() {
+        return jpa.findByEstado(EstadoJornada.EN_CIERRE).map(this::toDomain);
+    }
+
+    @Override
+    public Optional<Jornada> findById(Long id) {
+        return jpa.findById(id).map(this::toDomain);
+    }
+
+    @Override
     public Jornada save(Jornada jornada) {
         JornadaJpaEntity entity;
         if (jornada.getId() != null) {

@@ -27,15 +27,19 @@ public class Jornada {
         return new Jornada(null, fecha, EstadoJornada.ABIERTA, LocalDateTime.now(), null);
     }
 
-    /** Cierra la jornada (liquida la hoja). */
+    /** Liquida la hoja: pasa a EN_CIERRE para ventas rezagadas. */
+    public void pasarAEnCierre() {
+        this.estado = EstadoJornada.EN_CIERRE;
+    }
+
+    /** Cierra definitivamente la jornada (ya sin ventas pendientes). */
     public void cerrar() {
         this.estado    = EstadoJornada.CERRADA;
         this.cerradaEn = LocalDateTime.now();
     }
 
-    public boolean estaAbierta() {
-        return EstadoJornada.ABIERTA == this.estado;
-    }
+    public boolean estaAbierta()   { return EstadoJornada.ABIERTA   == this.estado; }
+    public boolean estaEnCierre()  { return EstadoJornada.EN_CIERRE == this.estado; }
 
     // ── Getters ────────────────────────────────────────────────────────────────
 

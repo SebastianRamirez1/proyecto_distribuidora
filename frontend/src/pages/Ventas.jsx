@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { ventasPorFecha, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
 import { listarClientes } from '../api/clientesApi'
 import { generarFactura, descargarPdfFactura } from '../api/facturasApi'
-import { obtenerJornadaActiva, liquidarJornada } from '../api/jornadasApi'
+import { obtenerEstadoJornadas, liquidarJornada, cerrarJornada } from '../api/jornadasApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Select from '../components/ui/Select'
@@ -33,10 +33,15 @@ export default function Ventas() {
   const [savingA, setSavingA] = useState(false)
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
 
-  // Jornada activa
-  const [jornada, setJornada] = useState(null)
-  const [liquidando, setLiquidando] = useState(false)
-  const [modalLiquidar, setModalLiquidar] = useState(false)
+  // Jornadas
+  const [jornada, setJornada]               = useState(null)   // ABIERTA
+  const [jornadaEnCierre, setJornadaEnCierre] = useState(null) // EN_CIERRE (puede ser null)
+  const [liquidando, setLiquidando]         = useState(false)
+  const [cerrando, setCerrando]             = useState(false)
+  const [modalLiquidar, setModalLiquidar]   = useState(false)
+  const [modalCerrar, setModalCerrar]       = useState(false)
+  // jornadaIdVenta: null = usar jornada ABIERTA, o ID de la jornada EN_CIERRE
+  const [jornadaIdVenta, setJornadaIdVenta] = useState(null)
 
   const [anulando, setAnulando] = useState(false)
   const [ventaAAnular, setVentaAAnular]     = useState(null)
@@ -60,12 +65,13 @@ export default function Ventas() {
     const load = async () => {
       try {
         const hoy = new Date().toISOString().split('T')[0]
-        const [v, c, j] = await Promise.all([ventasPorFecha(hoy), listarClientes(), obtenerJornadaActiva()])
+        const [v, c, estado] = await Promise.all([ventasPorFecha(hoy), listarClientes(), obtenerEstadoJornadas()])
         setVentas(v)
         setClientes(c)
-        setJornada(j)
-        // Si la jornada activa es de otro día, mostrar esa fecha por defecto
-        if (j && j.fecha !== hoy) setFechaSeleccionada(j.fecha)
+        setJornada(estado.abierta)
+        setJornadaEnCierre(estado.enCierre ?? null)
+        // Mostrar por defecto la fecha de la jornada activa
+        if (estado.abierta && estado.abierta.fecha !== hoy) setFechaSeleccionada(estado.abierta.fecha)
       } catch (e) {
         setError(e.message)
       } finally {
@@ -102,11 +108,18 @@ export default function Ventas() {
       if (mostrarPrecioManual && formVenta.precioManual !== '') {
         payload.precioManual = parsePrecio(formVenta.precioManual)
       }
+      if (jornadaIdVenta !== null) {
+        payload.jornadaId = jornadaIdVenta
+      }
       await registrarVenta(payload)
       setFormVenta(initVenta)
       setMostrarPrecioManual(false)
-      await loadVentas(new Date().toISOString().split('T')[0])
-      setFechaSeleccionada(new Date().toISOString().split('T')[0])
+      // Recargar la fecha correspondiente a la jornada usada
+      const fechaRecarga = jornadaIdVenta !== null && jornadaEnCierre
+        ? jornadaEnCierre.fecha
+        : (jornada?.fecha ?? new Date().toISOString().split('T')[0])
+      await loadVentas(fechaRecarga)
+      setFechaSeleccionada(fechaRecarga)
       setSuccess('Venta registrada correctamente ✅')
     } catch (e) {
       setError(e.message)
@@ -190,15 +203,33 @@ export default function Ventas() {
     setError('')
     try {
       const nuevaJornada = await liquidarJornada()
+      // La jornada que estaba ABIERTA pasa a EN_CIERRE; la nueva es ABIERTA
+      setJornadaEnCierre(jornada)
       setJornada(nuevaJornada)
       setModalLiquidar(false)
       setFechaSeleccionada(nuevaJornada.fecha)
       await loadVentas(nuevaJornada.fecha)
-      setSuccess(`✅ Jornada liquidada. Nueva jornada abierta: ${fmtFechaJornada(nuevaJornada.fecha)}`)
+      setSuccess(`✅ Jornada liquidada. Nueva hoja: ${fmtFechaJornada(nuevaJornada.fecha)}`)
     } catch (e) {
       setError(e.response?.data?.mensaje || e.message)
     } finally {
       setLiquidando(false)
+    }
+  }
+
+  const handleCerrar = async () => {
+    setCerrando(true)
+    setError('')
+    try {
+      await cerrarJornada()
+      setJornadaEnCierre(null)
+      setJornadaIdVenta(null)
+      setModalCerrar(false)
+      setSuccess('✅ Hoja anterior cerrada definitivamente')
+    } catch (e) {
+      setError(e.response?.data?.mensaje || e.message)
+    } finally {
+      setCerrando(false)
     }
   }
 
@@ -218,34 +249,45 @@ export default function Ventas() {
           <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
           <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
         </div>
-        {/* Banner jornada */}
-        {jornada && (
-          <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm font-medium ${
-            jornada.estado === 'ABIERTA'
-              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
-              : 'bg-slate-50 border-slate-200 text-slate-600'
-          }`}>
-            <span className="text-base">📋</span>
-            <div>
-              <span className="font-semibold capitalize">{fmtFechaJornada(jornada.fecha)}</span>
-              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-semibold ${
-                jornada.estado === 'ABIERTA'
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-slate-200 text-slate-500'
-              }`}>
-                {jornada.estado === 'ABIERTA' ? 'ABIERTA' : 'CERRADA'}
-              </span>
+        {/* Banners de jornada */}
+        <div className="flex flex-col gap-2 items-end">
+          {/* Jornada EN_CIERRE (hoja anterior con ventas pendientes) */}
+          {jornadaEnCierre && (
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-amber-50 border-amber-200 text-sm">
+              <span>📋</span>
+              <div>
+                <span className="font-semibold capitalize text-amber-800">{fmtFechaJornada(jornadaEnCierre.fecha)}</span>
+                <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-700">
+                  EN CIERRE
+                </span>
+              </div>
+              <button
+                onClick={() => setModalCerrar(true)}
+                className="ml-1 px-3 py-1 text-xs font-semibold bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors"
+              >
+                Cerrar definitivamente
+              </button>
             </div>
-            {jornada.estado === 'ABIERTA' && (
+          )}
+          {/* Jornada ABIERTA (hoja actual) */}
+          {jornada && (
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl border bg-emerald-50 border-emerald-200 text-sm">
+              <span>📋</span>
+              <div>
+                <span className="font-semibold capitalize text-emerald-800">{fmtFechaJornada(jornada.fecha)}</span>
+                <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-700">
+                  ABIERTA
+                </span>
+              </div>
               <button
                 onClick={() => setModalLiquidar(true)}
-                className="ml-2 px-3 py-1 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+                className="ml-1 px-3 py-1 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
               >
                 Liquidar
               </button>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
       </div>
 
       <Alert type="error"   message={error}   onClose={() => setError('')} />
@@ -283,6 +325,48 @@ export default function Ventas() {
             <div className="p-4">
               {tab === 'venta' ? (
                 <form onSubmit={handleVenta}>
+                  {/* Selector de hoja — solo visible cuando hay una jornada EN_CIERRE */}
+                  {jornadaEnCierre && (
+                    <div className="mb-3">
+                      <p className="label mb-1.5">¿En qué hoja va esta venta?</p>
+                      <div className="flex flex-col gap-1.5">
+                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                          jornadaIdVenta === null
+                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="jornadaVenta"
+                            checked={jornadaIdVenta === null}
+                            onChange={() => setJornadaIdVenta(null)}
+                            className="accent-emerald-600"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold">Hoja actual</p>
+                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornada?.fecha ?? '')}</p>
+                          </div>
+                        </label>
+                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
+                          jornadaIdVenta === jornadaEnCierre.id
+                            ? 'bg-amber-50 border-amber-300 text-amber-800'
+                            : 'border-slate-200 hover:bg-slate-50'
+                        }`}>
+                          <input
+                            type="radio"
+                            name="jornadaVenta"
+                            checked={jornadaIdVenta === jornadaEnCierre.id}
+                            onChange={() => setJornadaIdVenta(jornadaEnCierre.id)}
+                            className="accent-amber-500"
+                          />
+                          <div>
+                            <p className="text-xs font-semibold">Hoja anterior <span className="text-amber-600">(en cierre)</span></p>
+                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</p>
+                          </div>
+                        </label>
+                      </div>
+                    </div>
+                  )}
                   <Select
                     label="Cliente"
                     value={formVenta.clienteId}
@@ -617,6 +701,42 @@ export default function Ventas() {
                 className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
               >
                 📥 Descargar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal cerrar definitivamente ── */}
+      {modalCerrar && jornadaEnCierre && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">📋</span>
+              <h3 className="text-lg font-bold text-slate-800">Cerrar hoja anterior</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-4">
+              Vas a cerrar definitivamente la hoja del{' '}
+              <span className="font-semibold capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</span>.
+              Ya no se podrán registrar ventas en esa hoja.
+            </p>
+            <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs text-slate-600 mb-5">
+              ✅ Usá este botón cuando hayas terminado todas las ventas rezagadas de esa hoja.
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setModalCerrar(false)}
+                disabled={cerrando}
+                className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCerrar}
+                disabled={cerrando}
+                className="flex-1 py-2 rounded-lg bg-slate-700 text-white text-sm font-medium hover:bg-slate-800 transition-colors disabled:opacity-60"
+              >
+                {cerrando ? 'Cerrando…' : 'Cerrar hoja'}
               </button>
             </div>
           </div>
