@@ -337,46 +337,20 @@ export default function Ventas() {
             <div className="p-4">
               {tab === 'venta' ? (
                 <form onSubmit={handleVenta}>
-                  {/* Selector de hoja — solo visible cuando hay una jornada EN_CIERRE */}
+                  {/* Indicador de hoja activa — solo cuando hay dos jornadas */}
                   {jornadaEnCierre && (
-                    <div className="mb-3">
-                      <p className="label mb-1.5">¿En qué hoja va esta venta?</p>
-                      <div className="flex flex-col gap-1.5">
-                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
-                          jornadaIdVenta === null
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                            : 'border-slate-200 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="jornadaVenta"
-                            checked={jornadaIdVenta === null}
-                            onChange={() => setJornadaIdVenta(null)}
-                            className="accent-emerald-600"
-                          />
-                          <div>
-                            <p className="text-xs font-semibold">Hoja actual</p>
-                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornada?.fecha ?? '')}</p>
-                          </div>
-                        </label>
-                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
-                          jornadaIdVenta === jornadaEnCierre.id
-                            ? 'bg-amber-50 border-amber-300 text-amber-800'
-                            : 'border-slate-200 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="jornadaVenta"
-                            checked={jornadaIdVenta === jornadaEnCierre.id}
-                            onChange={() => setJornadaIdVenta(jornadaEnCierre.id)}
-                            className="accent-amber-500"
-                          />
-                          <div>
-                            <p className="text-xs font-semibold">Hoja anterior <span className="text-amber-600">(en cierre)</span></p>
-                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</p>
-                          </div>
-                        </label>
-                      </div>
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium mb-3 ${
+                      jornadaIdVenta === null
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
+                      <span>📋</span>
+                      <span>
+                        Hoja {jornadaIdVenta === null ? 'actual' : 'anterior'} —{' '}
+                        <span className="capitalize font-normal">
+                          {fmtFechaJornada(jornadaIdVenta === null ? jornada?.fecha ?? '' : jornadaEnCierre.fecha)}
+                        </span>
+                      </span>
                     </div>
                   )}
                   <Select
@@ -458,46 +432,20 @@ export default function Ventas() {
                 </form>
               ) : (
                 <form onSubmit={handleAbono}>
-                  {/* Selector de hoja — solo visible cuando hay una jornada EN_CIERRE */}
+                  {/* Indicador de hoja activa — solo cuando hay dos jornadas */}
                   {jornadaEnCierre && (
-                    <div className="mb-3">
-                      <p className="label mb-1.5">¿En qué hoja va este abono?</p>
-                      <div className="flex flex-col gap-1.5">
-                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
-                          jornadaIdAbono === null
-                            ? 'bg-emerald-50 border-emerald-300 text-emerald-800'
-                            : 'border-slate-200 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="jornadaAbono"
-                            checked={jornadaIdAbono === null}
-                            onChange={() => setJornadaIdAbono(null)}
-                            className="accent-emerald-600"
-                          />
-                          <div>
-                            <p className="text-xs font-semibold">Hoja actual</p>
-                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornada?.fecha ?? '')}</p>
-                          </div>
-                        </label>
-                        <label className={`flex items-center gap-2.5 px-3 py-2 rounded-lg border cursor-pointer transition-colors ${
-                          jornadaIdAbono === jornadaEnCierre.id
-                            ? 'bg-amber-50 border-amber-300 text-amber-800'
-                            : 'border-slate-200 hover:bg-slate-50'
-                        }`}>
-                          <input
-                            type="radio"
-                            name="jornadaAbono"
-                            checked={jornadaIdAbono === jornadaEnCierre.id}
-                            onChange={() => setJornadaIdAbono(jornadaEnCierre.id)}
-                            className="accent-amber-500"
-                          />
-                          <div>
-                            <p className="text-xs font-semibold">Hoja anterior <span className="text-amber-600">(en cierre)</span></p>
-                            <p className="text-xs text-slate-500 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</p>
-                          </div>
-                        </label>
-                      </div>
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg border text-xs font-medium mb-3 ${
+                      jornadaIdAbono === null
+                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                        : 'bg-amber-50 border-amber-200 text-amber-800'
+                    }`}>
+                      <span>📋</span>
+                      <span>
+                        Hoja {jornadaIdAbono === null ? 'actual' : 'anterior'} —{' '}
+                        <span className="capitalize font-normal">
+                          {fmtFechaJornada(jornadaIdAbono === null ? jornada?.fecha ?? '' : jornadaEnCierre.fecha)}
+                        </span>
+                      </span>
                     </div>
                   )}
                   <Select
@@ -532,12 +480,9 @@ export default function Ventas() {
                       ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
                       : 'bg-blue-50 text-blue-700 border border-blue-200'
                   }`}>
-                    {formAbono.medioPago === 'EFECTIVO' ? '💵 ' : '📲 '}
-                    {jornadaEnCierre
-                      ? `Sumará a la caja de la hoja ${jornadaIdAbono === null ? 'actual' : 'anterior'}`
-                      : (formAbono.medioPago === 'EFECTIVO'
-                          ? 'Este abono sumará al efectivo del día'
-                          : 'Este abono sumará a las transferencias del día')}
+                    {formAbono.medioPago === 'EFECTIVO'
+                      ? '💵 Este abono sumará al efectivo del día'
+                      : '📲 Este abono sumará a las transferencias del día'}
                   </div>
                   <Button type="submit" loading={savingA} variant="success" className="w-full">
                     💳 Registrar abono
@@ -556,7 +501,10 @@ export default function Ventas() {
               {jornadaEnCierre ? (
                 <>
                   <button
-                    onClick={() => { setFechaSeleccionada(jornada.fecha); loadVentas(jornada.fecha) }}
+                    onClick={() => {
+                      setFechaSeleccionada(jornada.fecha); loadVentas(jornada.fecha)
+                      setJornadaIdVenta(null); setJornadaIdAbono(null)
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                       fechaSeleccionada === jornada?.fecha
                         ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
@@ -567,7 +515,10 @@ export default function Ventas() {
                     <span className="ml-1.5 text-xs opacity-70 capitalize">{fmtFechaJornada(jornada.fecha)}</span>
                   </button>
                   <button
-                    onClick={() => { setFechaSeleccionada(jornadaEnCierre.fecha); loadVentas(jornadaEnCierre.fecha) }}
+                    onClick={() => {
+                      setFechaSeleccionada(jornadaEnCierre.fecha); loadVentas(jornadaEnCierre.fecha)
+                      setJornadaIdVenta(jornadaEnCierre.id); setJornadaIdAbono(jornadaEnCierre.id)
+                    }}
                     className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                       fechaSeleccionada === jornadaEnCierre?.fecha
                         ? 'bg-amber-50 border-amber-300 text-amber-700'
