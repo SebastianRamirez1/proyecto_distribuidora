@@ -36,6 +36,7 @@ class RegistrarVentaServiceTest {
     @Mock private CreditoRepository creditoRepository;
     @Mock private PrecioPublicoRepository precioPublicoRepository;
     @Mock private PrecioCostoRepository precioCostoRepository;
+    @Mock private JornadaRepository jornadaRepository;
     @Mock private VentaMapper ventaMapper;
 
     @InjectMocks
