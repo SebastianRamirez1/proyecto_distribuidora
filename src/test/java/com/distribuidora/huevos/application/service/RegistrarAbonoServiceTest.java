@@ -5,6 +5,7 @@ import com.distribuidora.huevos.domain.entities.Abono;
 import com.distribuidora.huevos.domain.entities.Caja;
 import com.distribuidora.huevos.domain.entities.Cliente;
 import com.distribuidora.huevos.domain.entities.Credito;
+import com.distribuidora.huevos.domain.entities.Jornada;
 import com.distribuidora.huevos.domain.enums.TipoCliente;
 import com.distribuidora.huevos.domain.enums.TipoPago;
 import com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException;
@@ -23,6 +24,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -43,10 +45,17 @@ class RegistrarAbonoServiceTest {
     private Cliente cliente;
     private Credito credito;
 
+    private static final LocalDate FECHA_JORNADA = LocalDate.of(2026, 1, 15);
+
     @BeforeEach
     void setUp() {
         cliente = new Cliente(1L, "Juan", TipoCliente.NORMAL, null, null);
         credito = Credito.nuevo(cliente, Dinero.de(new BigDecimal("100000.00")));
+
+        // Jornada activa por defecto para todos los tests que no pasan jornadaId
+        Jornada jornadaActiva = new Jornada(1L, FECHA_JORNADA, com.distribuidora.huevos.domain.enums.EstadoJornada.ABIERTA,
+                LocalDateTime.now(), null);
+        lenient().when(jornadaRepository.findActiva()).thenReturn(Optional.of(jornadaActiva));
     }
 
     // ── flujo normal ──────────────────────────────────────────────────────────
@@ -151,6 +160,44 @@ class RegistrarAbonoServiceTest {
         assertThatThrownBy(() -> service.ejecutar(crearCommand(1L, "999999.00", TipoPago.EFECTIVO)))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("excede el saldo pendiente");
+    }
+
+    // ── jornada específica (hoja anterior) ───────────────────────────────────
+
+    @Test
+    void abonoConJornadaIdUsaFechaDeEsaJornada() {
+        LocalDate fechaAnterior = LocalDate.of(2026, 1, 10);
+        Jornada jornadaAnterior = new Jornada(99L, fechaAnterior,
+                com.distribuidora.huevos.domain.enums.EstadoJornada.EN_CIERRE,
+                LocalDateTime.now().minusDays(1), null);
+
+        when(creditoRepository.findByClienteId(1L)).thenReturn(Optional.of(credito));
+        when(jornadaRepository.findById(99L)).thenReturn(Optional.of(jornadaAnterior));
+        when(cajaRepository.findByFecha(fechaAnterior)).thenReturn(Optional.empty());
+        when(cajaRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(abonoRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        RegistrarAbonoCommand command = crearCommand(1L, "10000.00", TipoPago.EFECTIVO);
+        command.setJornadaId(99L);
+
+        service.ejecutar(command);
+
+        // Debe consultar la caja de la fecha anterior, no la activa
+        verify(cajaRepository).findByFecha(fechaAnterior);
+        verify(jornadaRepository, never()).findActiva();
+    }
+
+    @Test
+    void abonoConJornadaIdInvalidoLanzaExcepcion() {
+        when(creditoRepository.findByClienteId(1L)).thenReturn(Optional.of(credito));
+        when(jornadaRepository.findById(999L)).thenReturn(Optional.empty());
+
+        RegistrarAbonoCommand command = crearCommand(1L, "5000.00", TipoPago.EFECTIVO);
+        command.setJornadaId(999L);
+
+        assertThatThrownBy(() -> service.ejecutar(command))
+                .isInstanceOf(com.distribuidora.huevos.domain.exceptions.RecursoNoEncontradoException.class)
+                .hasMessageContaining("999");
     }
 
     // ── helper ────────────────────────────────────────────────────────────────

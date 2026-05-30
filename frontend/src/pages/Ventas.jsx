@@ -629,7 +629,9 @@ export default function Ventas() {
                   </thead>
                   <tbody className="divide-y divide-slate-100">
                     {ventas.length === 0 ? (
-                      <tr><td colSpan={9} className="text-center text-slate-400 py-8">No hay ventas hoy</td></tr>
+                      <tr><td colSpan={9} className="text-center text-slate-400 py-8">
+                        {fechaSeleccionada === (jornada?.fecha ?? hoy) ? 'No hay ventas hoy' : 'No hay ventas en esta fecha'}
+                      </td></tr>
                     ) : ventas.map((v) => (
                       <tr key={v.id} className={`hover:bg-slate-50 ${v.anulada ? 'opacity-40 line-through' : ''}`}>
                         <td className="table-cell font-medium">{v.nombreCliente}</td>
