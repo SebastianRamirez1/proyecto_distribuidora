@@ -48,7 +48,8 @@ public class RegistrarAbonoService {
         if (command.getJornadaId() != null) {
             fechaJornada = jornadaRepository.findById(command.getJornadaId())
                     .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
-                    .orElse(LocalDate.now());
+                    .orElseThrow(() -> new RecursoNoEncontradoException(
+                            "Jornada no encontrada con ID: " + command.getJornadaId()));
         } else {
             fechaJornada = jornadaRepository.findActiva()
                     .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)

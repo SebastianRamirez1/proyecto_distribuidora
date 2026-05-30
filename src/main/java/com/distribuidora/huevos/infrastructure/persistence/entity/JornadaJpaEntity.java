@@ -24,7 +24,7 @@ public class JornadaJpaEntity {
     private LocalDate fecha;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 10)
+    @Column(nullable = false, length = 20)
     private EstadoJornada estado;
 
     @Column(name = "abierta_en", nullable = false)

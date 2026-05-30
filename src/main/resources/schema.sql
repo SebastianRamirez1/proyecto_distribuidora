@@ -228,7 +228,7 @@ ALTER TABLE inventario
 CREATE TABLE IF NOT EXISTS jornadas (
     id          BIGSERIAL    PRIMARY KEY,
     fecha       DATE         NOT NULL UNIQUE,
-    estado      VARCHAR(10)  NOT NULL DEFAULT 'ABIERTA',
+    estado      VARCHAR(20)  NOT NULL DEFAULT 'ABIERTA',
     abierta_en  TIMESTAMP    NOT NULL DEFAULT NOW(),
     cerrada_en  TIMESTAMP
 );
@@ -238,3 +238,6 @@ CREATE TABLE IF NOT EXISTS jornadas (
 INSERT INTO jornadas (fecha, estado, abierta_en)
 SELECT CURRENT_DATE, 'ABIERTA', NOW()
 WHERE NOT EXISTS (SELECT 1 FROM jornadas);
+
+-- Migración: ampliar columna estado de VARCHAR(10) a VARCHAR(20) en BDs existentes.
+ALTER TABLE jornadas ALTER COLUMN estado TYPE VARCHAR(20);
