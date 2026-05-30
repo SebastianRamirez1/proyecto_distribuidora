@@ -1,6 +1,7 @@
 package com.distribuidora.huevos.infrastructure.security;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -10,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,6 +24,10 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    /** Origen(es) permitidos para CORS. En prod = dominio real de Railway. */
+    @Value("${app.allowed-origin:http://localhost:5173}")
+    private String allowedOrigin;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -32,6 +38,23 @@ public class SecurityConfig {
             .csrf(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // ── Cabeceras de seguridad HTTP ───────────────────────────────────
+            .headers(headers -> headers
+                // Evita que el browser interprete el Content-Type distinto al declarado
+                .contentTypeOptions(opts -> {})
+                // Evita que la app sea embebida en iframes (clickjacking)
+                .frameOptions(frame -> frame.deny())
+                // Fuerza HTTPS en el browser durante 1 año (Railway ya usa TLS)
+                .httpStrictTransportSecurity(hsts -> hsts
+                    .includeSubDomains(true)
+                    .maxAgeInSeconds(31536000))
+                // Limita qué información se envía en el header Referer
+                .referrerPolicy(ref -> ref
+                    .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                // Content-Security-Policy: permite recursos solo del propio origen
+                .contentSecurityPolicy(csp -> csp
+                    .policyDirectives("default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"))
+            )
             .authorizeHttpRequests(auth -> auth
                 // Endpoints públicos
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
@@ -58,9 +81,11 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOriginPatterns(List.of("*"));
+        // Solo el origen configurado — nunca wildcard en producción
+        config.setAllowedOriginPatterns(List.of(allowedOrigin));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
+        config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
+        config.setAllowCredentials(false);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
