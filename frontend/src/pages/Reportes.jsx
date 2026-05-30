@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { reporteCajaHoy, reporteCajaPorFecha } from '../api/reportesApi'
-import { ventasHoy, ventasPorFecha } from '../api/ventasApi'
+import { reporteCajaPorFecha } from '../api/reportesApi'
+import { ventasPorFecha } from '../api/ventasApi'
 import { obtenerEstadoJornadas } from '../api/jornadasApi'
 import Card from '../components/ui/Card'
 import Alert from '../components/ui/Alert'
@@ -29,6 +29,11 @@ const tipoLabel = { EXTRA: 'EXTRA', AA: 'AA', A: 'A', B: 'B', EXTRA_MEDIA: '½ E
 const toInputDate = (d) => d.toISOString().slice(0, 10)
 const today = toInputDate(new Date())
 
+const fmtFechaJornada = (fecha) =>
+  new Date(fecha + 'T12:00:00').toLocaleDateString('es-CO', {
+    weekday: 'long', day: 'numeric', month: 'long'
+  })
+
 export default function Reportes() {
   const [caja, setCaja]     = useState(null)
   const [ventas, setVentas] = useState([])
@@ -38,13 +43,16 @@ export default function Reportes() {
   const [buscando, setBuscando] = useState(false)
   const [maxFecha, setMaxFecha] = useState(today)   // hasta la fecha de la jornada activa
 
+  // Jornadas (para el switch de hojas)
+  const [jornada, setJornada]               = useState(null) // ABIERTA
+  const [jornadaEnCierre, setJornadaEnCierre] = useState(null) // EN_CIERRE
+
   const cargar = async (f) => {
     setError('')
-    const esHoy = f === today
     try {
       const [c, v] = await Promise.all([
-        esHoy ? reporteCajaHoy() : reporteCajaPorFecha(f),
-        esHoy ? ventasHoy()      : ventasPorFecha(f),
+        reporteCajaPorFecha(f),
+        ventasPorFecha(f),
       ])
       setCaja(c)
       setVentas(v)
@@ -53,18 +61,25 @@ export default function Reportes() {
     }
   }
 
-  // Carga inicial (hoy) + fecha máxima desde la jornada activa
+  // Carga inicial desde la jornada activa
   useEffect(() => {
     const init = async () => {
-      await cargar(today)
-      setLoading(false)
+      try {
+        const estado = await obtenerEstadoJornadas()
+        const fechaActiva = estado?.abierta?.fecha ?? today
+        setJornada(estado?.abierta ?? null)
+        setJornadaEnCierre(estado?.enCierre ?? null)
+        setMaxFecha(fechaActiva)
+        setFecha(fechaActiva)
+        await cargar(fechaActiva)
+      } catch (e) {
+        setError(e.message)
+        await cargar(today)
+      } finally {
+        setLoading(false)
+      }
     }
     init()
-    // La jornada activa puede ser de un día futuro (después de liquidar).
-    // Actualizamos maxFecha para que el picker permita seleccionarla.
-    obtenerEstadoJornadas()
-      .then(e => { if (e?.abierta?.fecha) setMaxFecha(e.abierta.fecha) })
-      .catch(() => {})
   }, [])
 
   const handleBuscar = async (e) => {
@@ -78,6 +93,13 @@ export default function Reportes() {
     setFecha(maxFecha)
     setBuscando(true)
     await cargar(maxFecha)
+    setBuscando(false)
+  }
+
+  const handleSwitchHoja = async (f) => {
+    setFecha(f)
+    setBuscando(true)
+    await cargar(f)
     setBuscando(false)
   }
 
@@ -105,9 +127,9 @@ export default function Reportes() {
     { key: 'B',           label: 'B',       unidad: 'Can.',   bg: 'bg-slate-100',  text: 'text-slate-600'  },
   ]
 
-  const fechaLabel = fecha === today
-    ? new Date().toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    : new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+  const fechaLabel = new Date(fecha + 'T12:00:00').toLocaleDateString('es-PE', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+  })
 
   return (
     <div>
@@ -115,6 +137,34 @@ export default function Reportes() {
         <h1 className="text-2xl font-bold text-slate-800">Reportes</h1>
         <p className="text-slate-500 text-sm mt-1 capitalize">{fechaLabel}</p>
       </div>
+
+      {/* Switch rápido de hojas — solo cuando hay dos jornadas activas */}
+      {jornadaEnCierre && jornada && (
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
+          <button
+            onClick={() => handleSwitchHoja(jornada.fecha)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+              fecha === jornada.fecha
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-700'
+                : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            📋 Hoja actual
+            <span className="ml-1.5 text-xs opacity-70 capitalize">{fmtFechaJornada(jornada.fecha)}</span>
+          </button>
+          <button
+            onClick={() => handleSwitchHoja(jornadaEnCierre.fecha)}
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
+              fecha === jornadaEnCierre.fecha
+                ? 'bg-amber-50 border-amber-300 text-amber-700'
+                : 'border-slate-200 text-slate-500 hover:bg-slate-50'
+            }`}
+          >
+            📋 Hoja anterior
+            <span className="ml-1.5 text-xs opacity-70 capitalize">{fmtFechaJornada(jornadaEnCierre.fecha)}</span>
+          </button>
+        </div>
+      )}
 
       {/* Selector de fecha */}
       <form onSubmit={handleBuscar} className="flex items-center gap-3 mb-6 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm">
