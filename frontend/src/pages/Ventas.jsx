@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ventasPorFecha, registrarVenta, registrarAbono, anularVenta } from '../api/ventasApi'
 import { listarClientes } from '../api/clientesApi'
 import { generarFactura, descargarPdfFactura } from '../api/facturasApi'
+import { obtenerJornadaActiva, liquidarJornada } from '../api/jornadasApi'
 import Card from '../components/ui/Card'
 import Button from '../components/ui/Button'
 import Select from '../components/ui/Select'
@@ -32,6 +33,11 @@ export default function Ventas() {
   const [savingA, setSavingA] = useState(false)
   const [mostrarPrecioManual, setMostrarPrecioManual] = useState(false)
 
+  // Jornada activa
+  const [jornada, setJornada] = useState(null)
+  const [liquidando, setLiquidando] = useState(false)
+  const [modalLiquidar, setModalLiquidar] = useState(false)
+
   const [anulando, setAnulando] = useState(false)
   const [ventaAAnular, setVentaAAnular]     = useState(null)
   const [ventaAFacturar, setVentaAFacturar] = useState(null)
@@ -54,9 +60,12 @@ export default function Ventas() {
     const load = async () => {
       try {
         const hoy = new Date().toISOString().split('T')[0]
-        const [v, c] = await Promise.all([ventasPorFecha(hoy), listarClientes()])
+        const [v, c, j] = await Promise.all([ventasPorFecha(hoy), listarClientes(), obtenerJornadaActiva()])
         setVentas(v)
         setClientes(c)
+        setJornada(j)
+        // Si la jornada activa es de otro día, mostrar esa fecha por defecto
+        if (j && j.fecha !== hoy) setFechaSeleccionada(j.fecha)
       } catch (e) {
         setError(e.message)
       } finally {
@@ -176,15 +185,67 @@ export default function Ventas() {
     setFacturaForm({ nombreCliente: '', nitCliente: '', tipo: 'MANUAL' })
   }
 
+  const handleLiquidar = async () => {
+    setLiquidando(true)
+    setError('')
+    try {
+      const nuevaJornada = await liquidarJornada()
+      setJornada(nuevaJornada)
+      setModalLiquidar(false)
+      setFechaSeleccionada(nuevaJornada.fecha)
+      await loadVentas(nuevaJornada.fecha)
+      setSuccess(`✅ Jornada liquidada. Nueva jornada abierta: ${fmtFechaJornada(nuevaJornada.fecha)}`)
+    } catch (e) {
+      setError(e.response?.data?.mensaje || e.message)
+    } finally {
+      setLiquidando(false)
+    }
+  }
+
+  const fmtFechaJornada = (fecha) =>
+    new Date(fecha + 'T12:00:00').toLocaleDateString('es-CO', {
+      weekday: 'long', day: 'numeric', month: 'long'
+    })
+
   const totalDia = ventas.reduce((acc, v) => acc + Number(v.total || 0), 0)
   const hoy = new Date().toISOString().split('T')[0]
   const esHoy = fechaSeleccionada === hoy
 
   return (
     <div>
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
-        <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
+      <div className="mb-4 flex items-start justify-between gap-4 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
+          <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
+        </div>
+        {/* Banner jornada */}
+        {jornada && (
+          <div className={`flex items-center gap-3 px-4 py-2.5 rounded-xl border text-sm font-medium ${
+            jornada.estado === 'ABIERTA'
+              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              : 'bg-slate-50 border-slate-200 text-slate-600'
+          }`}>
+            <span className="text-base">📋</span>
+            <div>
+              <span className="font-semibold capitalize">{fmtFechaJornada(jornada.fecha)}</span>
+              <span className={`ml-2 text-xs px-2 py-0.5 rounded-full font-semibold ${
+                jornada.estado === 'ABIERTA'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-slate-200 text-slate-500'
+              }`}>
+                {jornada.estado === 'ABIERTA' ? 'ABIERTA' : 'CERRADA'}
+              </span>
+            </div>
+            {jornada.estado === 'ABIERTA' && (
+              <button
+                onClick={() => setModalLiquidar(true)}
+                className="ml-2 px-3 py-1 text-xs font-semibold bg-amber-500 hover:bg-amber-600 text-white rounded-lg transition-colors"
+              >
+                Liquidar
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       <Alert type="error"   message={error}   onClose={() => setError('')} />
@@ -556,6 +617,50 @@ export default function Ventas() {
                 className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors"
               >
                 📥 Descargar PDF
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Modal liquidar jornada ── */}
+      {modalLiquidar && jornada && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-2xl">📋</span>
+              <h3 className="text-lg font-bold text-slate-800">Liquidar jornada</h3>
+            </div>
+            <p className="text-sm text-slate-600 mb-1">
+              Vas a cerrar la jornada del{' '}
+              <span className="font-semibold capitalize">{fmtFechaJornada(jornada.fecha)}</span>.
+            </p>
+            <p className="text-sm text-slate-500 mb-4">
+              Se abrirá automáticamente la jornada del{' '}
+              <span className="font-semibold capitalize">
+                {fmtFechaJornada(
+                  new Date(new Date(jornada.fecha + 'T12:00:00').getTime() + 86400000)
+                    .toISOString().split('T')[0]
+                )}
+              </span>.
+            </p>
+            <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 text-xs text-amber-700 mb-5">
+              ⚠️ Las nuevas ventas y abonos quedarán registradas en el día siguiente a partir de este momento.
+            </div>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setModalLiquidar(false)}
+                disabled={liquidando}
+                className="flex-1 py-2 rounded-lg border border-slate-300 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleLiquidar}
+                disabled={liquidando}
+                className="flex-1 py-2 rounded-lg bg-amber-500 text-white text-sm font-medium hover:bg-amber-600 transition-colors disabled:opacity-60"
+              >
+                {liquidando ? 'Liquidando…' : 'Sí, liquidar'}
               </button>
             </div>
           </div>

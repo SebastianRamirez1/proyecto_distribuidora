@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Service
 @Transactional
@@ -28,6 +29,7 @@ public class RegistrarVentaService {
     private final CreditoRepository creditoRepository;
     private final PrecioPublicoRepository precioPublicoRepository;
     private final PrecioCostoRepository precioCostoRepository;
+    private final JornadaRepository jornadaRepository;
     private final VentaMapper ventaMapper;
 
     public RegistrarVentaService(ClienteRepository clienteRepository,
@@ -37,6 +39,7 @@ public class RegistrarVentaService {
                                  CreditoRepository creditoRepository,
                                  PrecioPublicoRepository precioPublicoRepository,
                                  PrecioCostoRepository precioCostoRepository,
+                                 JornadaRepository jornadaRepository,
                                  VentaMapper ventaMapper) {
         this.clienteRepository = clienteRepository;
         this.ventaRepository = ventaRepository;
@@ -45,6 +48,7 @@ public class RegistrarVentaService {
         this.creditoRepository = creditoRepository;
         this.precioPublicoRepository = precioPublicoRepository;
         this.precioCostoRepository = precioCostoRepository;
+        this.jornadaRepository = jornadaRepository;
         this.ventaMapper = ventaMapper;
     }
 
@@ -88,8 +92,15 @@ public class RegistrarVentaService {
         inventario.descontar(command.getTipoProducto(), cantidad);
         inventarioRepository.save(inventario);
 
+        // Usar la fecha de la jornada activa (no la fecha calendario).
+        // Así las ventas registradas después de liquidar quedan en el día siguiente.
+        LocalDate fechaJornada = jornadaRepository.findActiva()
+                .map(com.distribuidora.huevos.domain.entities.Jornada::getFecha)
+                .orElse(LocalDate.now());
+        LocalDateTime fechaVenta = LocalDateTime.of(fechaJornada, LocalTime.now());
+
         Venta venta = new Venta(null, cliente, command.getTipoProducto(), cantidad,
-                precioUnitario, costoUnitario, command.getTipoPago(), LocalDateTime.now());
+                precioUnitario, costoUnitario, command.getTipoPago(), fechaVenta);
         venta = ventaRepository.save(venta);
 
         registrarEnCaja(venta);
