@@ -255,8 +255,8 @@ export default function Ventas() {
   const esHoy = fechaSeleccionada === hoy
 
   return (
-    <div>
-      <div className="mb-4 flex items-start justify-between gap-4 flex-wrap">
+    <div className="h-full flex flex-col gap-3">
+      <div className="flex items-start justify-between gap-4 flex-wrap flex-shrink-0">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Ventas</h1>
           <p className="text-slate-500 text-sm mt-1">Registrar ventas y abonos</p>
@@ -302,13 +302,15 @@ export default function Ventas() {
         </div>
       </div>
 
-      <Alert type="error"   message={error}   onClose={() => setError('')} />
-      <Alert type="success" message={success} onClose={() => setSuccess('')} />
+      <div className="flex-shrink-0">
+        <Alert type="error"   message={error}   onClose={() => setError('')} />
+        <Alert type="success" message={success} onClose={() => setSuccess('')} />
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
 
-        {/* ── Panel izquierdo: formularios (sticky en desktop) ── */}
-        <div className="lg:col-span-1 lg:sticky lg:top-0 lg:self-start">
+        {/* ── Panel izquierdo: formularios ── */}
+        <div className="lg:col-span-1 lg:self-start">
           <Card className="p-0 overflow-hidden">
             {/* Tabs */}
             <div className="flex border-b border-slate-100">
@@ -493,9 +495,9 @@ export default function Ventas() {
           </Card>
         </div>
 
-        {/* ── Panel derecho: tabla de ventas ── */}
-        <div className="lg:col-span-3">
-          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap">
+        {/* ── Panel derecho: tabla de ventas (scroll solo aquí) ── */}
+        <div className="lg:col-span-3 flex flex-col min-h-0">
+          <div className="flex items-center justify-between mb-3 gap-3 flex-wrap flex-shrink-0">
             <div className="flex items-center gap-2 flex-wrap">
               {/* Switch rápido de hojas — aparece solo cuando hay dos jornadas activas */}
               {jornadaEnCierre ? (
@@ -560,13 +562,13 @@ export default function Ventas() {
           </div>
 
           {loading ? (
-            <div className="flex items-center justify-center py-16"><Spinner /></div>
+            <div className="flex items-center justify-center py-16 flex-1"><Spinner /></div>
           ) : (
-            <Card className="p-0 overflow-hidden">
-              <div className="overflow-x-auto">
+            <Card className="p-0 overflow-hidden flex-1 min-h-0 flex flex-col">
+              <div className="overflow-auto flex-1">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="table-head">
+                    <tr className="table-head sticky top-0 z-10">
                       <th className="px-3 py-2.5 text-left">Cliente</th>
                       <th className="px-3 py-2.5 text-left">Tipo</th>
                       <th className="px-3 py-2.5 text-right">Cant.</th>
