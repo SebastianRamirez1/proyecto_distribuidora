@@ -42,7 +42,7 @@ jobs:
           echo "Backup generado: $ARCHIVO ($(du -h "$ARCHIVO" | cut -f1))"
 
       - name: Subir backup como artefacto
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: db-backup-${{ github.run_number }}-${{ github.run_attempt }}
           path: "*.dump"
