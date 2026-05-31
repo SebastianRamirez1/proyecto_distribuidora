@@ -141,13 +141,9 @@ jobs:
           project: 'distribuidora-huevos'
           path: '.'
           format: 'HTML'
-          args: >
-            --failOnCVSS 7
-            --enableRetired
-            --nvdApiKey ${{ secrets.NVD_API_KEY }}
-        # failOnCVSS 7 → bloquea si hay CVE High o Critical
-        # Si NVD_API_KEY no está configurado, el step falla con rate limit;
-        # Dependabot (dependabot.yml) cubre el escaneo semanal como alternativa.
+          args: "--failOnCVSS 7 --enableRetired --nvdApiKey ${{ secrets.NVD_API_KEY }}"
+        # args en una sola línea — el bloque YAML > (folded) añadía un salto
+        # de línea al final que llegaba como argumento vacío a --nvdApiKey
 
       - name: Subir reporte de dependencias
         if: always()
