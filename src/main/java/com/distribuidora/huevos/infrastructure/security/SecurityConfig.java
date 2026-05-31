@@ -36,6 +36,11 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(AbstractHttpConfigurer::disable)
+            // Deshabilitamos formLogin y httpBasic para evitar que Spring Security
+            // registre handlers en /login y /logout que producen 500 al no tener
+            // una vista configurada (usamos JWT, no sesiones).
+            .formLogin(AbstractHttpConfigurer::disable)
+            .httpBasic(AbstractHttpConfigurer::disable)
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             // ── Cabeceras de seguridad HTTP ───────────────────────────────────

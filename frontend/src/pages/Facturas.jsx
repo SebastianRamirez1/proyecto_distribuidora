@@ -84,7 +84,7 @@ export default function Facturas() {
         nitCliente: nitCliente.trim() || null,
         tipo:       tipoFactura,
       })
-      setSuccess(`Factura ${nueva.numero} generada correctamente ✅`)
+      setSuccess(`Factura ${nueva.numero} generada correctamente`)
       setModalGenerar(null)
       setNitCliente('')
       setTipoFactura('MANUAL')
@@ -118,7 +118,7 @@ export default function Facturas() {
       })
       setConfig(saved)
       setFormConfig(saved)
-      setSuccess('Configuración guardada correctamente ✅')
+      setSuccess('Configuración guardada correctamente')
     } catch (e) {
       setError(e.message)
     } finally {

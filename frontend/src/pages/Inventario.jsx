@@ -78,7 +78,7 @@ export default function Inventario() {
       const inv = await cargarInventarioBulk({ extra: valores.EXTRA, aa: valores.AA, a: valores.A, b: valores.B })
       setInventario(inv)
       setFormAjustar({ stockExtra: inv.stockExtra, stockAA: inv.stockAA, stockA: inv.stockA, stockB: inv.stockB })
-      setSuccess('Inventario cargado correctamente ✅')
+      setSuccess('Inventario cargado correctamente')
       setFormAgregar(initAgregar)
     } catch (e) {
       setError(e.message)
@@ -102,7 +102,7 @@ export default function Inventario() {
       })
       setInventario(inv)
       setFormAjustar({ stockExtra: inv.stockExtra, stockAA: inv.stockAA, stockA: inv.stockA, stockB: inv.stockB })
-      setSuccess('Stock corregido correctamente ✅')
+      setSuccess('Stock corregido correctamente')
     } catch (e) {
       setError(e.message)
     } finally {

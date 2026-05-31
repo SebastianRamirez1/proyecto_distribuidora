@@ -83,7 +83,7 @@ export default function Precios() {
         precioB:     parsePrecio(form.precioB),
       })
       setPrecios(guardados)
-      setSuccess('Precios públicos actualizados correctamente ✅')
+      setSuccess('Precios públicos actualizados correctamente')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -103,7 +103,7 @@ export default function Precios() {
         costoB:     parsePrecio(formC.costoB),
       })
       setCostos(guardados)
-      setSuccess('Precios de liquidación actualizados correctamente ✅')
+      setSuccess('Precios de liquidación actualizados correctamente')
     } catch (e) {
       setError(e.message)
     } finally {
