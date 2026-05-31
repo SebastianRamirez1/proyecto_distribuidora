@@ -141,9 +141,11 @@ jobs:
           project: 'distribuidora-huevos'
           path: '.'
           format: 'HTML'
-          args: "--failOnCVSS 7 --enableRetired --nvdApiKey ${{ secrets.NVD_API_KEY }}"
-        # args en una sola línea — el bloque YAML > (folded) añadía un salto
-        # de línea al final que llegaba como argumento vacío a --nvdApiKey
+          args: "--failOnCVSS 7 --enableRetired${{ secrets.NVD_API_KEY != '' && format(' --nvdApiKey {0}', secrets.NVD_API_KEY) || '' }}"
+        # --nvdApiKey se incluye solo si el secret está disponible.
+        # En PRs de Dependabot el secret no llega → corre sin clave (usa caché NVD
+        # o descarga sin límite aumentado). Solución completa: agregar NVD_API_KEY
+        # en GitHub → Settings → Secrets → Dependabot.
 
       - name: Subir reporte de dependencias
         if: always()
