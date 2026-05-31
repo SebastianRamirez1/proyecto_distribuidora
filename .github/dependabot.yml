@@ -1,0 +1,40 @@
+# ============================================================
+# Dependabot — escaneo automático de dependencias vulnerables
+# GitHub lo ejecuta semanalmente y abre PRs cuando hay CVEs
+# en las dependencias de Maven o npm.
+# ============================================================
+version: 2
+
+updates:
+  # Backend — Maven (pom.xml)
+  - package-ecosystem: "maven"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+
+  # Frontend — npm/pnpm (frontend/package.json)
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+
+  # GitHub Actions — mantener las Actions actualizadas
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "ci"

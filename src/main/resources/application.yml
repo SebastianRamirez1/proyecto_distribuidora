@@ -31,6 +31,7 @@ server:
 app:
   username: ${APP_USERNAME:admin}
   password: ${APP_PASSWORD:admin123}
+  allowed-origin: ${APP_ALLOWED_ORIGIN:http://localhost:5173}
   jwt:
     secret: ${JWT_SECRET:3d8f2a1b9c4e7f0a2b5d8e1c4f7a0b3d6e9f2a5b8c1d4e7f0a3b6c9d2e5f8a1b}
     expiration: 86400000  # 24 horas
@@ -60,6 +61,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: false
 
 ---
 # ============================================================
@@ -85,6 +89,9 @@ spring:
     init:
       mode: always
       schema-locations: classpath:schema.sql
+  h2:
+    console:
+      enabled: false
 
 ---
 # ============================================================
@@ -131,3 +138,13 @@ server:
   error:
     include-message: never
     include-stacktrace: never
+
+# Credenciales sin fallback: el arranque falla si no están configuradas en prod.
+# Configurar en Railway: APP_USERNAME, APP_PASSWORD, JWT_SECRET, APP_ALLOWED_ORIGIN
+app:
+  username: ${APP_USERNAME}
+  password: ${APP_PASSWORD}
+  allowed-origin: ${APP_ALLOWED_ORIGIN}
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration: 86400000

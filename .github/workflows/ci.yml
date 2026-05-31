@@ -13,11 +13,32 @@ permissions:
 
 jobs:
   # ─────────────────────────────────────────
+  # JOB 0: Secret scanning (Gitleaks)
+  # Corre primero — bloquea si hay credenciales
+  # filtradas en el código o en el historial.
+  # ─────────────────────────────────────────
+  secret-scanning:
+    name: Secret Scanning — Gitleaks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # historial completo para escanear todos los commits
+
+      - name: Escanear secretos con Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ─────────────────────────────────────────
   # JOB 1: Backend — compila + tests (H2)
   # ─────────────────────────────────────────
   backend-tests:
     name: Backend — Tests
     runs-on: ubuntu-latest
+    needs: secret-scanning
 
     steps:
       - name: Checkout código
@@ -50,6 +71,7 @@ jobs:
   frontend-build:
     name: Frontend — Build
     runs-on: ubuntu-latest
+    needs: secret-scanning
 
     steps:
       - name: Checkout código
@@ -83,3 +105,51 @@ jobs:
           name: frontend-dist
           path: frontend/dist/
           retention-days: 3
+
+  # ─────────────────────────────────────────
+  # JOB 3: SCA — OWASP Dependency Check
+  # Escanea dependencias Maven contra CVEs.
+  # Falla si hay vulnerabilidad CVSS ≥ 7 (High).
+  #
+  # Requiere el secret NVD_API_KEY para funcionar
+  # de forma fiable (sin él la API de NVD aplica
+  # rate limiting y el job puede fallar por timeout).
+  # Obtener gratis en: https://nvd.nist.gov/developers/request-an-api-key
+  # Agregar en: GitHub → Settings → Secrets → NVD_API_KEY
+  # ─────────────────────────────────────────
+  dependency-check:
+    name: SCA — OWASP Dependency Check
+    runs-on: ubuntu-latest
+    needs: secret-scanning
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Cachear la BD de NVD entre runs para evitar re-descargas y rate limits
+      - name: Caché base de datos NVD
+        uses: actions/cache@v4
+        with:
+          path: ~/.dependency-check/data
+          key: dependency-check-nvd-${{ runner.os }}-${{ github.run_id }}
+          restore-keys: |
+            dependency-check-nvd-${{ runner.os }}-
+
+      - name: Ejecutar OWASP Dependency Check
+        uses: dependency-check/Dependency-Check_Action@main
+        with:
+          project: 'distribuidora-huevos'
+          path: '.'
+          format: 'HTML'
+          args: "--failOnCVSS 7 --enableRetired --nvdApiKey ${{ secrets.NVD_API_KEY }}"
+        # args en una sola línea — el bloque YAML > (folded) añadía un salto
+        # de línea al final que llegaba como argumento vacío a --nvdApiKey
+
+      - name: Subir reporte de dependencias
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-check-report
+          path: ${{ github.workspace }}/reports
+          retention-days: 14
