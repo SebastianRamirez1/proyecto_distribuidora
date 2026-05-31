@@ -122,7 +122,7 @@ export default function Ventas() {
         : (jornada?.fecha ?? new Date().toISOString().split('T')[0])
       await loadVentas(fechaRecarga)
       setFechaSeleccionada(fechaRecarga)
-      setSuccess('Venta registrada correctamente ✅')
+      setSuccess('Venta registrada correctamente')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -151,7 +151,7 @@ export default function Ventas() {
         : (jornada?.fecha ?? new Date().toISOString().split('T')[0])
       await loadVentas(fechaRecarga)
       setFechaSeleccionada(fechaRecarga)
-      setSuccess('Abono registrado correctamente ✅')
+      setSuccess('Abono registrado correctamente')
     } catch (e) {
       setError(e.message)
     } finally {
@@ -172,7 +172,7 @@ export default function Ventas() {
       await anularVenta(ventaAAnular.id)
       setVentaAAnular(null)
       await loadVentas()
-      setSuccess(`Venta #${ventaAAnular.id} anulada correctamente ✅`)
+      setSuccess(`Venta #${ventaAAnular.id} anulada correctamente`)
     } catch (e) {
       setError(e.response?.data?.mensaje || e.message)
       setVentaAAnular(null)
@@ -220,7 +220,7 @@ export default function Ventas() {
       setModalLiquidar(false)
       setFechaSeleccionada(nuevaJornada.fecha)
       await loadVentas(nuevaJornada.fecha)
-      setSuccess(`✅ Jornada liquidada. Nueva hoja: ${fmtFechaJornada(nuevaJornada.fecha)}`)
+      setSuccess(`Jornada liquidada. Nueva hoja: ${fmtFechaJornada(nuevaJornada.fecha)}`)
     } catch (e) {
       setError(e.response?.data?.mensaje || e.message)
     } finally {
@@ -237,7 +237,7 @@ export default function Ventas() {
       setJornadaIdVenta(null)
       setJornadaIdAbono(null)
       setModalCerrar(false)
-      setSuccess('✅ Hoja anterior cerrada definitivamente')
+      setSuccess('Hoja anterior cerrada definitivamente')
     } catch (e) {
       setError(e.response?.data?.mensaje || e.message)
     } finally {
@@ -309,8 +309,8 @@ export default function Ventas() {
 
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 flex-1 min-h-0">
 
-        {/* ── Panel izquierdo: formularios ── */}
-        <div className="lg:col-span-1 lg:self-start">
+        {/* ── Panel izquierdo: formularios (scroll interno si desborda) ── */}
+        <div className="lg:col-span-1 lg:self-start lg:overflow-y-auto lg:max-h-full">
           <Card className="p-0 overflow-hidden">
             {/* Tabs */}
             <div className="flex border-b border-slate-100">

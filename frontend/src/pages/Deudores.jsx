@@ -77,7 +77,7 @@ export default function Deudores() {
     setError('')
     try {
       await registrarAbono({ clienteId: modal.clienteId, monto: valor, medioPago })
-      setSuccess(`Abono de ${fmt(valor)} registrado para ${modal.nombre} ✅`)
+      setSuccess(`Abono de ${fmt(valor)} registrado para ${modal.nombre}`)
       setModal(null)
       await cargar()
     } catch (e) {
