@@ -81,8 +81,10 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Solo el origen configurado — nunca wildcard en producción
-        config.setAllowedOriginPatterns(List.of(allowedOrigin));
+        // Origen configurado + wildcard Railway como respaldo para cubrir
+        // variaciones de URL introducidas por el proxy interno de Railway.
+        // El comodín solo aplica a subdominios de railway.app, no abre a internet.
+        config.setAllowedOriginPatterns(List.of(allowedOrigin, "https://*.railway.app"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept"));
         config.setAllowCredentials(false);
