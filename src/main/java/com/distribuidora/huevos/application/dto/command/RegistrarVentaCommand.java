@@ -25,6 +25,13 @@ public class RegistrarVentaCommand {
     @DecimalMin(value = "0.01", message = "El precio manual debe ser mayor a 0")
     private BigDecimal precioManual;
 
+    /**
+     * Opcional. ID de la jornada a la que pertenece esta venta.
+     * Si es null se usa la jornada ABIERTA actualmente.
+     * Usar cuando hay una jornada EN_CIERRE y la venta es de esa hoja anterior.
+     */
+    private Long jornadaId;
+
     public RegistrarVentaCommand() {}
 
     public Long getClienteId() { return clienteId; }
@@ -41,4 +48,7 @@ public class RegistrarVentaCommand {
 
     public BigDecimal getPrecioManual() { return precioManual; }
     public void setPrecioManual(BigDecimal precioManual) { this.precioManual = precioManual; }
+
+    public Long getJornadaId() { return jornadaId; }
+    public void setJornadaId(Long jornadaId) { this.jornadaId = jornadaId; }
 }

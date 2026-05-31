@@ -217,3 +217,27 @@ DELETE FROM configuracion_factura WHERE id NOT IN (SELECT MIN(id) FROM configura
 ALTER TABLE inventario
   ALTER COLUMN stock_extra TYPE DOUBLE PRECISION USING stock_extra::DOUBLE PRECISION,
   ALTER COLUMN stock_aa    TYPE DOUBLE PRECISION USING stock_aa::DOUBLE PRECISION;
+
+-- ============================================================
+-- Feature: jornadas de trabajo
+-- Cada jornada representa una "hoja del cuaderno". Las ventas y
+-- abonos se registran con la fecha de la jornada activa, no con
+-- la fecha calendario. Al liquidar se cierra la jornada actual
+-- y se abre automáticamente la del día siguiente.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS jornadas (
+    id          BIGSERIAL    PRIMARY KEY,
+    fecha       DATE         NOT NULL UNIQUE,
+    estado      VARCHAR(20)  NOT NULL DEFAULT 'ABIERTA',
+    abierta_en  TIMESTAMP    NOT NULL DEFAULT NOW(),
+    cerrada_en  TIMESTAMP
+);
+
+-- Jornada inicial: si la tabla acaba de crearse y está vacía,
+-- crear la jornada de hoy para que el sistema funcione de inmediato.
+INSERT INTO jornadas (fecha, estado, abierta_en)
+SELECT CURRENT_DATE, 'ABIERTA', NOW()
+WHERE NOT EXISTS (SELECT 1 FROM jornadas);
+
+-- Migración: ampliar columna estado de VARCHAR(10) a VARCHAR(20) en BDs existentes.
+ALTER TABLE jornadas ALTER COLUMN estado TYPE VARCHAR(20);

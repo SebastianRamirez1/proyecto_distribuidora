@@ -18,6 +18,11 @@ TRUNCATE TABLE ventas    RESTART IDENTITY CASCADE;
 TRUNCATE TABLE clientes  RESTART IDENTITY CASCADE;
 TRUNCATE TABLE caja      RESTART IDENTITY CASCADE;
 
+-- ── 1b. Resetear jornadas a hoy ──────────────────────────────────────────────
+TRUNCATE TABLE jornadas  RESTART IDENTITY;
+INSERT INTO jornadas (fecha, estado, abierta_en)
+VALUES (CURRENT_DATE, 'ABIERTA', NOW());
+
 -- ── 2. Resetear stock e inventario a cero ────────────────────────────────────
 UPDATE inventario
    SET stock_extra = 0,
