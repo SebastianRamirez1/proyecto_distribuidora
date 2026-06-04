@@ -11,14 +11,15 @@ nixPkgs = ["nodejs_20", "jdk21", "curl"]
 cmds = [
   # Descargar Maven 3.9.6 sin dependencias de JDK propias
   "curl -fsSL https://archive.apache.org/dist/maven/maven-3/3.9.6/binaries/apache-maven-3.9.6-bin.tar.gz -o /tmp/mvn.tar.gz && tar -xzf /tmp/mvn.tar.gz -C /tmp",
-  # Instalar dependencias del frontend
-  "cd frontend && npm install"
+  # Instalar dependencias del frontend con pnpm (consistente con CI y lockfile)
+  # npm falla con peer deps de React 19 + @types/react-dom@18; pnpm resuelve via lockfile
+  "corepack enable pnpm && corepack prepare pnpm@8 --activate && cd frontend && pnpm install --frozen-lockfile"
 ]
 
 [phases.build]
 cmds = [
   # Compilar React → genera src/main/resources/static/
-  "cd frontend && npm run build",
+  "cd frontend && pnpm run build",
   # Compilar Spring Boot usando Maven con JDK 21 (único JDK instalado)
   "/tmp/apache-maven-3.9.6/bin/mvn package -DskipTests"
 ]
