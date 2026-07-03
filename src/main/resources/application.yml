@@ -113,9 +113,11 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
-      maximum-pool-size: 10
+      maximum-pool-size: 5          # Tope conservador: evita que la DB rechace conexiones bajo pico (ver ChaosLab: DB rechazaba con pico=9)
       minimum-idle: 2
-      connection-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000         # 30 min: recicla conexiones antes de que Railway/PostgreSQL las corte
+      idle-timeout: 300000          # 5 min: libera conexiones ociosas para no ocupar cupo de la DB
   jpa:
     hibernate:
       ddl-auto: validate
