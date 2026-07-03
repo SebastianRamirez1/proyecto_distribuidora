@@ -67,12 +67,14 @@ export default function Ventas() {
     const load = async () => {
       try {
         const hoy = new Date().toISOString().split('T')[0]
-        const [v, c, estado] = await Promise.all([ventasPorFecha(hoy), listarClientes(), obtenerEstadoJornadas()])
+        const [c, estado] = await Promise.all([listarClientes(), obtenerEstadoJornadas()])
+        // Usar la fecha de la jornada activa (puede ser de un día anterior si no se liquidó)
+        const fechaJornada = estado.abierta?.fecha ?? hoy
+        const v = await ventasPorFecha(fechaJornada)
         setVentas(v)
         setClientes(c)
         setJornada(estado.abierta)
         setJornadaEnCierre(estado.enCierre ?? null)
-        // Mostrar por defecto la fecha de la jornada activa
         if (estado.abierta && estado.abierta.fecha !== hoy) setFechaSeleccionada(estado.abierta.fecha)
       } catch (e) {
         setError(e.message)
